@@ -6,3 +6,9 @@ variable "network_name" {
     error_message = "network_name cannot be empty"
   }
 }
+
+variable "gcp_project_id" {
+  type        = string
+  default     = ""
+  description = "GCP project ID"
+}

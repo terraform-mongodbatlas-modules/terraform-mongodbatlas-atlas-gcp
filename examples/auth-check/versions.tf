@@ -9,6 +9,6 @@ terraform {
 }
 
 provider "google" {
-  project = "tf-lz-module-gcp-ci"
+  project = var.gcp_project_id
   region  = "us-east1"
 }

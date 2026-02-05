@@ -39,4 +39,4 @@ jobs:
         working-directory: examples/auth-check
         run: |
           terraform init
-          terraform plan -var="network_name=ci-check-${{ github.run_id }}"
+          terraform plan -var="network_name=ci-check-${{ github.run_id }}" -var="gcp_project_id=${{ vars.GCP_PROJECT_ID }}"
