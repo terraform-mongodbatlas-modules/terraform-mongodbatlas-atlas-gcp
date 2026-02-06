@@ -1,0 +1,19 @@
+# path-sync copy -n sdlc
+# === DO_NOT_EDIT: path-sync triggers ===
+name: Code Health
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      provider_ref:
+        description: 'Provider git ref (empty = default branch)'
+        required: false
+        type: string
+# === OK_EDIT: path-sync triggers ===
