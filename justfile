@@ -1,4 +1,6 @@
 # path-sync copy -n sdlc
+PLAN_TEST_FILES := ""
+
 # === DO_NOT_EDIT: path-sync core ===
 set dotenv-load
 
