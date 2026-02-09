@@ -1,19 +1,24 @@
-# {Module-Name} Terraform Module
+# MongoDB Atlas GCP Terraform Module
 
-Description of the module
+Integrates MongoDB Atlas with Google Cloud Platform:
 
-## Usage 
+- **Encryption at Rest** using Google Cloud KMS (customer-managed keys)
+- **PrivateLink** via Private Service Connect (PSC) with port-mapped architecture
+- **Backup Export** to Google Cloud Storage (GCS)
 
+## Usage
 
-## Resources
+```hcl
+module "atlas_gcp" {
+  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+  project_id = "64259ee860c43338194b0f8e"
 
-
-## Considerations 
-
-
-## License
-
-See LICENSE <link_to_license> for full details.
+  encryption = {
+    enabled                 = true
+    key_version_resource_id = google_kms_crypto_key_version.atlas.id
+  }
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 <!-- @generated
@@ -23,7 +28,11 @@ Run 'just docs' to regenerate.
 -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| terraform | >= 1.9 |
+| google | ~> 6.0 |
+| mongodbatlas | ~> 2.6 |
 
 ## Providers
 
@@ -51,3 +60,25 @@ No optional inputs.
 
 No outputs.
 <!-- END_TF_DOCS -->
+
+## FAQ
+
+**Why does the module require mongodbatlas provider ~> 2.6?**
+
+Provider >= 2.7.0 (target: Feb 18th) adds `port_mapping_enabled` on `mongodbatlas_privatelink_endpoint`, required for port-mapped PSC architecture. The `~> 2.6` constraint allows this upgrade.
+
+**How does region format work?**
+
+All region variables accept both GCP format (`us-east4`) and Atlas format (`US_EAST_4`). The module normalizes internally using a static 41-entry mapping.
+
+**Why is there no encryption private endpoint support?**
+
+Atlas does not support private endpoints for GCP KMS. Only AWS KMS (via PrivateLink) and Azure Key Vault (via Private Link) are supported.
+
+**What is the difference between `privatelink_endpoints` and `privatelink_endpoints_single_region`?**
+
+`privatelink_endpoints` is for multi-region deployments (unique region per entry, region used as `for_each` key). `privatelink_endpoints_single_region` is for multiple VPCs in the same region (list index as key). They are mutually exclusive.
+
+## License
+
+See [LICENSE](LICENSE) for full details.

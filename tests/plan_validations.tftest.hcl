@@ -1,0 +1,198 @@
+mock_provider "mongodbatlas" {}
+mock_provider "google" {}
+
+variables {
+  project_id = "000000000000000000000000"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cloud Provider Access Validations
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "cpa_create_false_requires_existing" {
+  command = plan
+  variables {
+    cloud_provider_access = { create = false }
+  }
+  expect_failures = [var.cloud_provider_access]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Encryption Validations
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "encryption_byo_and_create_conflict" {
+  command = plan
+  variables {
+    encryption = {
+      enabled                 = true
+      key_version_resource_id = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+      create_kms_key          = { enabled = true, key_ring_name = "kr", crypto_key_name = "ck", location = "us-east4" }
+    }
+  }
+  expect_failures = [var.encryption]
+}
+
+run "encryption_enabled_without_key" {
+  command = plan
+  variables {
+    encryption = { enabled = true }
+  }
+  expect_failures = [var.encryption]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PrivateLink Validations
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "privatelink_duplicate_regions" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" },
+      { region = "us-east4", subnetwork = "sub-b" }
+    ]
+  }
+  expect_failures = [var.privatelink_endpoints]
+}
+
+run "privatelink_single_region_must_match" {
+  command = plan
+  variables {
+    privatelink_endpoints_single_region = [
+      { region = "us-east4", subnetwork = "sub-a" },
+      { region = "us-west1", subnetwork = "sub-b" }
+    ]
+  }
+  expect_failures = [var.privatelink_endpoints_single_region]
+}
+
+run "privatelink_cannot_mix_patterns" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" }
+    ]
+    privatelink_endpoints_single_region = [
+      { region = "us-west1", subnetwork = "sub-b" }
+    ]
+  }
+  expect_failures = [var.privatelink_endpoints_single_region]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BYOE Validations
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "byoe_key_not_in_regions" {
+  command = plan
+  variables {
+    privatelink_byoe_regions = { primary = "us-east4" }
+    privatelink_byoe         = { secondary = { ip_address = "10.0.1.5", forwarding_rule_name = "fr-1" } }
+  }
+  expect_failures = [var.privatelink_byoe]
+}
+
+run "byoe_region_overlap_with_endpoints" {
+  command = plan
+  variables {
+    privatelink_endpoints    = [{ region = "us-east4", subnetwork = "sub-a" }]
+    privatelink_byoe_regions = { primary = "us-east4" }
+  }
+  expect_failures = [var.privatelink_byoe_regions]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Backup Export Validations
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "backup_byo_and_create_conflict" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled       = true
+      bucket_name   = "my-bucket"
+      create_bucket = { enabled = true, name = "new-bucket", location = "us-east4" }
+    }
+  }
+  expect_failures = [var.backup_export]
+}
+
+run "backup_enabled_without_bucket" {
+  command = plan
+  variables {
+    backup_export = { enabled = true }
+  }
+  expect_failures = [var.backup_export]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Valid Configuration Assertions
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "default_config" {
+  command = plan
+  assert {
+    condition     = output.encryption_at_rest_provider == "NONE"
+    error_message = "Expected NONE when encryption disabled"
+  }
+  assert {
+    condition     = output.regional_mode_enabled == false
+    error_message = "Expected regional mode disabled by default"
+  }
+}
+
+run "encryption_provider_gcp" {
+  command = plan
+  variables {
+    encryption = {
+      enabled                 = true
+      key_version_resource_id = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+    }
+  }
+  assert {
+    condition     = output.encryption_at_rest_provider == "GCP"
+    error_message = "Expected GCP when encryption enabled"
+  }
+}
+
+run "regional_mode_multi_region" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" },
+      { region = "us-west1", subnetwork = "sub-b" }
+    ]
+  }
+  assert {
+    condition     = output.regional_mode_enabled == true
+    error_message = "Expected regional mode enabled for multi-region"
+  }
+}
+
+run "regional_mode_single_region" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" }
+    ]
+  }
+  assert {
+    condition     = output.regional_mode_enabled == false
+    error_message = "Expected regional mode disabled for single region"
+  }
+}
+
+run "regional_mode_byoe_multi_region" {
+  command = plan
+  variables {
+    privatelink_byoe_regions = {
+      primary   = "us-east4"
+      secondary = "us-west1"
+    }
+  }
+  assert {
+    condition     = output.regional_mode_enabled == true
+    error_message = "Expected regional mode enabled for multi-region BYOE"
+  }
+}
