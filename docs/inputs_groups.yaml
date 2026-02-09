@@ -1,5 +1,50 @@
 sections:
-  # TODO: ADD sections here
+  - id: required
+    title: "Required Variables"
+    level: 2
+    match:
+      names:
+        - project_id
+
+  - id: cloud_provider_access
+    title: "GCP Cloud Provider Access"
+    level: 2
+    description: |
+      Configure the GCP service account used by MongoDB Atlas. See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-unified-gcp-access/) for details.
+    match:
+      names:
+        - cloud_provider_access
+
+  - id: encryption
+    title: "Encryption at Rest"
+    level: 2
+    description: |
+      Configure encryption at rest using Google Cloud KMS. See the [GCP encryption documentation](https://www.mongodb.com/docs/atlas/security-gcp-kms/) for details.
+    match:
+      names:
+        - encryption
+
+  - id: privatelink
+    title: "Private Service Connect"
+    level: 2
+    description: |
+      Configure GCP Private Service Connect (PSC) endpoints for secure connectivity. See the [GCP PrivateLink documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
+    match:
+      names:
+        - privatelink_endpoints
+        - privatelink_endpoints_single_region
+        - privatelink_byoe_regions
+        - privatelink_byoe
+
+  - id: backup
+    title: "Backup Export"
+    level: 2
+    description: |
+      Configure backup snapshot export to Google Cloud Storage (GCS).
+    match:
+      names:
+        - backup_export
+
   - id: optional
     title: "Optional Variables"
     level: 2
