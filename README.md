@@ -38,11 +38,16 @@ The following requirements are needed by this module:
 
 ## Providers
 
-No providers.
+The following providers are used by this module:
+
+- <a name="provider_mongodbatlas"></a> [mongodbatlas](#provider\_mongodbatlas) (~> 2.6)
 
 ## Resources
 
-No resources.
+The following resources are used by this module:
+
+- [mongodbatlas_private_endpoint_regional_mode.this](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/private_endpoint_regional_mode) (resource)
+- [mongodbatlas_privatelink_endpoint.this](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/privatelink_endpoint) (resource)
 
 <!-- BEGIN_TF_INPUTS_RAW -->
 <!-- @generated
@@ -264,7 +269,7 @@ Description: All resource IDs for data source lookups
 
 ### <a name="output_role_id"></a> [role\_id](#output\_role\_id)
 
-Description: Atlas Cloud Provider Access role ID (echoes existing config until resource wiring in CLOUDP-379585)
+Description: Atlas Cloud Provider Access role ID
 <!-- END_TF_DOCS -->
 
 ## FAQ
