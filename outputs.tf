@@ -31,7 +31,7 @@ output "resource_ids" {
 
 output "privatelink" {
   description = "PrivateLink status per endpoint key"
-  value       = {} # TODO(CLOUDP-379585): wire to privatelink module
+  value       = {} # TODO: wire when privatelink submodule is built
 }
 
 output "privatelink_service_info" {

@@ -197,7 +197,7 @@ run "default_config" {
   }
 }
 
-run "encryption_creates_cpa" {
+run "encryption_provider_gcp" {
   command = plan
   variables {
     encryption = {
@@ -216,6 +216,37 @@ run "privatelink_only_skips_cpa" {
   variables {
     privatelink_endpoints = [
       { region = "us-east4", subnetwork = "sub-a" }
+    ]
+  }
+  assert {
+    condition     = output.role_id == null
+    error_message = "Expected null role_id when only privatelink configured"
+  }
+  assert {
+    condition     = output.regional_mode_enabled == false
+    error_message = "Expected regional mode disabled for single region"
+  }
+}
+
+run "existing_cpa_flows_through" {
+  command = plan
+  variables {
+    cloud_provider_access = {
+      create   = false
+      existing = { role_id = "existing-role-123", service_account_for_atlas = "sa@gcp.iam" }
+    }
+  }
+  assert {
+    condition     = output.role_id == "existing-role-123"
+    error_message = "Expected existing role_id to flow through"
+  }
+}
+
+run "atlas_region_format_in_privatelink" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "US_EAST_4", subnetwork = "sub-a" }
     ]
   }
   assert {
