@@ -265,6 +265,10 @@ run "atlas_region_format_in_privatelink" {
     condition     = output.regional_mode_enabled == false
     error_message = "Expected regional mode disabled for single region"
   }
+  assert {
+    condition     = contains(keys(output.privatelink_service_info), "US_EAST_4")
+    error_message = "Expected privatelink_service_info key 'US_EAST_4' for Atlas format input"
+  }
 }
 
 run "regional_mode_multi_region" {
@@ -343,6 +347,42 @@ run "region_cross_format_byoe_overlap" {
     privatelink_byoe_regions = { primary = "US_EAST_4" }
   }
   expect_failures = [terraform_data.region_validations]
+}
+
+run "region_unknown_single_region_rejected" {
+  command = plan
+  variables {
+    privatelink_endpoints_single_region = [
+      { region = "invalid-region", subnetwork = "sub-a" }
+    ]
+  }
+  expect_failures = [terraform_data.region_validations]
+}
+
+run "region_unknown_byoe_rejected" {
+  command = plan
+  variables {
+    privatelink_byoe_regions = { primary = "invalid-region" }
+  }
+  expect_failures = [terraform_data.region_validations]
+}
+
+run "region_mixed_format_multi_region" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" },
+      { region = "US_WEST_4", subnetwork = "sub-b" }
+    ]
+  }
+  assert {
+    condition     = output.regional_mode_enabled == true
+    error_message = "Expected regional mode enabled for mixed-format multi-region"
+  }
+  assert {
+    condition     = length(output.privatelink_service_info) == 2
+    error_message = "Expected two privatelink_service_info entries"
+  }
 }
 
 run "region_custom_mapping_override" {
