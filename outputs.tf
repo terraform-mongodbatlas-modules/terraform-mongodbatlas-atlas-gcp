@@ -1,5 +1,5 @@
 output "role_id" {
-  description = "Atlas Cloud Provider Access role ID (echoes existing config until resource wiring in CLOUDP-379585)"
+  description = "Atlas Cloud Provider Access role ID"
   value       = local.role_id
 }
 
@@ -16,12 +16,16 @@ output "encryption" {
 output "resource_ids" {
   description = "All resource IDs for data source lookups"
   value = {
-    role_id                   = local.role_id
-    service_account_for_atlas = local.service_account_for_atlas
-    crypto_key_id             = null # TODO(CLOUDP-379590): wire to encryption module
-    key_ring_id               = null # TODO(CLOUDP-379590): wire to encryption module
-    bucket_name               = null # TODO(CLOUDP-379594): wire to backup_export module
-    bucket_url                = null # TODO(CLOUDP-379594): wire to backup_export module
+    role_id                       = local.role_id
+    service_account_for_atlas     = local.service_account_for_atlas
+    encryption_role_id            = local.encryption_role_id
+    encryption_service_account    = local.encryption_service_account
+    backup_export_role_id         = local.backup_export_role_id
+    backup_export_service_account = local.backup_export_service_account
+    crypto_key_id                 = null # TODO(CLOUDP-379590): wire to encryption module
+    key_ring_id                   = null # TODO(CLOUDP-379590): wire to encryption module
+    bucket_name                   = null # TODO(CLOUDP-379594): wire to backup_export module
+    bucket_url                    = null # TODO(CLOUDP-379594): wire to backup_export module
   }
 }
 
@@ -32,7 +36,13 @@ output "privatelink" {
 
 output "privatelink_service_info" {
   description = "Atlas PrivateLink service info for BYOE pattern"
-  value       = {} # TODO(CLOUDP-379585): wire to mongodbatlas_privatelink_endpoint
+  value = {
+    for k, ep in mongodbatlas_privatelink_endpoint.this : k => {
+      private_link_id          = ep.private_link_id
+      endpoint_service_name    = ep.endpoint_service_name
+      service_attachment_names = ep.service_attachment_names
+    }
+  }
 }
 
 output "regional_mode_enabled" {

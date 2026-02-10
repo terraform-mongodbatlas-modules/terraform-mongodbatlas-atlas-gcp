@@ -197,7 +197,7 @@ run "default_config" {
   }
 }
 
-run "encryption_provider_gcp" {
+run "encryption_creates_cpa" {
   command = plan
   variables {
     encryption = {
@@ -208,6 +208,23 @@ run "encryption_provider_gcp" {
   assert {
     condition     = output.encryption_at_rest_provider == "GCP"
     error_message = "Expected GCP when encryption enabled"
+  }
+}
+
+run "privatelink_only_skips_cpa" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" }
+    ]
+  }
+  assert {
+    condition     = output.role_id == null
+    error_message = "Expected null role_id when only privatelink configured"
+  }
+  assert {
+    condition     = output.regional_mode_enabled == false
+    error_message = "Expected regional mode disabled for single region"
   }
 }
 
@@ -222,19 +239,6 @@ run "regional_mode_multi_region" {
   assert {
     condition     = output.regional_mode_enabled == true
     error_message = "Expected regional mode enabled for multi-region"
-  }
-}
-
-run "regional_mode_single_region" {
-  command = plan
-  variables {
-    privatelink_endpoints = [
-      { region = "us-east4", subnetwork = "sub-a" }
-    ]
-  }
-  assert {
-    condition     = output.regional_mode_enabled == false
-    error_message = "Expected regional mode disabled for single region"
   }
 }
 

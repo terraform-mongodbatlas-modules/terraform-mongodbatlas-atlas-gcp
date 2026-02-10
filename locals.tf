@@ -59,17 +59,32 @@ locals {
   )
 
   create_cloud_provider_access = var.cloud_provider_access.create && !local.skip_cloud_provider_access
-  # TODO(CLOUDP-379585): wire to cloud_provider_access module
-  role_id                   = try(var.cloud_provider_access.existing.role_id, null)
-  service_account_for_atlas = try(var.cloud_provider_access.existing.service_account_for_atlas, null)
+
+  role_id = local.create_cloud_provider_access ? (
+    module.cloud_provider_access[0].role_id
+  ) : try(var.cloud_provider_access.existing.role_id, null)
+
+  service_account_for_atlas = local.create_cloud_provider_access ? (
+    module.cloud_provider_access[0].service_account_for_atlas
+  ) : try(var.cloud_provider_access.existing.service_account_for_atlas, null)
 
   # Encryption role: dedicated or shared
   create_encryption_dedicated_role = var.encryption.enabled && var.encryption.dedicated_role_enabled
-  encryption_role_id               = local.create_encryption_dedicated_role ? null : local.role_id
+  encryption_role_id = local.create_encryption_dedicated_role ? (
+    module.encryption_cloud_provider_access[0].role_id
+  ) : local.role_id
+  encryption_service_account = local.create_encryption_dedicated_role ? (
+    module.encryption_cloud_provider_access[0].service_account_for_atlas
+  ) : local.service_account_for_atlas
 
   # Backup export role: dedicated or shared
   create_backup_export_dedicated_role = var.backup_export.enabled && var.backup_export.dedicated_role_enabled
-  backup_export_role_id               = local.create_backup_export_dedicated_role ? null : local.role_id
+  backup_export_role_id = local.create_backup_export_dedicated_role ? (
+    module.backup_export_cloud_provider_access[0].role_id
+  ) : local.role_id
+  backup_export_service_account = local.create_backup_export_dedicated_role ? (
+    module.backup_export_cloud_provider_access[0].service_account_for_atlas
+  ) : local.service_account_for_atlas
 
   # PrivateLink: convert lists to maps for for_each
   privatelink_endpoints_map               = { for ep in var.privatelink_endpoints : ep.region => ep }
@@ -90,4 +105,5 @@ locals {
     lookup(local.atlas_to_gcp_region, value.region, value.region)
   ])
   enable_regional_mode = length(local.privatelink_all_regions) > 1
+
 }
