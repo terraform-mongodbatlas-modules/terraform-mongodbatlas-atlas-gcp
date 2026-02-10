@@ -22,6 +22,11 @@ variable "cloud_provider_access" {
     condition     = var.cloud_provider_access.create || var.cloud_provider_access.existing != null
     error_message = "When cloud_provider_access.create = false, existing.role_id and existing.service_account_for_atlas are required."
   }
+
+  validation {
+    condition     = !var.cloud_provider_access.create || var.cloud_provider_access.existing == null
+    error_message = "cloud_provider_access.create and cloud_provider_access.existing are mutually exclusive: use either create = true (without existing) or create = false (with existing)."
+  }
 }
 
 variable "encryption" {
@@ -29,15 +34,13 @@ variable "encryption" {
     enabled                 = optional(bool, false)
     key_version_resource_id = optional(string)
     create_kms_key = optional(object({
-      enabled         = bool
-      key_ring_name   = string
-      crypto_key_name = string
-      location        = string
+      enabled         = optional(bool, false)
+      key_ring_name   = optional(string, "")
+      crypto_key_name = optional(string, "")
+      location        = optional(string, "")
       rotation_period = optional(string)
-    }))
-    dedicated_role = optional(object({
-      enabled = bool
-    }))
+    }), {})
+    dedicated_role_enabled = optional(bool, false)
   })
   default     = {}
   description = <<-EOT
@@ -47,17 +50,31 @@ variable "encryption" {
     - `key_version_resource_id` (user-provided KMS key version)
     - `create_kms_key.enabled = true` (module-managed Key Ring + Crypto Key)
 
-    `dedicated_role.enabled = true` creates a dedicated Atlas service account for encryption.
+    `dedicated_role_enabled = true` creates a dedicated Atlas service account for encryption.
   EOT
 
   validation {
-    condition     = !(var.encryption.key_version_resource_id != null && try(var.encryption.create_kms_key.enabled, false))
+    condition     = !(var.encryption.key_version_resource_id != null && var.encryption.create_kms_key.enabled)
     error_message = "Cannot use both key_version_resource_id (user-provided) and create_kms_key.enabled = true (module-managed)."
   }
 
   validation {
-    condition     = !var.encryption.enabled || (var.encryption.key_version_resource_id != null || try(var.encryption.create_kms_key.enabled, false))
+    condition     = !var.encryption.enabled || (var.encryption.key_version_resource_id != null || var.encryption.create_kms_key.enabled)
     error_message = "encryption.enabled = true requires key_version_resource_id OR create_kms_key.enabled = true."
+  }
+
+  validation {
+    condition     = var.encryption.enabled || (var.encryption.key_version_resource_id == null && !var.encryption.create_kms_key.enabled)
+    error_message = "encryption.key_version_resource_id and create_kms_key.enabled can only be set when encryption.enabled = true."
+  }
+
+  validation {
+    condition = !var.encryption.create_kms_key.enabled || (
+      var.encryption.create_kms_key.key_ring_name != "" &&
+      var.encryption.create_kms_key.crypto_key_name != "" &&
+      var.encryption.create_kms_key.location != ""
+    )
+    error_message = "create_kms_key requires key_ring_name, crypto_key_name, and location when enabled."
   }
 }
 
@@ -129,16 +146,14 @@ variable "backup_export" {
     enabled     = optional(bool, false)
     bucket_name = optional(string)
     create_bucket = optional(object({
-      enabled            = bool
-      name               = string
-      location           = string
+      enabled            = optional(bool, false)
+      name               = optional(string, "")
+      location           = optional(string, "")
       force_destroy      = optional(bool, false)
       storage_class      = optional(string, "STANDARD")
       versioning_enabled = optional(bool, true)
-    }))
-    dedicated_role = optional(object({
-      enabled = bool
-    }))
+    }), {})
+    dedicated_role_enabled = optional(bool, false)
   })
   default     = {}
   description = <<-EOT
@@ -148,17 +163,30 @@ variable "backup_export" {
     - `bucket_name` (user-provided GCS bucket)
     - `create_bucket.enabled = true` (module-managed GCS bucket)
 
-    `dedicated_role.enabled = true` creates a dedicated Atlas service account for backup export.
+    `dedicated_role_enabled = true` creates a dedicated Atlas service account for backup export.
   EOT
 
   validation {
-    condition     = !(var.backup_export.bucket_name != null && try(var.backup_export.create_bucket.enabled, false))
+    condition     = !(var.backup_export.bucket_name != null && var.backup_export.create_bucket.enabled)
     error_message = "Cannot use both bucket_name (user-provided) and create_bucket.enabled = true (module-managed)."
   }
 
   validation {
-    condition     = !var.backup_export.enabled || (var.backup_export.bucket_name != null || try(var.backup_export.create_bucket.enabled, false))
+    condition     = !var.backup_export.enabled || (var.backup_export.bucket_name != null || var.backup_export.create_bucket.enabled)
     error_message = "backup_export.enabled = true requires bucket_name OR create_bucket.enabled = true."
+  }
+
+  validation {
+    condition     = var.backup_export.enabled || (var.backup_export.bucket_name == null && !var.backup_export.create_bucket.enabled)
+    error_message = "bucket_name and create_bucket.enabled may only be set when backup_export.enabled = true."
+  }
+
+  validation {
+    condition = !var.backup_export.create_bucket.enabled || (
+      var.backup_export.create_bucket.name != "" &&
+      var.backup_export.create_bucket.location != ""
+    )
+    error_message = "create_bucket requires name and location when enabled."
   }
 }
 

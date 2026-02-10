@@ -1,5 +1,5 @@
 output "role_id" {
-  description = "Atlas role ID for reuse with other Atlas-GCP features"
+  description = "Atlas Cloud Provider Access role ID (echoes existing config until resource wiring in CLOUDP-379585)"
   value       = local.role_id
 }
 

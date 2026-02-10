@@ -96,7 +96,7 @@ Provide EITHER:
 - `key_version_resource_id` (user-provided KMS key version)
 - `create_kms_key.enabled = true` (module-managed Key Ring + Crypto Key)
 
-`dedicated_role.enabled = true` creates a dedicated Atlas service account for encryption.
+`dedicated_role_enabled = true` creates a dedicated Atlas service account for encryption.
 
 Type:
 
@@ -105,15 +105,13 @@ object({
   enabled                 = optional(bool, false)
   key_version_resource_id = optional(string)
   create_kms_key = optional(object({
-    enabled         = bool
-    key_ring_name   = string
-    crypto_key_name = string
-    location        = string
+    enabled         = optional(bool, false)
+    key_ring_name   = optional(string, "")
+    crypto_key_name = optional(string, "")
+    location        = optional(string, "")
     rotation_period = optional(string)
-  }))
-  dedicated_role = optional(object({
-    enabled = bool
-  }))
+  }), {})
+  dedicated_role_enabled = optional(bool, false)
 })
 ```
 
@@ -193,7 +191,7 @@ Provide EITHER:
 - `bucket_name` (user-provided GCS bucket)
 - `create_bucket.enabled = true` (module-managed GCS bucket)
 
-`dedicated_role.enabled = true` creates a dedicated Atlas service account for backup export.
+`dedicated_role_enabled = true` creates a dedicated Atlas service account for backup export.
 
 Type:
 
@@ -202,16 +200,14 @@ object({
   enabled     = optional(bool, false)
   bucket_name = optional(string)
   create_bucket = optional(object({
-    enabled            = bool
-    name               = string
-    location           = string
+    enabled            = optional(bool, false)
+    name               = optional(string, "")
+    location           = optional(string, "")
     force_destroy      = optional(bool, false)
     storage_class      = optional(string, "STANDARD")
     versioning_enabled = optional(bool, true)
-  }))
-  dedicated_role = optional(object({
-    enabled = bool
-  }))
+  }), {})
+  dedicated_role_enabled = optional(bool, false)
 })
 ```
 
@@ -268,7 +264,7 @@ Description: All resource IDs for data source lookups
 
 ### <a name="output_role_id"></a> [role\_id](#output\_role\_id)
 
-Description: Atlas role ID for reuse with other Atlas-GCP features
+Description: Atlas Cloud Provider Access role ID (echoes existing config until resource wiring in CLOUDP-379585)
 <!-- END_TF_DOCS -->
 
 ## FAQ

@@ -1,6 +1,7 @@
 locals {
   # 41-entry static region mapping: Atlas format -> GCP format (CLOUDP-379586)
-  # Validated via extract_regions.py against Atlas CLI and gcloud
+  # Entries verified against Atlas CLI (atlas clusters availableRegions) and gcloud (gcloud compute regions list)
+  # using extract_regions.py (see just extract-regions / just validate-regions)
   atlas_to_gcp_region = {
     AFRICA_SOUTH_1            = "africa-south1"
     ASIA_EAST_2               = "asia-east2"
@@ -46,6 +47,7 @@ locals {
     SOUTHEASTERN_ASIA_PACIFIC = "asia-southeast1"
   }
 
+  # Reverse mapping: GCP format -> Atlas format. Used in CLOUDP-379585 when calling Atlas APIs that require Atlas region format
   gcp_to_atlas_region = { for k, v in local.atlas_to_gcp_region : v => k }
 
   # Cloud provider access: skip when only privatelink is configured
@@ -62,11 +64,11 @@ locals {
   service_account_for_atlas = try(var.cloud_provider_access.existing.service_account_for_atlas, null)
 
   # Encryption role: dedicated or shared
-  create_encryption_dedicated_role = var.encryption.enabled && try(var.encryption.dedicated_role.enabled, false)
+  create_encryption_dedicated_role = var.encryption.enabled && var.encryption.dedicated_role_enabled
   encryption_role_id               = local.create_encryption_dedicated_role ? null : local.role_id
 
   # Backup export role: dedicated or shared
-  create_backup_export_dedicated_role = var.backup_export.enabled && try(var.backup_export.dedicated_role.enabled, false)
+  create_backup_export_dedicated_role = var.backup_export.enabled && var.backup_export.dedicated_role_enabled
   backup_export_role_id               = local.create_backup_export_dedicated_role ? null : local.role_id
 
   # PrivateLink: convert lists to maps for for_each

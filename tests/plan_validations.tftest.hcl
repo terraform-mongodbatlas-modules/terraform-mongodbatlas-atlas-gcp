@@ -17,6 +17,17 @@ run "cpa_create_false_requires_existing" {
   expect_failures = [var.cloud_provider_access]
 }
 
+run "cpa_create_true_with_existing_conflict" {
+  command = plan
+  variables {
+    cloud_provider_access = {
+      create   = true
+      existing = { role_id = "abc123", service_account_for_atlas = "sa@gcp.iam" }
+    }
+  }
+  expect_failures = [var.cloud_provider_access]
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Encryption Validations
 # ─────────────────────────────────────────────────────────────────────────────
@@ -37,6 +48,28 @@ run "encryption_enabled_without_key" {
   command = plan
   variables {
     encryption = { enabled = true }
+  }
+  expect_failures = [var.encryption]
+}
+
+run "encryption_disabled_with_key_conflict" {
+  command = plan
+  variables {
+    encryption = {
+      enabled                 = false
+      key_version_resource_id = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+    }
+  }
+  expect_failures = [var.encryption]
+}
+
+run "encryption_create_kms_key_missing_fields" {
+  command = plan
+  variables {
+    encryption = {
+      enabled        = true
+      create_kms_key = { enabled = true }
+    }
   }
   expect_failures = [var.encryption]
 }
@@ -122,6 +155,28 @@ run "backup_enabled_without_bucket" {
   command = plan
   variables {
     backup_export = { enabled = true }
+  }
+  expect_failures = [var.backup_export]
+}
+
+run "backup_disabled_with_bucket_conflict" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled     = false
+      bucket_name = "my-bucket"
+    }
+  }
+  expect_failures = [var.backup_export]
+}
+
+run "backup_create_bucket_missing_fields" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled       = true
+      create_bucket = { enabled = true }
+    }
   }
   expect_failures = [var.backup_export]
 }
