@@ -94,7 +94,7 @@ run "privatelink_single_region_must_match" {
   variables {
     privatelink_endpoints_single_region = [
       { region = "us-east4", subnetwork = "sub-a" },
-      { region = "us-west1", subnetwork = "sub-b" }
+      { region = "us-west4", subnetwork = "sub-b" }
     ]
   }
   expect_failures = [var.privatelink_endpoints_single_region]
@@ -107,7 +107,7 @@ run "privatelink_cannot_mix_patterns" {
       { region = "us-east4", subnetwork = "sub-a" }
     ]
     privatelink_endpoints_single_region = [
-      { region = "us-west1", subnetwork = "sub-b" }
+      { region = "us-west4", subnetwork = "sub-b" }
     ]
   }
   expect_failures = [var.privatelink_endpoints_single_region]
@@ -272,7 +272,7 @@ run "regional_mode_multi_region" {
   variables {
     privatelink_endpoints = [
       { region = "us-east4", subnetwork = "sub-a" },
-      { region = "us-west1", subnetwork = "sub-b" }
+      { region = "us-west4", subnetwork = "sub-b" }
     ]
   }
   assert {
@@ -284,7 +284,7 @@ run "regional_mode_multi_region" {
     error_message = "Expected two privatelink_service_info entries"
   }
   assert {
-    condition     = length(setintersection(keys(output.privatelink_service_info), ["us-east4", "us-west1"])) == 2
+    condition     = length(setintersection(keys(output.privatelink_service_info), ["us-east4", "us-west4"])) == 2
     error_message = "Expected privatelink_service_info keys to match endpoint regions"
   }
 }
@@ -294,7 +294,7 @@ run "regional_mode_byoe_multi_region" {
   variables {
     privatelink_byoe_regions = {
       primary   = "us-east4"
-      secondary = "us-west1"
+      secondary = "us-west4"
     }
   }
   assert {
@@ -308,5 +308,55 @@ run "regional_mode_byoe_multi_region" {
   assert {
     condition     = length(setintersection(keys(output.privatelink_service_info), ["primary", "secondary"])) == 2
     error_message = "Expected privatelink_service_info keys to match BYOE region keys"
+  }
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Region Normalization Validations (preconditions on terraform_data)
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "region_unknown_rejected" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "invalid-region", subnetwork = "sub-a" }
+    ]
+  }
+  expect_failures = [terraform_data.region_validations]
+}
+
+run "region_cross_format_duplicate" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" },
+      { region = "US_EAST_4", subnetwork = "sub-b" }
+    ]
+  }
+  expect_failures = [terraform_data.region_validations]
+}
+
+run "region_cross_format_byoe_overlap" {
+  command = plan
+  variables {
+    privatelink_endpoints    = [{ region = "us-east4", subnetwork = "sub-a" }]
+    privatelink_byoe_regions = { primary = "US_EAST_4" }
+  }
+  expect_failures = [terraform_data.region_validations]
+}
+
+run "region_custom_mapping_override" {
+  command = plan
+  variables {
+    atlas_to_gcp_region = {
+      US_EAST_4 = "us-east4"
+    }
+    privatelink_endpoints = [
+      { region = "US_EAST_4", subnetwork = "sub-a" }
+    ]
+  }
+  assert {
+    condition     = length(output.privatelink_service_info) == 1
+    error_message = "Expected one entry with custom mapping"
   }
 }
