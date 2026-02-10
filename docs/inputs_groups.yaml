@@ -45,6 +45,12 @@ sections:
       names:
         - backup_export
 
+  - id: regions
+    title: "Regions Mapping"
+    level: 2
+    match:
+      names:
+        - atlas_to_gcp_region
   - id: optional
     title: "Optional Variables"
     level: 2

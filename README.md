@@ -222,7 +222,7 @@ object({
 Default: `{}`
 
 
-## Optional Variables
+## Regions Mapping
 
 ### atlas_to_gcp_region
 
@@ -279,6 +279,9 @@ Default:
   "WESTERN_US": "us-west1"
 }
 ```
+
+
+## Optional Variables
 
 ### gcp_tags
 
