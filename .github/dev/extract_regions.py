@@ -317,27 +317,27 @@ GCP_REGION_MAP: dict[str, str | None] = {
     "US_WEST_2": "us-west2",
     "US_WEST_3": "us-west3",
     "US_WEST_4": "us-west4",
-    # Atlas geographic region aliases - mappings from:
-    # https://www.mongodb.com/docs/atlas/reference/google-gcp/#stream-processing-workspaces
-    "CENTRAL_US": "us-central1",  # Documented in Stream Processing Workspaces table
-    "WESTERN_EUROPE": "europe-west1",  # Documented in Stream Processing Workspaces table
-    # Inferred mappings based on GCP primary regions per geography:
-    "EASTERN_US": "us-east1",  # Primary GCP east coast region
-    "WESTERN_US": "us-west1",  # Primary GCP west coast region
-    "EASTERN_ASIA_PACIFIC": "asia-east1",  # Taiwan (primary East Asia)
-    "NORTHEASTERN_ASIA_PACIFIC": "asia-northeast1",  # Tokyo (primary Northeast Asia)
-    "SOUTHEASTERN_ASIA_PACIFIC": "asia-southeast1",  # Singapore (primary Southeast Asia)
+    # Canonical Atlas geographic region names (not aliases).
+    # These are the ONLY Atlas names for their GCP regions -- no numbered variant exists.
+    # Source: https://www.mongodb.com/docs/atlas/reference/google-gcp/
+    "CENTRAL_US": "us-central1",  # Iowa
+    "WESTERN_US": "us-west1",  # Oregon
+    "WESTERN_EUROPE": "europe-west1",  # Belgium
+    "EASTERN_ASIA_PACIFIC": "asia-east1",  # Taiwan
+    "NORTHEASTERN_ASIA_PACIFIC": "asia-northeast1",  # Tokyo
+    "SOUTHEASTERN_ASIA_PACIFIC": "asia-southeast1",  # Singapore
+    # Undocumented: us-east1 is not in the Atlas GCP docs table.
+    "EASTERN_US": "us-east1",
 }
 
 GCP_GEOGRAPHIC_ALIASES: frozenset[str] = frozenset(
     {
-        "CENTRAL_US",
-        "WESTERN_EUROPE",
+        # EASTERN_US is the only undocumented alias: us-east1 is not in the Atlas GCP docs.
+        # The other 6 geographic names (CENTRAL_US, WESTERN_US, WESTERN_EUROPE,
+        # EASTERN_ASIA_PACIFIC, NORTHEASTERN_ASIA_PACIFIC, SOUTHEASTERN_ASIA_PACIFIC)
+        # are the canonical Atlas region names -- not aliases -- per:
+        # https://www.mongodb.com/docs/atlas/reference/google-gcp/
         "EASTERN_US",
-        "WESTERN_US",
-        "EASTERN_ASIA_PACIFIC",
-        "NORTHEASTERN_ASIA_PACIFIC",
-        "SOUTHEASTERN_ASIA_PACIFIC",
     }
 )
 

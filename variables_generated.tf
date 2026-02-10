@@ -11,6 +11,8 @@ variable "atlas_to_gcp_region" {
     ASIA_SOUTHEAST_2          = "asia-southeast2"
     AUSTRALIA_SOUTHEAST_1     = "australia-southeast1"
     AUSTRALIA_SOUTHEAST_2     = "australia-southeast2"
+    CENTRAL_US                = "us-central1"
+    EASTERN_ASIA_PACIFIC      = "asia-east1"
     EUROPE_CENTRAL_2          = "europe-central2"
     EUROPE_NORTH_1            = "europe-north1"
     EUROPE_SOUTHWEST_1        = "europe-southwest1"
@@ -28,14 +30,18 @@ variable "atlas_to_gcp_region" {
     NORTH_AMERICA_NORTHEAST_1 = "northamerica-northeast1"
     NORTH_AMERICA_NORTHEAST_2 = "northamerica-northeast2"
     NORTH_AMERICA_SOUTH_1     = "northamerica-south1"
+    NORTHEASTERN_ASIA_PACIFIC = "asia-northeast1"
     SOUTH_AMERICA_EAST_1      = "southamerica-east1"
     SOUTH_AMERICA_WEST_1      = "southamerica-west1"
+    SOUTHEASTERN_ASIA_PACIFIC = "asia-southeast1"
     US_EAST_4                 = "us-east4"
     US_EAST_5                 = "us-east5"
     US_SOUTH_1                = "us-south1"
     US_WEST_2                 = "us-west2"
     US_WEST_3                 = "us-west3"
     US_WEST_4                 = "us-west4"
+    WESTERN_EUROPE            = "europe-west1"
+    WESTERN_US                = "us-west1"
   }
   description = <<-EOT
     Atlas to GCP region mapping. Keys = Atlas format, values = GCP format.
