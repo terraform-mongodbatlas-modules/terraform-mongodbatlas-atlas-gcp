@@ -326,20 +326,9 @@ GCP_REGION_MAP: dict[str, str | None] = {
     "EASTERN_ASIA_PACIFIC": "asia-east1",  # Taiwan
     "NORTHEASTERN_ASIA_PACIFIC": "asia-northeast1",  # Tokyo
     "SOUTHEASTERN_ASIA_PACIFIC": "asia-southeast1",  # Singapore
-    # Undocumented: us-east1 is not in the Atlas GCP docs table.
+    # Undocumented: us-east1 is not in the Atlas GCP docs table but is returned by the API.
     "EASTERN_US": "us-east1",
 }
-
-GCP_GEOGRAPHIC_ALIASES: frozenset[str] = frozenset(
-    {
-        # EASTERN_US is the only undocumented alias: us-east1 is not in the Atlas GCP docs.
-        # The other 6 geographic names (CENTRAL_US, WESTERN_US, WESTERN_EUROPE,
-        # EASTERN_ASIA_PACIFIC, NORTHEASTERN_ASIA_PACIFIC, SOUTHEASTERN_ASIA_PACIFIC)
-        # are the canonical Atlas region names -- not aliases -- per:
-        # https://www.mongodb.com/docs/atlas/reference/google-gcp/
-        "EASTERN_US",
-    }
-)
 
 
 def atlas_to_aws(atlas_region: str) -> str:
@@ -693,7 +682,6 @@ def main():
                 provider,
                 mappings[provider_upper],
                 output_dir,
-                geographic_aliases=GCP_GEOGRAPHIC_ALIASES,
                 include_invalid=include_invalid,
             )
         else:

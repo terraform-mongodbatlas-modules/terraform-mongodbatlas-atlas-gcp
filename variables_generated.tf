@@ -13,6 +13,7 @@ variable "atlas_to_gcp_region" {
     AUSTRALIA_SOUTHEAST_2     = "australia-southeast2"
     CENTRAL_US                = "us-central1"
     EASTERN_ASIA_PACIFIC      = "asia-east1"
+    EASTERN_US                = "us-east1"
     EUROPE_CENTRAL_2          = "europe-central2"
     EUROPE_NORTH_1            = "europe-north1"
     EUROPE_SOUTHWEST_1        = "europe-southwest1"
