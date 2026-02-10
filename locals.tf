@@ -19,6 +19,19 @@ locals {
     contains(values(local.atlas_to_gcp_region), v) ? v : null)
   ]
 
+  # Validation helpers: extract bad values for error messages
+  _pl_unknown    = [for i, r in local._pl_normalized : var.privatelink_endpoints[i].region if r == null]
+  _pl_sr_unknown = [for i, r in local._pl_sr_normalized : var.privatelink_endpoints_single_region[i].region if r == null]
+  _byoe_unknown  = [for i, r in local._byoe_normalized : values(var.privatelink_byoe_regions)[i] if r == null]
+  _pl_duplicates = toset([
+    for r in local._pl_normalized : r if r != null
+    && length([for n in local._pl_normalized : n if n == r]) > 1
+  ])
+  _pl_byoe_overlap = setintersection(
+    toset([for r in local._pl_normalized : r if r != null]),
+    toset([for r in local._byoe_normalized : r if r != null])
+  )
+
   # Cloud provider access: skip when only privatelink is configured
   privatelink_configured = length(var.privatelink_endpoints) > 0 || length(var.privatelink_endpoints_single_region) > 0 || length(var.privatelink_byoe_regions) > 0
   skip_cloud_provider_access = (

@@ -349,10 +349,10 @@ run "region_custom_mapping_override" {
   command = plan
   variables {
     atlas_to_gcp_region = {
-      US_EAST_4 = "us-east4"
+      US_EAST_99 = "us-east4"
     }
     privatelink_endpoints = [
-      { region = "US_EAST_4", subnetwork = "sub-a" }
+      { region = "US_EAST_99", subnetwork = "sub-a" }
     ]
   }
   assert {
