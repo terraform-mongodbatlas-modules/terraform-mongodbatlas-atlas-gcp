@@ -243,3 +243,6 @@ update-terraform-versions:
 sdlc-validate:
     uvx path-sync validate-no-changes -b main
 # === OK_EDIT: path-sync sdlc-validate ===
+
+validate-regions-gcp:
+    just validate-regions gcp --output-format variable
