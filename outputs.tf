@@ -10,7 +10,11 @@ output "encryption_at_rest_provider" {
 
 output "encryption" {
   description = "Encryption at rest status and configuration"
-  value       = null # TODO(CLOUDP-379590): wire to encryption module
+  value = var.encryption.enabled ? {
+    valid                   = module.encryption[0].valid
+    key_version_resource_id = module.encryption[0].key_version_resource_id
+    crypto_key_id           = module.encryption[0].crypto_key_id
+  } : null
 }
 
 output "resource_ids" {
@@ -22,8 +26,8 @@ output "resource_ids" {
     encryption_service_account    = local.encryption_service_account
     backup_export_role_id         = local.backup_export_role_id
     backup_export_service_account = local.backup_export_service_account
-    crypto_key_id                 = null # TODO(CLOUDP-379590): wire to encryption module
-    key_ring_id                   = null # TODO(CLOUDP-379590): wire to encryption module
+    crypto_key_id                 = var.encryption.enabled ? module.encryption[0].crypto_key_id : null
+    key_ring_id                   = var.encryption.enabled ? module.encryption[0].key_ring_id : null
     bucket_name                   = null # TODO(CLOUDP-379594): wire to backup_export module
     bucket_url                    = null # TODO(CLOUDP-379594): wire to backup_export module
   }

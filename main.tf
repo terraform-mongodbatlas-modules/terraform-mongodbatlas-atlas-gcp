@@ -53,6 +53,26 @@ module "backup_export_cloud_provider_access" {
 # PrivateLink
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Encryption
+# ─────────────────────────────────────────────────────────────────────────────
+
+module "encryption" {
+  count  = var.encryption.enabled ? 1 : 0
+  source = "./modules/encryption"
+
+  project_id                  = var.project_id
+  role_id                     = local.encryption_role_id
+  atlas_service_account_email = local.encryption_service_account
+  key_version_resource_id     = var.encryption.key_version_resource_id
+  create_kms_key              = var.encryption.create_kms_key
+  labels                      = var.gcp_tags
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PrivateLink
+# ─────────────────────────────────────────────────────────────────────────────
+
 resource "mongodbatlas_private_endpoint_regional_mode" "this" {
   count      = local.enable_regional_mode ? 1 : 0
   project_id = var.project_id

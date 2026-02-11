@@ -76,6 +76,13 @@ variable "encryption" {
     )
     error_message = "create_kms_key requires key_ring_name, crypto_key_name, and location when enabled."
   }
+
+  validation {
+    condition = var.encryption.key_version_resource_id == null ? true : can(
+      regex("^projects/.+/locations/.+/keyRings/.+/cryptoKeys/.+/cryptoKeyVersions/.+$", var.encryption.key_version_resource_id)
+    )
+    error_message = "key_version_resource_id must be a full GCP resource path: projects/{project}/locations/{location}/keyRings/{ring}/cryptoKeys/{key}/cryptoKeyVersions/{version}"
+  }
 }
 
 variable "privatelink_endpoints" {
