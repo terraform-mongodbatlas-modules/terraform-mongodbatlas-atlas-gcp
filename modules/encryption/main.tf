@@ -1,6 +1,11 @@
 locals {
   create_kms_key = var.create_kms_key.enabled
 
+  # Default names use atlas project ID prefix to avoid key ring collisions across Atlas projects
+  # Prefix with "atlas-" to guarantee the name starts with a letter (GCP requirement)
+  key_ring_name   = var.create_kms_key.key_ring_name != null ? var.create_kms_key.key_ring_name : "atlas-${var.project_id}-keyring"
+  crypto_key_name = var.create_kms_key.crypto_key_name != null ? var.create_kms_key.crypto_key_name : "atlas-${var.project_id}-encryption-key"
+
   key_version_resource_id = local.create_kms_key ? (
     google_kms_crypto_key.atlas[0].primary[0].name
   ) : var.key_version_resource_id
@@ -16,13 +21,13 @@ locals {
 
 resource "google_kms_key_ring" "atlas" {
   count    = local.create_kms_key ? 1 : 0
-  name     = var.create_kms_key.key_ring_name
+  name     = local.key_ring_name
   location = var.create_kms_key.location
 }
 
 resource "google_kms_crypto_key" "atlas" {
   count           = local.create_kms_key ? 1 : 0
-  name            = var.create_kms_key.crypto_key_name
+  name            = local.crypto_key_name
   key_ring        = google_kms_key_ring.atlas[0].id
   purpose         = "ENCRYPT_DECRYPT"
   rotation_period = var.create_kms_key.rotation_period

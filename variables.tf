@@ -35,8 +35,8 @@ variable "encryption" {
     key_version_resource_id = optional(string)
     create_kms_key = optional(object({
       enabled         = optional(bool, false)
-      key_ring_name   = optional(string, "atlas-keyring")
-      crypto_key_name = optional(string, "atlas-encryption-key")
+      key_ring_name   = optional(string)
+      crypto_key_name = optional(string)
       location        = optional(string, "")
       rotation_period = optional(string)
     }), {})
@@ -49,6 +49,10 @@ variable "encryption" {
     Provide EITHER:
     - `key_version_resource_id` (user-provided KMS key version)
     - `create_kms_key.enabled = true` (module-managed Key Ring + Crypto Key)
+
+    When `key_ring_name`/`crypto_key_name` are omitted, defaults to `atlas-{project_id}-keyring`
+    and `atlas-{project_id}-encryption-key` to avoid collisions across Atlas projects.
+    Key rings are permanent in GCP -- choose stable names.
 
     `dedicated_role_enabled = true` creates a dedicated Atlas service account for encryption.
   EOT

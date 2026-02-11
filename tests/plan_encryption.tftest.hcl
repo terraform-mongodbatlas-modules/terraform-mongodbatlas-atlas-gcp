@@ -50,6 +50,40 @@ run "kvri_valid_format_accepted" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Encryption Variable Validations
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "encryption_mutual_exclusion_rejected" {
+  command = plan
+  variables {
+    encryption = {
+      enabled                 = true
+      key_version_resource_id = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+      create_kms_key          = { enabled = true, location = "us-east4" }
+    }
+  }
+  expect_failures = [var.encryption]
+}
+
+run "encryption_enabled_without_source_rejected" {
+  command = plan
+  variables {
+    encryption = { enabled = true }
+  }
+  expect_failures = [var.encryption]
+}
+
+run "encryption_key_source_when_disabled_rejected" {
+  command = plan
+  variables {
+    encryption = {
+      key_version_resource_id = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+    }
+  }
+  expect_failures = [var.encryption]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Encryption Module Wiring
 # ─────────────────────────────────────────────────────────────────────────────
 
