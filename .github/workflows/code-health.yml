@@ -17,6 +17,7 @@ on:
         required: false
         type: string
 # === OK_EDIT: path-sync triggers ===
+jobs:
   # === DO_NOT_EDIT: path-sync job-check ===
   check:
     name: Code Quality & Validation
