@@ -29,7 +29,16 @@ variable "create_kms_key" {
   })
   default     = {}
   nullable    = false
-  description = "Module-managed KMS key configuration"
+  description = <<-EOT
+    Module-managed KMS key configuration.
+
+    `rotation_period` controls GCP automatic key version rotation.
+    Format: seconds as string, e.g., "7776000s" (90 days). Must be > 86400s (1 day).
+    When omitted, no automatic rotation occurs.
+    Atlas recommends rotating CMKs every 90 days and creates an alert at that cadence.
+    Each rotation causes a plan diff on key_version_resource_id on the next terraform apply.
+    Old key versions remain enabled and functional -- no data re-encryption is needed.
+  EOT
 }
 
 variable "labels" {

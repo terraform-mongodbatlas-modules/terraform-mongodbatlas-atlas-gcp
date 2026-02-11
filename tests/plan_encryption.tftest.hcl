@@ -162,6 +162,31 @@ run "encryption_create_kms_key_defaults_only_location_required" {
   }
 }
 
+run "encryption_create_kms_key_atlas_region_format" {
+  command = plan
+  variables {
+    encryption = {
+      enabled = true
+      create_kms_key = {
+        enabled  = true
+        location = "US_EAST_4"
+      }
+    }
+  }
+  assert {
+    condition     = output.encryption.kms_location == "us-east4"
+    error_message = "Expected location normalized from US_EAST_4 to us-east4, got: ${output.encryption.kms_location}"
+  }
+  assert {
+    condition     = startswith(output.encryption.key_ring_name, "atlas-")
+    error_message = "Expected key ring name to start with atlas- prefix"
+  }
+  assert {
+    condition     = output.encryption.crypto_key_name == "atlas-encryption-key"
+    error_message = "Expected default crypto key name atlas-encryption-key"
+  }
+}
+
 run "encryption_create_kms_key_missing_location" {
   command = plan
   variables {

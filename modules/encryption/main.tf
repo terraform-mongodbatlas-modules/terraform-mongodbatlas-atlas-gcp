@@ -1,10 +1,11 @@
 locals {
   create_kms_key = var.create_kms_key.enabled
 
-  # Default names use atlas project ID prefix to avoid key ring collisions across Atlas projects
+  # Key ring gets project ID prefix to avoid collisions across Atlas projects in the same GCP project+location
   # Prefix with "atlas-" to guarantee the name starts with a letter (GCP requirement)
+  # Crypto key name needs no prefix -- it's already scoped within the key ring
   key_ring_name   = var.create_kms_key.key_ring_name != null ? var.create_kms_key.key_ring_name : "atlas-${var.project_id}-keyring"
-  crypto_key_name = var.create_kms_key.crypto_key_name != null ? var.create_kms_key.crypto_key_name : "atlas-${var.project_id}-encryption-key"
+  crypto_key_name = var.create_kms_key.crypto_key_name != null ? var.create_kms_key.crypto_key_name : "atlas-encryption-key"
 
   key_version_resource_id = local.create_kms_key ? (
     google_kms_crypto_key.atlas[0].primary[0].name

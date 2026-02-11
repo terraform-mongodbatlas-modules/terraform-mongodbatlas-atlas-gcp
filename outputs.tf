@@ -14,6 +14,9 @@ output "encryption" {
     valid                   = module.encryption[0].valid
     key_version_resource_id = module.encryption[0].key_version_resource_id
     crypto_key_id           = module.encryption[0].crypto_key_id
+    key_ring_name           = module.encryption[0].key_ring_name
+    crypto_key_name         = module.encryption[0].crypto_key_name
+    kms_location            = module.encryption[0].kms_location
   } : null
 }
 

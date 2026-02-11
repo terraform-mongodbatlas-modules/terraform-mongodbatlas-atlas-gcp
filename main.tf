@@ -61,8 +61,15 @@ module "encryption" {
   role_id                     = local.encryption_role_id
   atlas_service_account_email = local.encryption_service_account
   key_version_resource_id     = var.encryption.key_version_resource_id
-  create_kms_key              = var.encryption.create_kms_key
   labels                      = var.gcp_tags
+
+  create_kms_key = merge(var.encryption.create_kms_key, {
+    location = lookup(
+      local.atlas_to_gcp_region,
+      var.encryption.create_kms_key.location,
+      var.encryption.create_kms_key.location
+    )
+  })
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -50,9 +50,19 @@ variable "encryption" {
     - `key_version_resource_id` (user-provided KMS key version)
     - `create_kms_key.enabled = true` (module-managed Key Ring + Crypto Key)
 
-    When `key_ring_name`/`crypto_key_name` are omitted, defaults to `atlas-{project_id}-keyring`
-    and `atlas-{project_id}-encryption-key` to avoid collisions across Atlas projects.
+    When `key_ring_name` is omitted, defaults to `atlas-{project_id}-keyring` to avoid
+    collisions across Atlas projects. `crypto_key_name` defaults to `atlas-encryption-key`.
     Key rings are permanent in GCP -- choose stable names.
+
+    `location` accepts GCP locations (`us-east4`) or Atlas region names (`US_EAST_4`).
+    Multi-regional locations (`us`, `europe`, `asia`) are also valid.
+
+    `rotation_period` controls GCP automatic key version rotation.
+    Format: seconds as string, e.g., "7776000s" (90 days). Must be > 86400s (1 day).
+    When omitted, no automatic rotation occurs. Atlas recommends 90-day rotation and
+    creates an alert at that cadence. Each rotation causes a plan diff on
+    key_version_resource_id on the next terraform apply. Old key versions remain
+    enabled -- no data re-encryption is needed.
 
     `dedicated_role_enabled = true` creates a dedicated Atlas service account for encryption.
   EOT

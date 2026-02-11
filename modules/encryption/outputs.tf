@@ -27,3 +27,18 @@ output "key_ring_id" {
   description = "KMS key ring ID (null if user-provided key)"
   value       = local.create_kms_key ? google_kms_key_ring.atlas[0].id : null
 }
+
+output "key_ring_name" {
+  description = "Resolved key ring name (auto-generated or user-provided)"
+  value       = local.key_ring_name
+}
+
+output "crypto_key_name" {
+  description = "Resolved crypto key name (auto-generated or user-provided)"
+  value       = local.crypto_key_name
+}
+
+output "kms_location" {
+  description = "GCP KMS location (normalized to GCP format)"
+  value       = var.create_kms_key.location
+}
