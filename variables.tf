@@ -35,8 +35,8 @@ variable "encryption" {
     key_version_resource_id = optional(string)
     create_kms_key = optional(object({
       enabled         = optional(bool, false)
-      key_ring_name   = optional(string, "")
-      crypto_key_name = optional(string, "")
+      key_ring_name   = optional(string, "atlas-keyring")
+      crypto_key_name = optional(string, "atlas-encryption-key")
       location        = optional(string, "")
       rotation_period = optional(string)
     }), {})
@@ -69,12 +69,8 @@ variable "encryption" {
   }
 
   validation {
-    condition = !var.encryption.create_kms_key.enabled || (
-      var.encryption.create_kms_key.key_ring_name != "" &&
-      var.encryption.create_kms_key.crypto_key_name != "" &&
-      var.encryption.create_kms_key.location != ""
-    )
-    error_message = "create_kms_key requires key_ring_name, crypto_key_name, and location when enabled."
+    condition     = !var.encryption.create_kms_key.enabled || var.encryption.create_kms_key.location != ""
+    error_message = "create_kms_key.location is required when create_kms_key.enabled = true."
   }
 
   validation {

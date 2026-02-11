@@ -106,3 +106,35 @@ run "encryption_with_dedicated_role" {
     error_message = "Expected GCP with dedicated role"
   }
 }
+
+run "encryption_create_kms_key_defaults_only_location_required" {
+  command = plan
+  variables {
+    encryption = {
+      enabled = true
+      create_kms_key = {
+        enabled  = true
+        location = "us-east4"
+      }
+    }
+  }
+  assert {
+    condition     = output.encryption_at_rest_provider == "GCP"
+    error_message = "Expected GCP with defaulted key names"
+  }
+  assert {
+    condition     = output.encryption != null
+    error_message = "Expected encryption output to be non-null with defaults"
+  }
+}
+
+run "encryption_create_kms_key_missing_location" {
+  command = plan
+  variables {
+    encryption = {
+      enabled        = true
+      create_kms_key = { enabled = true }
+    }
+  }
+  expect_failures = [var.encryption]
+}

@@ -22,8 +22,8 @@ variable "key_version_resource_id" {
 variable "create_kms_key" {
   type = object({
     enabled         = optional(bool, false)
-    key_ring_name   = optional(string, "")
-    crypto_key_name = optional(string, "")
+    key_ring_name   = optional(string, "atlas-keyring")
+    crypto_key_name = optional(string, "atlas-encryption-key")
     location        = optional(string, "")
     rotation_period = optional(string)
   })
