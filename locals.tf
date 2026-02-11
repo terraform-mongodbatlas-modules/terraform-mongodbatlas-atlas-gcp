@@ -76,7 +76,8 @@ locals {
     local.privatelink_module_managed,
     { for k, region in var.privatelink_byoe_regions : k => { region = region, subnetwork = "", labels = {} } }
   )
-  privatelink_module_calls = merge(
+  # tflint-ignore: terraform_unused_declarations
+  privatelink_module_calls = merge( # 
     local.privatelink_module_managed,
     { for k, region in var.privatelink_byoe_regions : k => { region = region, subnetwork = "", labels = {} } if contains(keys(var.privatelink_byoe), k) }
   )
