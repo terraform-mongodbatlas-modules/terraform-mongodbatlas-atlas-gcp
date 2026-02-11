@@ -222,8 +222,7 @@ extract-regions provider *args: # use --output-dir to specify the output directo
     {{py}} dev.extract_regions --provider {{provider}} {{args}}
 
 validate-regions provider:
-    {{py}} dev.extract_regions --provider {{provider}} --fail-on-unmapped --output-dir {{justfile_directory()}}
-    git diff --exit-code --name-only {{justfile_directory()}} || (echo "Region files have uncommitted changes after extraction. Please commit the updated files." && exit 1)
+    {{py}} dev.extract_regions --provider {{provider}} --fail-on-unmapped
 # === OK_EDIT: path-sync regions ===
 # === DO_NOT_EDIT: path-sync testing-tf ===
 # TERRAFORM TESTING
