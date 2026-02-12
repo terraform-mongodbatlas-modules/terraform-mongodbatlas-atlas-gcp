@@ -2,7 +2,7 @@ locals {
   create_bucket = var.create_bucket.enabled
   default_name  = "atlas-backup-${var.project_id}${var.create_bucket.name_suffix}"
   resolved_name = var.create_bucket.name != "" ? var.create_bucket.name : local.default_name
-  bucket_name   = local.create_bucket ? local.resolved_name : var.bucket_name
+  bucket_name   = local.create_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
   bucket_location = (
     local.create_bucket ? var.create_bucket.location : data.google_storage_bucket.user_provided[0].location
   )
