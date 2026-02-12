@@ -219,6 +219,22 @@ Provide EITHER:
 - `bucket_name` (user-provided GCS bucket)
 - `create_bucket.enabled = true` (module-managed GCS bucket)
 
+**Bucket Naming:**
+- `name` - exact bucket name (globally unique in GCS)
+- `name_suffix` - appended to default `atlas-backup-{project_id}` (include separator, e.g. "-dev")
+- Neither: defaults to `atlas-backup-{project_id}`
+
+**Location:**
+`location` accepts GCP regions (`us-east4`), Atlas format (`US_EAST_4`),
+multi-regions (`US`, `EU`, `ASIA`), or dual-regions (`NAM4`, `EUR4`).
+Atlas format is normalized via `atlas_to_gcp_region`. Choose a region
+colocated with the Atlas cluster for lowest latency.
+
+**Security Defaults:**
+- `uniform_bucket_level_access = true` (IAM-only, no per-object ACLs)
+- `public_access_prevention = "enforced"` (blocks all public access)
+- `versioning_enabled = true` (backup recovery)
+
 `dedicated_role_enabled = true` creates a dedicated Atlas service account for backup export.
 
 Type:
@@ -228,12 +244,15 @@ object({
   enabled     = optional(bool, false)
   bucket_name = optional(string)
   create_bucket = optional(object({
-    enabled            = optional(bool, false)
-    name               = optional(string, "")
-    location           = optional(string, "")
-    force_destroy      = optional(bool, false)
-    storage_class      = optional(string, "STANDARD")
-    versioning_enabled = optional(bool, true)
+    enabled                     = optional(bool, false)
+    name                        = optional(string, "")
+    name_suffix                 = optional(string, "")
+    location                    = optional(string, "")
+    force_destroy               = optional(bool, false)
+    storage_class               = optional(string, "STANDARD")
+    versioning_enabled          = optional(bool, true)
+    uniform_bucket_level_access = optional(bool, true)
+    public_access_prevention    = optional(string, "enforced")
   }), {})
   dedicated_role_enabled = optional(bool, false)
 })
