@@ -15,6 +15,11 @@ TEST_CASES = [
     ('encryption', 'module_atlas_gcp_module_encryption[0]_mongodbatlas_encryption_at_rest_this', True),
     ('encryption', 'module_atlas_gcp_module_encryption[0]_google_kms_crypto_key_iam_member_encrypter', True),
     ('encryption', 'module_atlas_gcp_module_encryption[0]_google_kms_crypto_key_iam_member_viewer', True),
+    ('backup_export', 'module_atlas_gcp_module_cloud_provider_access[0]_mongodbatlas_cloud_provider_access_setup_this', True),
+    ('backup_export', 'module_atlas_gcp_module_cloud_provider_access[0]_mongodbatlas_cloud_provider_access_authorization_this', True),
+    ('backup_export', 'module_atlas_gcp_module_backup_export[0]_google_storage_bucket_atlas[0]', True),
+    ('backup_export', 'module_atlas_gcp_module_backup_export[0]_google_storage_bucket_iam_member_atlas', True),
+    ('backup_export', 'module_atlas_gcp_module_backup_export[0]_mongodbatlas_cloud_backup_snapshot_export_bucket_this', True),
 ]
 
 
