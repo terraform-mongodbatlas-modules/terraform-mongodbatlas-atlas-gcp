@@ -246,3 +246,6 @@ sdlc-validate:
 
 validate-regions-gcp:
     just validate-regions gcp --output-format variable
+
+dev-vars-gcp:
+    {{py}} dev.dev_vars gcp

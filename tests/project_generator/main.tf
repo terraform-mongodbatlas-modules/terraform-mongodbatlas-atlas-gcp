@@ -1,8 +1,9 @@
+# path-sync copy -n sdlc
 terraform {
   required_providers {
     mongodbatlas = {
       source  = "mongodb/mongodbatlas"
-      version = "~> 2.6"
+      version = "~> 2.1"
     }
     random = {
       source  = "hashicorp/random"
@@ -13,17 +14,20 @@ terraform {
 }
 
 variable "org_id" {
-  type = string
+  type        = string
+  description = "Organization ID for creating the project."
 }
 
 variable "project_name" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
+  description = "Project name. If empty, generates from prefix + random suffix."
 }
 
 variable "project_name_prefix" {
-  type    = string
-  default = "test-acc-tf-p-" # DO NOT EDIT, prefix used by cleanup-test-env.yml
+  type        = string
+  default     = "test-acc-tf-p-" # DO NOT EDIT, prefix used by cleanup-test-env.yml
+  description = "Project name prefix when auto-generating name."
 }
 
 resource "random_string" "suffix" {
