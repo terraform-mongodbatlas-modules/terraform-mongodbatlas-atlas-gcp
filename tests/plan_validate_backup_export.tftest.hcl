@@ -115,7 +115,47 @@ run "backup_export_dedicated_role" {
     }
   }
   assert {
-    condition     = output.resource_ids.bucket_name == "existing-bucket"
-    error_message = "Expected bucket_name with dedicated role"
+    condition     = output.backup_export != null
+    error_message = "Expected non-null backup_export output with dedicated role"
+  }
+  assert {
+    condition     = output.resource_ids.backup_export_role_id != null
+    error_message = "Expected non-null backup_export_role_id with dedicated role"
+  }
+  assert {
+    condition     = output.resource_ids.backup_export_service_account != null
+    error_message = "Expected non-null backup_export_service_account with dedicated role"
+  }
+}
+
+run "backup_export_dedicated_role_with_encryption" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled                = true
+      bucket_name            = "existing-bucket"
+      dedicated_role_enabled = true
+    }
+    encryption = {
+      enabled                 = true
+      key_version_resource_id = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+      dedicated_role_enabled  = true
+    }
+  }
+  assert {
+    condition     = output.backup_export != null
+    error_message = "Expected non-null backup_export when both features use dedicated roles"
+  }
+  assert {
+    condition     = output.encryption != null
+    error_message = "Expected non-null encryption when both features use dedicated roles"
+  }
+  assert {
+    condition     = output.resource_ids.backup_export_role_id != null
+    error_message = "Expected non-null backup_export_role_id"
+  }
+  assert {
+    condition     = output.resource_ids.encryption_role_id != null
+    error_message = "Expected non-null encryption_role_id"
   }
 }

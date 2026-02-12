@@ -19,8 +19,8 @@ resource "google_storage_bucket" "atlas" {
   location                    = var.create_bucket.location
   storage_class               = var.create_bucket.storage_class
   force_destroy               = var.create_bucket.force_destroy
-  uniform_bucket_level_access = true
-  public_access_prevention    = "enforced"
+  uniform_bucket_level_access = var.create_bucket.uniform_bucket_level_access
+  public_access_prevention    = var.create_bucket.public_access_prevention
   labels                      = var.labels
 
   versioning {

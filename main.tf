@@ -86,7 +86,13 @@ module "backup_export" {
   bucket_name                 = var.backup_export.bucket_name
   labels                      = var.gcp_tags
 
-  create_bucket = var.backup_export.create_bucket
+  create_bucket = merge(var.backup_export.create_bucket, {
+    location = lookup(
+      local.atlas_to_gcp_region,
+      var.backup_export.create_bucket.location,
+      var.backup_export.create_bucket.location
+    )
+  })
 
   depends_on = [module.cloud_provider_access, module.backup_export_cloud_provider_access]
 }

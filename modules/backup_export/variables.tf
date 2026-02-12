@@ -21,13 +21,15 @@ variable "bucket_name" {
 
 variable "create_bucket" {
   type = object({
-    enabled            = optional(bool, false)
-    name               = optional(string, "")
-    name_suffix        = optional(string, "")
-    location           = optional(string, "")
-    force_destroy      = optional(bool, false)
-    storage_class      = optional(string, "STANDARD")
-    versioning_enabled = optional(bool, true)
+    enabled                     = optional(bool, false)
+    name                        = optional(string, "")
+    name_suffix                 = optional(string, "")
+    location                    = optional(string, "")
+    force_destroy               = optional(bool, false)
+    storage_class               = optional(string, "STANDARD")
+    versioning_enabled          = optional(bool, true)
+    uniform_bucket_level_access = optional(bool, true)
+    public_access_prevention    = optional(string, "enforced")
   })
   default     = {}
   nullable    = false
