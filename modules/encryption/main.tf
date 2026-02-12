@@ -11,11 +11,18 @@ locals {
     google_kms_crypto_key.atlas[0].primary[0].name
   ) : var.key_version_resource_id
 
-  # Derive crypto_key_id for IAM bindings
+  # Derive crypto_key_id and kms_location from key_version_resource_id for user-provided keys
   # Format: projects/{p}/locations/{l}/keyRings/{kr}/cryptoKeys/{ck}/cryptoKeyVersions/{v}
+  _kvri_parts = local.create_kms_key ? null : regex(
+    "projects/[^/]+/locations/(?P<location>[^/]+)/keyRings/[^/]+/cryptoKeys/(?P<crypto_key>[^/]+)/cryptoKeyVersions/",
+    var.key_version_resource_id
+  )
+
   crypto_key_id = local.create_kms_key ? (
     google_kms_crypto_key.atlas[0].id
   ) : regex("(.+)/cryptoKeyVersions/", var.key_version_resource_id)[0]
+
+  kms_location = local.create_kms_key ? var.create_kms_key.location : local._kvri_parts.location
 }
 
 # Module-Managed KMS Key (when create_kms_key.enabled = true)

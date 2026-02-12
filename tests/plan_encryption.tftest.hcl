@@ -47,6 +47,10 @@ run "kvri_valid_format_accepted" {
     condition     = output.encryption != null
     error_message = "Expected encryption output to be non-null"
   }
+  assert {
+    condition     = output.encryption.kms_location == "us-east4"
+    error_message = "Expected kms_location extracted from key_version_resource_id, got: ${output.encryption.kms_location}"
+  }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

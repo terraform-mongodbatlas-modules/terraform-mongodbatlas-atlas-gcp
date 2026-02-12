@@ -207,7 +207,6 @@ variable "backup_export" {
   }
 }
 
-# tflint-ignore: terraform_unused_declarations # TODO: encryption task
 variable "gcp_tags" {
   type        = map(string)
   default     = {}

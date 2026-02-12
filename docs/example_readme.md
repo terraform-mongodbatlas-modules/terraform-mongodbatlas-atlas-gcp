@@ -20,8 +20,8 @@ terraform init # this will download the required providers and create a `terrafo
 # configure your `vars.tfvars` with `project_id={PROJECT_ID}`
 {{ .PRODUCTION_CONSIDERATIONS_COMMENT }}
 terraform apply -var-file vars.tfvars
-# Find the connection string (will not include the username and password, see the [database_user](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/database_user) documentation to configure your app's access)
-terraform output cluster.connection_strings
+# View resource IDs created by the module
+terraform output resource_ids
 # cleanup
 terraform destroy -var-file vars.tfvars
 ```

@@ -40,5 +40,5 @@ output "crypto_key_name" {
 
 output "kms_location" {
   description = "GCP KMS location (normalized to GCP format)"
-  value       = var.create_kms_key.location
+  value       = local.kms_location
 }
