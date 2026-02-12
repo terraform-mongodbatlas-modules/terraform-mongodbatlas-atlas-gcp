@@ -73,6 +73,25 @@ module "encryption" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Backup Export
+# ─────────────────────────────────────────────────────────────────────────────
+
+module "backup_export" {
+  count  = var.backup_export.enabled ? 1 : 0
+  source = "./modules/backup_export"
+
+  project_id                  = var.project_id
+  role_id                     = local.backup_export_role_id
+  atlas_service_account_email = local.backup_export_service_account
+  bucket_name                 = var.backup_export.bucket_name
+  labels                      = var.gcp_tags
+
+  create_bucket = var.backup_export.create_bucket
+
+  depends_on = [module.cloud_provider_access, module.backup_export_cloud_provider_access]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # PrivateLink
 # ─────────────────────────────────────────────────────────────────────────────
 

@@ -171,6 +171,7 @@ variable "backup_export" {
     create_bucket = optional(object({
       enabled            = optional(bool, false)
       name               = optional(string, "")
+      name_suffix        = optional(string, "")
       location           = optional(string, "")
       force_destroy      = optional(bool, false)
       storage_class      = optional(string, "STANDARD")
@@ -205,11 +206,18 @@ variable "backup_export" {
   }
 
   validation {
-    condition = !var.backup_export.create_bucket.enabled || (
-      var.backup_export.create_bucket.name != "" &&
-      var.backup_export.create_bucket.location != ""
-    )
-    error_message = "create_bucket requires name and location when enabled."
+    condition     = !var.backup_export.create_bucket.enabled || var.backup_export.create_bucket.location != ""
+    error_message = "create_bucket.location is required when create_bucket.enabled = true."
+  }
+
+  validation {
+    condition     = !(var.backup_export.create_bucket.name != "" && var.backup_export.create_bucket.name_suffix != "")
+    error_message = "Cannot use both create_bucket.name and create_bucket.name_suffix."
+  }
+
+  validation {
+    condition     = var.backup_export.create_bucket.name == "" || can(regex("^[a-z0-9]", var.backup_export.create_bucket.name))
+    error_message = "Bucket name must start with a lowercase letter or number."
   }
 }
 
