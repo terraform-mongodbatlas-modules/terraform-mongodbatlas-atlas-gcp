@@ -8,6 +8,11 @@ output "bucket_name" {
   value       = local.bucket_name
 }
 
+output "bucket_location" {
+  description = "GCS bucket location (region, dual-region, or multi-region)"
+  value       = local.bucket_location
+}
+
 output "bucket_url" {
   description = "GCS bucket URL (gs://bucket-name)"
   value       = local.bucket_url

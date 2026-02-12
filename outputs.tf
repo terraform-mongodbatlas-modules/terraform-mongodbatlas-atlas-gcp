@@ -67,6 +67,7 @@ output "backup_export" {
   value = var.backup_export.enabled ? {
     export_bucket_id = module.backup_export[0].export_bucket_id
     bucket_name      = module.backup_export[0].bucket_name
+    bucket_location  = module.backup_export[0].bucket_location
     bucket_url       = module.backup_export[0].bucket_url
   } : null
 }

@@ -84,6 +84,42 @@ run "backup_export_create_bucket_with_suffix" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Region Normalization
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "backup_export_atlas_region_format" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled       = true
+      create_bucket = { enabled = true, location = "US_EAST_4" }
+    }
+  }
+  assert {
+    condition     = output.backup_export.bucket_location == "us-east4"
+    error_message = "Expected location normalized from US_EAST_4 to us-east4, got: ${output.backup_export.bucket_location}"
+  }
+  assert {
+    condition     = startswith(output.resource_ids.bucket_name, "atlas-backup-")
+    error_message = "Expected default bucket_name with Atlas region format input"
+  }
+}
+
+run "backup_export_gcp_region_passthrough" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled       = true
+      create_bucket = { enabled = true, location = "us-west4" }
+    }
+  }
+  assert {
+    condition     = output.backup_export != null
+    error_message = "Expected non-null backup_export with GCP region format"
+  }
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # User-Provided Bucket
 # ─────────────────────────────────────────────────────────────────────────────
 
