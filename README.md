@@ -112,7 +112,7 @@ Key rings are permanent in GCP -- choose stable names.
 Multi-regional locations (`us`, `europe`, `asia`) are also valid.
 
 `rotation_period` controls GCP automatic key version rotation.
-Format: seconds as string, e.g., "7776000s" (90 days). Must be > 86400s (1 day).
+Format: seconds as string, e.g., "7776000s" (90 days). Should be > 86400s (1 day).
 When omitted, no automatic rotation occurs. Atlas recommends 90-day rotation and
 creates an alert at that cadence. Each rotation causes a plan diff on
 key_version_resource_id on the next terraform apply. Old key versions remain
