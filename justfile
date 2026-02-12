@@ -250,11 +250,11 @@ validate-regions-gcp:
 dev-vars-gcp:
     {{py}} dev.dev_vars gcp
 
-plan-snapshot-test-gcp:
-    just plan-snapshot-test --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars
+plan-snapshot-test-gcp *args:
+    just plan-snapshot-test --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars {{args}}
 
-apply-examples-gcp:
-    just apply-examples --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars
+apply-examples-gcp *args:
+    just apply-examples --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars {{args}}
 
-destroy-examples-gcp:
-    just destroy-examples --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars
+destroy-examples-gcp *args:
+    just destroy-examples --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars {{args}}
