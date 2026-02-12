@@ -17,6 +17,16 @@ variable "key_version_resource_id" {
   type        = string
   default     = null
   description = "User-provided KMS crypto key version resource ID"
+
+  validation {
+    condition     = var.create_kms_key.enabled || var.key_version_resource_id != null
+    error_message = "key_version_resource_id is required when create_kms_key.enabled = false."
+  }
+
+  validation {
+    condition     = !var.create_kms_key.enabled || var.key_version_resource_id == null
+    error_message = "key_version_resource_id must not be set when create_kms_key.enabled = true."
+  }
 }
 
 variable "create_kms_key" {
@@ -33,7 +43,7 @@ variable "create_kms_key" {
     Module-managed KMS key configuration.
 
     `rotation_period` controls GCP automatic key version rotation.
-    Format: seconds as string, e.g., "7776000s" (90 days). Must be > 86400s (1 day).
+    Format: seconds as string, e.g., "7776000s" (90 days). Should be > 86400s (1 day).
     When omitted, no automatic rotation occurs.
     Atlas recommends rotating CMKs every 90 days and creates an alert at that cadence.
     Each rotation causes a plan diff on key_version_resource_id on the next terraform apply.
