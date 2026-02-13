@@ -38,7 +38,8 @@ variable "gcp_region" {
 
 variable "project_ids" {
   type = object({
-    encryption = optional(string)
+    encryption    = optional(string)
+    backup_export = optional(string)
   })
   default = {}
 }
@@ -60,6 +61,8 @@ locals {
   project_ids         = { for k, v in var.project_ids : k => v != null ? v : module.project[k].project_id }
   # tflint-ignore: terraform_unused_declarations
   project_id_encryption = local.project_ids.encryption
+  # tflint-ignore: terraform_unused_declarations
+  project_id_backup_export = local.project_ids.backup_export
   # tflint-ignore: terraform_unused_declarations
   key_ring_name = "atlas-test-${random_string.suffix.id}"
 }

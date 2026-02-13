@@ -26,3 +26,6 @@ tables:
       - folder_name: encryption
         feature: Encryption at Rest
         name: GCP Cloud KMS Integration (User-Provided)
+      - folder_name: backup_export
+        feature: Backup Export
+        name: GCS Bucket Export (Module-Managed)
