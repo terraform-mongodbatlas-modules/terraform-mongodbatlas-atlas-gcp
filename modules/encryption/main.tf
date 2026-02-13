@@ -3,6 +3,8 @@ locals {
 
   # Key ring gets project ID prefix to avoid collisions across Atlas projects in the same GCP project+location
   # Prefix with "atlas-" to guarantee the name starts with a letter (GCP requirement)
+  # GCP key ring names: 1-63 chars, [a-zA-Z][a-zA-Z0-9_-]*
+  # Auto-generated: "atlas-" (6) + project_id (24 hex) + "-keyring" (8) = 38 chars
   # Crypto key name needs no prefix -- it's already scoped within the key ring
   key_ring_name   = var.create_kms_key.key_ring_name != null ? var.create_kms_key.key_ring_name : "atlas-${var.project_id}-keyring"
   crypto_key_name = var.create_kms_key.crypto_key_name != null ? var.create_kms_key.crypto_key_name : "atlas-encryption-key"
