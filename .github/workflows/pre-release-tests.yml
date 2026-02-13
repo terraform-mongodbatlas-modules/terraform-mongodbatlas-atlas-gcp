@@ -30,6 +30,7 @@ env:
   MONGODB_ATLAS_CLIENT_SECRET: ${{ secrets.MONGODB_ATLAS_CLIENT_SECRET }}
   MONGODB_ATLAS_BASE_URL: ${{ secrets.MONGODB_ATLAS_BASE_URL }}
 # === OK_EDIT: path-sync env ===
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
 
 jobs:
   # === DO_NOT_EDIT: path-sync job-tftest ===
@@ -55,11 +56,16 @@ jobs:
       - run: just tftest-all
   # === OK_EDIT: path-sync job-tftest ===
 
+  # === DO_NOT_EDIT: path-sync job-apply-setup ===
   apply-and-destroy:
     name: Apply & Destroy Examples
     runs-on: ubuntu-latest
+  # === OK_EDIT: path-sync job-apply-setup ===
+    permissions:
+      id-token: write
+      contents: read
+  # === DO_NOT_EDIT: path-sync job-apply-setup ===
     steps:
-      # === DO_NOT_EDIT: path-sync job-apply-setup ===
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: ./.github/actions/setup
         with:
@@ -74,14 +80,18 @@ jobs:
         if: inputs.provider_ref != 'registry' && inputs.provider_ref != 'default'
         with:
           provider-ref: ${{ inputs.provider_ref }}
-      # === OK_EDIT: path-sync job-apply-setup ===
-      - run: just dev-vars-org "${MONGODB_ATLAS_ORG_ID}"
+  # === OK_EDIT: path-sync job-apply-setup ===
+      - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+      - run: just dev-vars-gcp
       - name: Apply examples
         env:
           INCLUDE_EXAMPLES: ${{ inputs.include_examples }}
-        run: just apply-examples --auto-approve -e "$INCLUDE_EXAMPLES" --var-file $(pwd)/tests/workspace_cluster_examples/dev.tfvars
+        run: just apply-examples-gcp --auto-approve -e "$INCLUDE_EXAMPLES"
       - name: Destroy examples
         if: always()
         env:
           INCLUDE_EXAMPLES: ${{ inputs.include_examples }}
-        run: just destroy-examples --auto-approve -e "$INCLUDE_EXAMPLES" --var-file $(pwd)/tests/workspace_cluster_examples/dev.tfvars
+        run: just destroy-examples-gcp --auto-approve -e "$INCLUDE_EXAMPLES"
