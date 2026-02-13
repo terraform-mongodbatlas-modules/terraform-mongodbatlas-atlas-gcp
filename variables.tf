@@ -190,9 +190,8 @@ variable "backup_export" {
     - `create_bucket.enabled = true` (module-managed GCS bucket)
 
     **Bucket Naming:**
-    - `name` - exact bucket name (globally unique in GCS)
-    - `name_suffix` - appended to default `atlas-backup-{project_id}` (include separator, e.g. "-dev")
-    - Neither: defaults to `atlas-backup-{project_id}`
+    - `name` accepts a string to set an explicit bucket name (must be globally unique in GCS). When omitted, the bucket name is auto-generated as `atlas-backup-{project_id}`.
+    - `name_suffix` accepts a string appended to the auto-generated name, resulting in `atlas-backup-{project_id}{name_suffix}`. Include a separator (e.g. `"-dev"` produces `atlas-backup-{project_id}-dev`). Mutually exclusive with `name`.
 
     **Location:**
     `location` accepts GCP regions (`us-east4`), Atlas format (`US_EAST_4`),
@@ -200,10 +199,10 @@ variable "backup_export" {
     Atlas format is normalized via `atlas_to_gcp_region`. Choose a region
     colocated with the Atlas cluster for lowest latency.
 
-    **Security Defaults:**
-    - `uniform_bucket_level_access = true` (IAM-only, no per-object ACLs)
-    - `public_access_prevention = "enforced"` (blocks all public access)
-    - `versioning_enabled = true` (backup recovery)
+    **Security:**
+    - `uniform_bucket_level_access` accepts `true` or `false` to control IAM-only access (no per-object ACLs). Defaults to `true`.
+    - `public_access_prevention` accepts `"enforced"` to block public access or `"inherited"` to use project-level settings. Defaults to `"enforced"`.
+    - `versioning_enabled` accepts `true` or `false` to enable or disable object versioning for backup recovery. Defaults to `true`.
 
     `dedicated_role_enabled = true` creates a dedicated Atlas service account for backup export.
   EOT
