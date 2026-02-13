@@ -50,29 +50,6 @@ module "backup_export_cloud_provider_access" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Encryption
-# ─────────────────────────────────────────────────────────────────────────────
-
-module "encryption" {
-  count  = var.encryption.enabled ? 1 : 0
-  source = "./modules/encryption"
-
-  project_id                  = var.project_id
-  role_id                     = local.encryption_role_id
-  atlas_service_account_email = local.encryption_service_account
-  key_version_resource_id     = var.encryption.key_version_resource_id
-  labels                      = var.gcp_tags
-
-  create_kms_key = merge(var.encryption.create_kms_key, {
-    location = lookup(
-      local.atlas_to_gcp_region,
-      var.encryption.create_kms_key.location,
-      var.encryption.create_kms_key.location
-    )
-  })
-}
-
-# ─────────────────────────────────────────────────────────────────────────────
 # PrivateLink
 # ─────────────────────────────────────────────────────────────────────────────
 

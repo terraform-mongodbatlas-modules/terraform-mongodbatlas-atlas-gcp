@@ -35,8 +35,8 @@ variable "encryption" {
     key_version_resource_id = optional(string)
     create_kms_key = optional(object({
       enabled         = optional(bool, false)
-      key_ring_name   = optional(string)
-      crypto_key_name = optional(string)
+      key_ring_name   = optional(string, "")
+      crypto_key_name = optional(string, "")
       location        = optional(string, "")
       rotation_period = optional(string)
     }), {})
@@ -49,20 +49,6 @@ variable "encryption" {
     Provide EITHER:
     - `key_version_resource_id` (user-provided KMS key version)
     - `create_kms_key.enabled = true` (module-managed Key Ring + Crypto Key)
-
-    When `key_ring_name` is omitted, defaults to `atlas-{project_id}-keyring` to avoid
-    collisions across Atlas projects. `crypto_key_name` defaults to `atlas-encryption-key`.
-    Key rings are permanent in GCP -- choose stable names.
-
-    `location` accepts GCP locations (`us-east4`) or Atlas region names (`US_EAST_4`).
-    Multi-regional locations (`us`, `europe`, `asia`) are also valid.
-
-    `rotation_period` controls GCP automatic key version rotation.
-    Format: seconds as string, e.g., "7776000s" (90 days). Should be > 86400s (1 day).
-    When omitted, no automatic rotation occurs. Atlas recommends 90-day rotation and
-    creates an alert at that cadence. Each rotation causes a plan diff on
-    key_version_resource_id on the next terraform apply. Old key versions remain
-    enabled -- no data re-encryption is needed.
 
     `dedicated_role_enabled = true` creates a dedicated Atlas service account for encryption.
   EOT
@@ -83,15 +69,12 @@ variable "encryption" {
   }
 
   validation {
-    condition     = !var.encryption.create_kms_key.enabled || var.encryption.create_kms_key.location != ""
-    error_message = "create_kms_key.location is required when create_kms_key.enabled = true."
-  }
-
-  validation {
-    condition = var.encryption.key_version_resource_id == null ? true : can(
-      regex("^projects/.+/locations/.+/keyRings/.+/cryptoKeys/.+/cryptoKeyVersions/.+$", var.encryption.key_version_resource_id)
+    condition = !var.encryption.create_kms_key.enabled || (
+      var.encryption.create_kms_key.key_ring_name != "" &&
+      var.encryption.create_kms_key.crypto_key_name != "" &&
+      var.encryption.create_kms_key.location != ""
     )
-    error_message = "key_version_resource_id must be a full GCP resource path: projects/{project}/locations/{location}/keyRings/{ring}/cryptoKeys/{key}/cryptoKeyVersions/{version}"
+    error_message = "create_kms_key requires key_ring_name, crypto_key_name, and location when enabled."
   }
 }
 
