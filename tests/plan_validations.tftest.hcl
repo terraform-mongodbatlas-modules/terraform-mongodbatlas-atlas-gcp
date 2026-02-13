@@ -203,6 +203,39 @@ run "backup_invalid_bucket_name_start" {
   expect_failures = [var.backup_export]
 }
 
+run "backup_invalid_bucket_name_uppercase" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled       = true
+      create_bucket = { enabled = true, name = "myBucket", location = "us-east4" }
+    }
+  }
+  expect_failures = [var.backup_export]
+}
+
+run "backup_invalid_bucket_name_too_short" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled       = true
+      create_bucket = { enabled = true, name = "ab", location = "us-east4" }
+    }
+  }
+  expect_failures = [var.backup_export]
+}
+
+run "backup_invalid_bucket_name_end" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled       = true
+      create_bucket = { enabled = true, name = "my-bucket-", location = "us-east4" }
+    }
+  }
+  expect_failures = [var.backup_export]
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Valid Configuration Assertions
 # ─────────────────────────────────────────────────────────────────────────────

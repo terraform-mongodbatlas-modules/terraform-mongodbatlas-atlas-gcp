@@ -39,7 +39,7 @@ resource "google_storage_bucket" "atlas" {
 }
 
 resource "google_storage_bucket_iam_member" "atlas" {
-  bucket = local.bucket_name
+  bucket = local.create_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
   role   = "roles/storage.objectCreator"
   member = "serviceAccount:${var.atlas_service_account_email}"
 }

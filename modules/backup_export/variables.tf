@@ -17,6 +17,11 @@ variable "bucket_name" {
   type        = string
   default     = null
   description = "User-provided GCS bucket name"
+
+  validation {
+    condition     = var.create_bucket.enabled || var.bucket_name != null
+    error_message = "bucket_name is required when create_bucket.enabled = false."
+  }
 }
 
 variable "create_bucket" {

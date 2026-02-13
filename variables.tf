@@ -233,8 +233,10 @@ variable "backup_export" {
   }
 
   validation {
-    condition     = var.backup_export.create_bucket.name == "" || can(regex("^[a-z0-9]", var.backup_export.create_bucket.name))
-    error_message = "Bucket name must start with a lowercase letter or number."
+    condition = var.backup_export.create_bucket.name == "" || can(
+      regex("^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$", var.backup_export.create_bucket.name)
+    )
+    error_message = "Bucket name must be 3-63 characters, contain only lowercase letters, numbers, dots (.), underscores (_), and hyphens (-), and must start and end with a lowercase letter or number."
   }
 }
 
