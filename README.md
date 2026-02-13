@@ -104,9 +104,15 @@ Provide EITHER:
 - `key_version_resource_id` (user-provided KMS key version)
 - `create_kms_key.enabled = true` (module-managed Key Ring + Crypto Key)
 
-When `key_ring_name` is omitted, defaults to `atlas-{project_id}-keyring` to avoid
-collisions across Atlas projects. `crypto_key_name` defaults to `atlas-encryption-key`.
-Key rings are permanent in GCP -- choose stable names.
+`key_ring_name` sets the name for the GCP KMS key ring. When omitted, defaults to
+`atlas-{project_id}-keyring` to avoid collisions across Atlas projects sharing the
+same GCP project and location. Key rings are permanent in GCP -- choose stable names.
+GCP allows 1-63 characters (`[a-zA-Z][a-zA-Z0-9_-]*`); the auto-generated name is
+38 characters (well within the limit).
+
+`crypto_key_name` sets the name for the GCP KMS crypto key within the key ring.
+When omitted, defaults to `atlas-encryption-key`. No project ID prefix needed since
+the key is already scoped within the key ring.
 
 `location` accepts GCP locations (`us-east4`) or Atlas region names (`US_EAST_4`).
 Multi-regional locations (`us`, `europe`, `asia`) are also valid.
