@@ -14,14 +14,13 @@ variable "gcp_region" {
   default     = "us-east4"
 }
 
-variable "subnetwork_us_east4" {
-  type        = string
-  description = "Subnetwork self_link in us-east4 for PSC endpoint"
-}
-
-variable "subnetwork_us_west1" {
-  type        = string
-  description = "Subnetwork self_link in us-west1 for PSC endpoint"
+variable "privatelink_endpoints" {
+  type = list(object({
+    region     = string
+    subnetwork = string
+    labels     = optional(map(string), {})
+  }))
+  description = "Multi-region PrivateLink endpoints via PSC. Region accepts us-east4 or US_EAST_4 format. All regions must be UNIQUE."
 }
 
 variable "gcp_tags" {

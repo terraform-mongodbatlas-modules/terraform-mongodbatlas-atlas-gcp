@@ -58,25 +58,19 @@ resource "random_string" "suffix" {
   upper   = false
 }
 
-resource "google_compute_network" "privatelink" {
-  name                    = "atlas-pl-test-${random_string.suffix.id}"
-  auto_create_subnetworks = false
+module "network_us_east4" {
+  source      = "../network_generator"
+  region      = "us-east4"
+  subnet_cidr = "10.10.0.0/24"
+  name_prefix = "atlas-pl-use4-${random_string.suffix.id}-"
 }
 
-resource "google_compute_subnetwork" "us_east4" {
-  name          = "atlas-pl-use4-${random_string.suffix.id}"
-  ip_cidr_range = "10.10.0.0/24"
-  region        = "us-east4"
-  network       = google_compute_network.privatelink.id
-  purpose       = "PRIVATE_SERVICE_CONNECT"
-}
-
-resource "google_compute_subnetwork" "us_west1" {
-  name          = "atlas-pl-usw1-${random_string.suffix.id}"
-  ip_cidr_range = "10.11.0.0/24"
-  region        = "us-west1"
-  network       = google_compute_network.privatelink.id
-  purpose       = "PRIVATE_SERVICE_CONNECT"
+module "network_us_west1" {
+  source      = "../network_generator"
+  region      = "us-west1"
+  subnet_cidr = "10.11.0.0/24"
+  name_prefix = "atlas-pl-usw1-${random_string.suffix.id}-"
+  network_id  = module.network_us_east4.network_id
 }
 
 locals {
@@ -93,9 +87,10 @@ locals {
   # tflint-ignore: terraform_unused_declarations
   key_ring_name = "atlas-test-${random_string.suffix.id}"
   # tflint-ignore: terraform_unused_declarations
-  subnetwork_us_east4 = google_compute_subnetwork.us_east4.self_link
+  privatelink_endpoints_multi_region = [
+    { region = "us-east4", subnetwork = module.network_us_east4.subnetwork_self_link },
+    { region = "us-west1", subnetwork = module.network_us_west1.subnetwork_self_link },
+  ]
   # tflint-ignore: terraform_unused_declarations
-  subnetwork_us_west1 = google_compute_subnetwork.us_west1.self_link
-  # tflint-ignore: terraform_unused_declarations
-  subnetwork_privatelink_byoe = google_compute_subnetwork.us_east4.self_link
+  subnetwork_privatelink_byoe = module.network_us_east4.subnetwork_self_link
 }

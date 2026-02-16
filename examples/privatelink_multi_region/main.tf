@@ -2,10 +2,7 @@ module "atlas_gcp" {
   source     = "../../"
   project_id = var.project_id
 
-  privatelink_endpoints = [
-    { region = "us-east4", subnetwork = var.subnetwork_us_east4 },
-    { region = "us-west1", subnetwork = var.subnetwork_us_west1 },
-  ]
+  privatelink_endpoints = var.privatelink_endpoints
 
   gcp_tags = var.gcp_tags
 }

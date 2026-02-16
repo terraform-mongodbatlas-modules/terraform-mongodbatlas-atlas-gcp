@@ -77,12 +77,9 @@ var_groups:
     - name: gcp_region
       expose_in_workspace: false
       module_value: '""'
-    - name: subnetwork_us_east4
+    - name: privatelink_endpoints
       expose_in_workspace: false
-      module_value: local.subnetwork_us_east4
-    - name: subnetwork_us_west1
-      expose_in_workspace: false
-      module_value: local.subnetwork_us_west1
+      module_value: local.privatelink_endpoints_multi_region
   privatelink_byoe:
     - name: project_id
       expose_in_workspace: false

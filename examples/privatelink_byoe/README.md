@@ -94,6 +94,7 @@ output "forwarding_rule_id" {
 
 **Additional files needed:**
 - [variables.tf](./variables.tf)
+- [versions.tf](./versions.tf)
 
 
 
