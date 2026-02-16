@@ -1,0 +1,8 @@
+address_type: INTERNAL
+effective_labels:
+  goog-terraform-provisioned: 'true'
+name: atlas-psc-address
+project: tf-lz-module-gcp-ci
+region: us-east4
+terraform_labels:
+  goog-terraform-provisioned: 'true'

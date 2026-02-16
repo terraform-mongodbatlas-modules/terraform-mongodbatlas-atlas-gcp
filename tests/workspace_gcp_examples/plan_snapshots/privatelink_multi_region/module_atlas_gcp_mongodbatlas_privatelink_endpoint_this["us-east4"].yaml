@@ -1,0 +1,3 @@
+port_mapping_enabled: true
+provider_name: GCP
+region: US_EAST_4

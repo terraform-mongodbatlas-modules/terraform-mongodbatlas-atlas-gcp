@@ -29,3 +29,9 @@ tables:
       - folder_name: backup_export
         feature: Backup Export
         name: GCS Bucket Export (Module-Managed)
+      - folder_name: privatelink_multi_region
+        feature: PrivateLink (PSC)
+        name: Multi-Region Private Service Connect
+      - folder_name: privatelink_byoe
+        feature: PrivateLink (PSC)
+        name: BYOE (Bring Your Own Endpoint)

@@ -1,0 +1,5 @@
+load_balancing_scheme: ''
+name: atlas-psc-us-east1-fr
+project: tf-lz-module-gcp-ci
+recreate_closed_psc: false
+region: us-east1

@@ -3,7 +3,7 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# GCS Bucket Export (Module-Managed)
+# BYOE (Bring Your Own Endpoint)
 
 ## Pre Requirements
 
@@ -35,43 +35,62 @@ Copy and use this code to get started quickly:
 
 **main.tf**
 ```hcl
+/*
+  BYOE (Bring Your Own Endpoint) pattern for GCP Private Service Connect.
+
+  Single `terraform apply` approach:
+  1. Create Atlas-side PrivateLink using `privatelink_byoe_regions` to get service attachment info.
+  2. Create your own GCP address + forwarding rule using `privatelink_service_info` output.
+  3. Register your endpoint with Atlas using `privatelink_byoe` to complete the connection.
+*/
+
+locals {
+  ep1 = "ep1"
+}
+
 module "atlas_gcp" {
   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
   project_id = var.project_id
 
-  backup_export = {
-    enabled = true
-    create_bucket = {
-      enabled       = true
-      name          = var.bucket_name
-      name_suffix   = var.bucket_name_suffix
-      location      = var.gcp_region
-      force_destroy = var.force_destroy
+  privatelink_byoe = {
+    (local.ep1) = {
+      ip_address           = google_compute_address.psc.address
+      forwarding_rule_name = google_compute_forwarding_rule.psc.name
     }
   }
+  privatelink_byoe_regions = { (local.ep1) = var.gcp_region }
 
   gcp_tags = var.gcp_tags
 }
 
-# Alternative: user-provided bucket (uncomment and remove create_bucket above)
-# module "atlas_gcp" {
-#   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-#   project_id = var.project_id
-#
-#   backup_export = {
-#     enabled     = true
-#     bucket_name = "my-existing-bucket"
-#   }
-#
-#   gcp_tags = var.gcp_tags
-# }
-
-output "backup_export" {
-  value = module.atlas_gcp.backup_export
+data "google_compute_subnetwork" "psc" {
+  self_link = var.subnetwork
 }
 
-output "export_bucket_id" {
-  value = module.atlas_gcp.export_bucket_id
+resource "google_compute_address" "psc" {
+  name         = "atlas-psc-address"
+  region       = var.gcp_region
+  address_type = "INTERNAL"
+  subnetwork   = var.subnetwork
+}
+
+resource "google_compute_forwarding_rule" "psc" {
+  name                  = "atlas-psc-rule"
+  region                = var.gcp_region
+  network               = data.google_compute_subnetwork.psc.network
+  ip_address            = google_compute_address.psc.id
+  target                = module.atlas_gcp.privatelink_service_info[local.ep1].service_attachment_names[0]
+  load_balancing_scheme = ""
+}
+
+output "privatelink" {
+  description = "PrivateLink connection details"
+  value       = module.atlas_gcp.privatelink[local.ep1]
+}
+
+output "forwarding_rule_id" {
+  description = "GCP forwarding rule ID"
+  value       = google_compute_forwarding_rule.psc.id
 }
 
 output "resource_ids" {
