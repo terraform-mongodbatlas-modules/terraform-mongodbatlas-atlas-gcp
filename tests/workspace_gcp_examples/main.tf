@@ -66,12 +66,11 @@ module "network_us_east4" {
 }
 
 module "network_us_west1" {
-  source         = "../network_generator"
-  region         = "us-west1"
-  subnet_cidr    = "10.11.0.0/24"
-  name_prefix    = "atlas-pl-usw1-${random_string.suffix.id}-"
-  create_network = false
-  network_id     = module.network_us_east4.network_id
+  source           = "../network_generator"
+  region           = "us-west1"
+  subnet_cidr      = "10.11.0.0/24"
+  name_prefix      = "atlas-pl-usw1-${random_string.suffix.id}-"
+  existing_network = { id = module.network_us_east4.network_id }
 }
 
 locals {
