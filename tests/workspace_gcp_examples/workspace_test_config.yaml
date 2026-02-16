@@ -1,6 +1,9 @@
 examples:
   - name: encryption
     var_groups: [encryption]
+    output_assertions:
+      - output: encryption
+        not_empty: true
     plan_regressions:
       - address: google_kms_key_ring.atlas
       - address: google_kms_crypto_key.atlas
@@ -11,6 +14,11 @@ examples:
       - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.viewer
   - name: backup_export
     var_groups: [backup_export]
+    output_assertions:
+      - output: export_bucket_id
+        pattern: "^[a-f0-9]{24}$"
+      - output: backup_export
+        not_empty: true
     plan_regressions:
       - address: module.atlas_gcp.module.cloud_provider_access[0].mongodbatlas_cloud_provider_access_setup.this
       - address: module.atlas_gcp.module.cloud_provider_access[0].mongodbatlas_cloud_provider_access_authorization.this
