@@ -12,8 +12,8 @@ If you are familiar with Terraform and already have a project configured in Mong
 To use MongoDB Atlas through Terraform, ensure you meet the following requirements:
 
 1. Install [Terraform](https://developer.hashicorp.com/terraform/install) to be able to run the `terraform` commands.
-2. Sign up for a [MongoDB Atlas Account](https://www.mongodb.com/products/integrations/hashicorp-terraform)
-3. Configure [authentication](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs#authentication)
+2. Sign up for a [MongoDB Atlas Account](https://www.mongodb.com/products/integrations/hashicorp-terraform).
+3. Configure [authentication](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs#authentication).
 4. [Create a new Atlas Project](#optionally-create-a-new-atlas-project-resource) to use with Terraform, or use an existing [MongoDB Atlas Project](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/project) by setting `project_id` in your `vars.tfvars` file.
 
 ## Commands
@@ -88,7 +88,7 @@ output "resource_ids" {
 
 ## Feedback or Help
 
-- If you have any feedback or trouble please open a Github Issue
+- If you have any feedback or trouble please open a Github Issue.
 
 ## Optionally Create a New Atlas Project Resource
 

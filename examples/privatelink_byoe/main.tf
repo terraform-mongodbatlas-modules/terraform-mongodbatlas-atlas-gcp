@@ -1,9 +1,11 @@
-# BYOE (Bring Your Own Endpoint) pattern for GCP Private Service Connect
-#
-# Single `terraform apply` approach:
-# 1: Create Atlas-side PrivateLink using `privatelink_byoe_regions` to get service attachment info
-# 2: Create your own GCP address + forwarding rule using `privatelink_service_info` output
-# 3: Register your endpoint with Atlas using `privatelink_byoe` to complete the connection
+/*
+  BYOE (Bring Your Own Endpoint) pattern for GCP Private Service Connect.
+
+  Single `terraform apply` approach:
+  1. Create Atlas-side PrivateLink using `privatelink_byoe_regions` to get service attachment info.
+  2. Create your own GCP address + forwarding rule using `privatelink_service_info` output.
+  3. Register your endpoint with Atlas using `privatelink_byoe` to complete the connection.
+*/
 
 locals {
   ep1 = "ep1"
