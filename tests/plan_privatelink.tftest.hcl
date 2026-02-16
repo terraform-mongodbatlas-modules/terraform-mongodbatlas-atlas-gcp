@@ -297,8 +297,6 @@ run "privatelink_with_encryption_creates_cpa" {
   assert {
     condition     = output.encryption_at_rest_provider == "GCP"
     error_message = "Expected GCP encryption provider"
-    condition     = output.encryption_at_rest_provider == "GCP"
-    error_message = "Expected GCP encryption provider"
   }
   assert {
     condition     = length(output.privatelink) == 1
