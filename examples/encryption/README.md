@@ -62,6 +62,11 @@ module "atlas_gcp" {
 output "encryption" {
   value = module.atlas_gcp.encryption
 }
+
+output "resource_ids" {
+  description = "All resource IDs created by the module"
+  value       = module.atlas_gcp.resource_ids
+}
 ```
 
 **Additional files needed:**

@@ -58,6 +58,11 @@ output "privatelink_service_info" {
   description = "Atlas PrivateLink service info for BYOE pattern"
   value       = module.atlas_gcp.privatelink_service_info
 }
+
+output "resource_ids" {
+  description = "All resource IDs created by the module"
+  value       = module.atlas_gcp.resource_ids
+}
 ```
 
 **Additional files needed:**

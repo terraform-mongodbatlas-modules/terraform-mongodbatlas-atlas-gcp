@@ -73,6 +73,11 @@ output "backup_export" {
 output "export_bucket_id" {
   value = module.atlas_gcp.export_bucket_id
 }
+
+output "resource_ids" {
+  description = "All resource IDs created by the module"
+  value       = module.atlas_gcp.resource_ids
+}
 ```
 
 **Additional files needed:**
