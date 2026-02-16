@@ -46,7 +46,6 @@ resource "google_compute_subnetwork" "this" {
   ip_cidr_range = var.subnet_cidr
   region        = var.region
   network       = local.create_network ? google_compute_network.this[0].id : var.existing_network.id
-  purpose       = "PRIVATE_SERVICE_CONNECT"
 }
 
 output "network_id" {
