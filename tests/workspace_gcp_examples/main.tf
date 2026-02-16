@@ -38,6 +38,7 @@ variable "gcp_region" {
 
 variable "project_ids" {
   type = object({
+    complete                 = optional(string)
     encryption               = optional(string)
     backup_export            = optional(string)
     privatelink_multi_region = optional(string)
@@ -77,6 +78,8 @@ locals {
   missing_project_ids = [for k, v in var.project_ids : k if v == null]
   project_ids         = { for k, v in var.project_ids : k => v != null ? v : module.project[k].project_id }
   # tflint-ignore: terraform_unused_declarations
+  project_id_complete = local.project_ids.complete
+  # tflint-ignore: terraform_unused_declarations
   project_id_encryption = local.project_ids.encryption
   # tflint-ignore: terraform_unused_declarations
   project_id_backup_export = local.project_ids.backup_export
@@ -86,6 +89,12 @@ locals {
   project_id_privatelink_byoe = local.project_ids.privatelink_byoe
   # tflint-ignore: terraform_unused_declarations
   key_ring_name = "atlas-test-${random_string.suffix.id}"
+  # tflint-ignore: terraform_unused_declarations
+  key_ring_name_complete = "atlas-complete-${random_string.suffix.id}"
+  # tflint-ignore: terraform_unused_declarations
+  privatelink_endpoints_complete = [
+    { region = "us-east4", subnetwork = module.network_us_east4.subnetwork_self_link },
+  ]
   # tflint-ignore: terraform_unused_declarations
   privatelink_endpoints_multi_region = [
     { region = "us-east4", subnetwork = module.network_us_east4.subnetwork_self_link },

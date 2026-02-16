@@ -8,6 +8,20 @@ EXPECTED_DIR = Path(__file__).parent / "plan_snapshots"
 
 # (example_id, sanitized_address, nested)
 TEST_CASES = [
+    ('complete', 'module_atlas_gcp_module_cloud_provider_access[0]_mongodbatlas_cloud_provider_access_setup_this', True),
+    ('complete', 'module_atlas_gcp_module_cloud_provider_access[0]_mongodbatlas_cloud_provider_access_authorization_this', True),
+    ('complete', 'module_atlas_gcp_module_encryption[0]_google_kms_key_ring_atlas[0]', True),
+    ('complete', 'module_atlas_gcp_module_encryption[0]_google_kms_crypto_key_atlas[0]', True),
+    ('complete', 'module_atlas_gcp_module_encryption[0]_google_kms_crypto_key_iam_member_encrypter', True),
+    ('complete', 'module_atlas_gcp_module_encryption[0]_google_kms_crypto_key_iam_member_viewer', True),
+    ('complete', 'module_atlas_gcp_module_encryption[0]_mongodbatlas_encryption_at_rest_this', True),
+    ('complete', 'module_atlas_gcp_module_backup_export[0]_google_storage_bucket_atlas[0]', True),
+    ('complete', 'module_atlas_gcp_module_backup_export[0]_google_storage_bucket_iam_member_atlas', True),
+    ('complete', 'module_atlas_gcp_module_backup_export[0]_mongodbatlas_cloud_backup_snapshot_export_bucket_this', True),
+    ('complete', 'module_atlas_gcp_mongodbatlas_privatelink_endpoint_this["us-east4"]', True),
+    ('complete', 'module_atlas_gcp_module_privatelink["us-east4"]_google_compute_address_atlas[0]', True),
+    ('complete', 'module_atlas_gcp_module_privatelink["us-east4"]_google_compute_forwarding_rule_atlas[0]', True),
+    ('complete', 'module_atlas_gcp_module_privatelink["us-east4"]_mongodbatlas_privatelink_endpoint_service_this', True),
     ('encryption', 'google_kms_key_ring_atlas', True),
     ('encryption', 'google_kms_crypto_key_atlas', True),
     ('encryption', 'module_atlas_gcp_module_cloud_provider_access[0]_mongodbatlas_cloud_provider_access_setup_this', True),
