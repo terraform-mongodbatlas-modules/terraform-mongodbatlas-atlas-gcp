@@ -303,7 +303,7 @@ run "privatelink_with_encryption_creates_cpa" {
     error_message = "Expected one privatelink output entry"
   }
   assert {
-    condition = length(module.cloud_provider_access) == 1
+    condition     = length(module.cloud_provider_access) == 1
     error_message = "Expected one cloud_provider_access module"
   }
 }
