@@ -112,8 +112,25 @@ resource "mongodbatlas_privatelink_endpoint" "this" {
   project_id    = var.project_id
   provider_name = "GCP"
   region        = lookup(local.gcp_to_atlas_region, each.value.region, each.value.region)
-  # TODO(d06-13): uncomment when provider ~> 2.7 is released (target Feb 18)
-  # port_mapping_enabled = true
+  port_mapping_enabled = true
+
+  depends_on = [mongodbatlas_private_endpoint_regional_mode.this]
+}
+
+module "privatelink" {
+  source   = "./modules/privatelink"
+  for_each = local.privatelink_module_calls
+
+  project_id              = var.project_id
+  gcp_region              = lookup(local.atlas_to_gcp_region, each.value.region, each.value.region)
+  private_link_id         = mongodbatlas_privatelink_endpoint.this[each.key].private_link_id
+  service_attachment_name = mongodbatlas_privatelink_endpoint.this[each.key].service_attachment_names[0]
+
+  subnetwork  = contains(keys(local.privatelink_module_managed), each.key) ? each.value.subnetwork : null
+  byo         = try(var.privatelink_byoe[each.key], null)
+  name_prefix = "atlas-psc-${replace(lower(each.key), "_", "-")}"
+
+  labels = merge(var.gcp_tags, each.value.labels)
 
   depends_on = [mongodbatlas_private_endpoint_regional_mode.this]
 }

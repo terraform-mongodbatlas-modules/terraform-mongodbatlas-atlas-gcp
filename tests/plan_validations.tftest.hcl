@@ -289,6 +289,14 @@ run "privatelink_only_skips_cpa" {
     condition     = contains(keys(output.privatelink_service_info), "us-east4")
     error_message = "Expected privatelink_service_info key 'us-east4'"
   }
+  assert {
+    condition     = length(output.privatelink) == 1
+    error_message = "Expected one privatelink output entry"
+  }
+  assert {
+    condition     = contains(keys(output.privatelink), "us-east4")
+    error_message = "Expected privatelink output key 'us-east4'"
+  }
 }
 
 run "existing_cpa_flows_through" {
@@ -346,6 +354,10 @@ run "regional_mode_multi_region" {
     condition     = length(setintersection(keys(output.privatelink_service_info), ["us-east4", "us-west4"])) == 2
     error_message = "Expected privatelink_service_info keys to match endpoint regions"
   }
+  assert {
+    condition     = length(output.privatelink) == 2
+    error_message = "Expected two privatelink output entries"
+  }
 }
 
 run "regional_mode_byoe_multi_region" {
@@ -368,7 +380,31 @@ run "regional_mode_byoe_multi_region" {
     condition     = length(setintersection(keys(output.privatelink_service_info), ["primary", "secondary"])) == 2
     error_message = "Expected privatelink_service_info keys to match BYOE region keys"
   }
+  assert {
+    condition     = length(output.privatelink) == 0
+    error_message = "Expected empty privatelink output for BYOE Phase 1 (no forwarding rules)"
+  }
 }
+
+# TODO(d06-13): uncomment when provider ~> 2.7 is released
+# BYOE Phase 2 sets gcp_project_id + private_endpoint_ip_address which conflicts in 2.6.x schema
+# run "byoe_phase2_populates_privatelink" {
+#   command = plan
+#   variables {
+#     privatelink_byoe_regions = { primary = "us-east4" }
+#     privatelink_byoe = {
+#       primary = { ip_address = "10.0.1.5", forwarding_rule_name = "my-fr" }
+#     }
+#   }
+#   assert {
+#     condition     = length(output.privatelink) == 1
+#     error_message = "Expected one privatelink output entry for BYOE Phase 2"
+#   }
+#   assert {
+#     condition     = contains(keys(output.privatelink), "primary")
+#     error_message = "Expected privatelink output key 'primary'"
+#   }
+# }
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Region Normalization Validations (preconditions on terraform_data)
