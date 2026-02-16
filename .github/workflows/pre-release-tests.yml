@@ -89,6 +89,10 @@ jobs:
         env:
           INCLUDE_EXAMPLES: ${{ inputs.include_examples }}
         run: just apply-examples-gcp --auto-approve -e "$INCLUDE_EXAMPLES"
+      - name: Check outputs
+        run: just ws-output-assertions -e "$INCLUDE_EXAMPLES"
+        env:
+          INCLUDE_EXAMPLES: ${{ inputs.include_examples }}
       - name: Destroy examples
         if: always()
         env:
