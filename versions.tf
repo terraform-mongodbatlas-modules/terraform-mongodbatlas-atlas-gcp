@@ -4,7 +4,7 @@ terraform {
   required_providers {
     mongodbatlas = {
       source  = "mongodb/mongodbatlas"
-      version = "~> 2.6"
+      version = "~> 2.6" # TODO(CLOUDP-381477): temporary until provider ~> 2.7 is released
     }
     google = {
       source  = "hashicorp/google"

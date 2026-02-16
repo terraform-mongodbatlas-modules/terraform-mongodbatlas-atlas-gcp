@@ -1,4 +1,3 @@
-# path-sync copy -n sdlc
 # === DO_NOT_EDIT: path-sync triggers ===
 name: Code Health
 
@@ -29,6 +28,8 @@ jobs:
           just: 'true'
           terraform: 'true'
           docs: 'true'
+      - name: Setup provider (default branch) # TODO(CLOUDP-381477): temporary until provider ~> 2.7 is released
+        uses: ./.github/actions/setup-provider-dev
       - name: Run all validation checks
         run: just pre-commit
   # === OK_EDIT: path-sync job-check ===
@@ -42,6 +43,8 @@ jobs:
         with:
           just: 'true'
           terraform: 'true'
+      - name: Setup provider (default branch) # TODO(CLOUDP-381477): temporary until provider ~> 2.7 is released
+        uses: ./.github/actions/setup-provider-dev
       - name: Run Terraform plan tests
         run: just unit-plan-tests
   # === OK_EDIT: path-sync job-plan-tests ===
@@ -56,6 +59,8 @@ jobs:
           just: 'true'
           uv: 'true'
           mise: 'true'
+      - name: Setup provider (default branch) # TODO(CLOUDP-381477): temporary until provider ~> 2.7 is released
+        uses: ./.github/actions/setup-provider-dev
       - run: just test-compat
   # === OK_EDIT: path-sync job-compat-tests ===
 
@@ -85,6 +90,8 @@ jobs:
       - uses: ./.github/actions/setup-provider-dev
         with:
           provider-ref: ${{ inputs.provider_ref }}
+      - name: Setup provider (default branch) # TODO(CLOUDP-381477): temporary until provider ~> 2.7 is released
+        uses: ./.github/actions/setup-provider-dev
   # === OK_EDIT: path-sync job-snapshot-tests ===
       - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
         with:
