@@ -16,6 +16,9 @@ examples:
       - address: module.atlas_gcp.module.cloud_provider_access[0].mongodbatlas_cloud_provider_access_setup.this
       - address: module.atlas_gcp.module.cloud_provider_access[0].mongodbatlas_cloud_provider_access_authorization.this
       - address: module.atlas_gcp.module.encryption[0].google_kms_key_ring.atlas[0]
+        dump:
+          skip_lines:
+            substring_attributes: [name] # uses random suffix in key ring name
       - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key.atlas[0]
       - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.encrypter
       - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.viewer
