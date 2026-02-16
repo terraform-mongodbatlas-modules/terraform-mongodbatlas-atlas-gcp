@@ -1,1 +1,3 @@
+gcp_project_id: <gcp_project_id>
+project_id: <project_id>
 provider_name: GCP
