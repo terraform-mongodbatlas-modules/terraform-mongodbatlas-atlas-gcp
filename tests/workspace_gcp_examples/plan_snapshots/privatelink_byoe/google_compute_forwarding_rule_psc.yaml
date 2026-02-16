@@ -2,4 +2,4 @@ load_balancing_scheme: ''
 name: atlas-psc-rule
 project: tf-lz-module-gcp-ci
 recreate_closed_psc: false
-region: us-east1
+region: us-east4

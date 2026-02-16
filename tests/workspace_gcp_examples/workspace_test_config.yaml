@@ -22,13 +22,13 @@ examples:
     plan_regressions:
       - address: module.atlas_gcp.mongodbatlas_private_endpoint_regional_mode.this[0]
       - address: module.atlas_gcp.mongodbatlas_privatelink_endpoint.this["us-east4"]
-      - address: module.atlas_gcp.mongodbatlas_privatelink_endpoint.this["us-west1"]
+      - address: module.atlas_gcp.mongodbatlas_privatelink_endpoint.this["us-east1"]
       - address: module.atlas_gcp.module.privatelink["us-east4"].google_compute_address.atlas[0]
       - address: module.atlas_gcp.module.privatelink["us-east4"].google_compute_forwarding_rule.atlas[0]
       - address: module.atlas_gcp.module.privatelink["us-east4"].mongodbatlas_privatelink_endpoint_service.this
-      - address: module.atlas_gcp.module.privatelink["us-west1"].google_compute_address.atlas[0]
-      - address: module.atlas_gcp.module.privatelink["us-west1"].google_compute_forwarding_rule.atlas[0]
-      - address: module.atlas_gcp.module.privatelink["us-west1"].mongodbatlas_privatelink_endpoint_service.this
+      - address: module.atlas_gcp.module.privatelink["us-east1"].google_compute_address.atlas[0]
+      - address: module.atlas_gcp.module.privatelink["us-east1"].google_compute_forwarding_rule.atlas[0]
+      - address: module.atlas_gcp.module.privatelink["us-east1"].mongodbatlas_privatelink_endpoint_service.this
   - name: privatelink_byoe
     var_groups: [privatelink_byoe]
     plan_regressions:
@@ -89,7 +89,7 @@ var_groups:
       module_value: var.gcp_project_id
     - name: gcp_region
       expose_in_workspace: false
-      module_value: var.gcp_region
+      module_value: '"us-east4"'
     - name: subnetwork
       expose_in_workspace: false
       module_value: local.subnetwork_privatelink_byoe

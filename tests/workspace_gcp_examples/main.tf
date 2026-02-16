@@ -65,11 +65,11 @@ module "network_us_east4" {
   name_prefix = "atlas-pl-use4-${random_string.suffix.id}-"
 }
 
-module "network_us_west1" {
+module "network_us_east1" {
   source           = "../network_generator"
-  region           = "us-west1"
+  region           = "us-east1"
   subnet_cidr      = "10.11.0.0/24"
-  name_prefix      = "atlas-pl-usw1-${random_string.suffix.id}-"
+  name_prefix      = "atlas-pl-use1-${random_string.suffix.id}-"
   existing_network = { id = module.network_us_east4.network_id }
 }
 
@@ -89,7 +89,7 @@ locals {
   # tflint-ignore: terraform_unused_declarations
   privatelink_endpoints_multi_region = [
     { region = "us-east4", subnetwork = module.network_us_east4.subnetwork_self_link },
-    { region = "us-west1", subnetwork = module.network_us_west1.subnetwork_self_link },
+    { region = "us-east1", subnetwork = module.network_us_east1.subnetwork_self_link },
   ]
   # tflint-ignore: terraform_unused_declarations
   subnetwork_privatelink_byoe = module.network_us_east4.subnetwork_self_link
