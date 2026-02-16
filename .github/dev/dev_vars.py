@@ -13,7 +13,11 @@ DEFAULT_GCP_REGION = "us-east1"
 
 _project_ids = """\
 project_ids = {{
-  encryption = "{project_id}"
+  complete                 = "{project_id}"
+  encryption               = "{project_id}"
+  backup_export            = "{project_id}"
+  privatelink_multi_region = "{project_id}"
+  privatelink_byoe         = "{project_id}"
 }}
 """
 
