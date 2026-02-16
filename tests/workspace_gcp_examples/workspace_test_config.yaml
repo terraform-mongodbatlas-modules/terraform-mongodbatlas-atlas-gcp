@@ -17,6 +17,25 @@ examples:
       - address: module.atlas_gcp.module.backup_export[0].google_storage_bucket.atlas[0]
       - address: module.atlas_gcp.module.backup_export[0].google_storage_bucket_iam_member.atlas
       - address: module.atlas_gcp.module.backup_export[0].mongodbatlas_cloud_backup_snapshot_export_bucket.this
+  - name: privatelink_multi_region
+    var_groups: [privatelink_multi_region]
+    plan_regressions:
+      - address: module.atlas_gcp.mongodbatlas_private_endpoint_regional_mode.this[0]
+      - address: module.atlas_gcp.mongodbatlas_privatelink_endpoint.this["us-east4"]
+      - address: module.atlas_gcp.mongodbatlas_privatelink_endpoint.this["us-west1"]
+      - address: module.atlas_gcp.module.privatelink["us-east4"].google_compute_address.atlas[0]
+      - address: module.atlas_gcp.module.privatelink["us-east4"].google_compute_forwarding_rule.atlas[0]
+      - address: module.atlas_gcp.module.privatelink["us-east4"].mongodbatlas_privatelink_endpoint_service.this
+      - address: module.atlas_gcp.module.privatelink["us-west1"].google_compute_address.atlas[0]
+      - address: module.atlas_gcp.module.privatelink["us-west1"].google_compute_forwarding_rule.atlas[0]
+      - address: module.atlas_gcp.module.privatelink["us-west1"].mongodbatlas_privatelink_endpoint_service.this
+  - name: privatelink_byoe
+    var_groups: [privatelink_byoe]
+    plan_regressions:
+      - address: module.atlas_gcp.mongodbatlas_privatelink_endpoint.this["ep1"]
+      - address: module.atlas_gcp.module.privatelink["ep1"].mongodbatlas_privatelink_endpoint_service.this
+      - address: google_compute_address.psc
+      - address: google_compute_forwarding_rule.psc
 
 var_groups:
   encryption:
@@ -48,3 +67,32 @@ var_groups:
     - name: bucket_name_suffix
       expose_in_workspace: false
       module_value: '"-test"'
+  privatelink_multi_region:
+    - name: project_id
+      expose_in_workspace: false
+      module_value: local.project_id_privatelink_multi_region
+    - name: gcp_project_id
+      expose_in_workspace: false
+      module_value: var.gcp_project_id
+    - name: gcp_region
+      expose_in_workspace: false
+      module_value: '""'
+    - name: subnetwork_us_east4
+      expose_in_workspace: false
+      module_value: local.subnetwork_us_east4
+    - name: subnetwork_us_west1
+      expose_in_workspace: false
+      module_value: local.subnetwork_us_west1
+  privatelink_byoe:
+    - name: project_id
+      expose_in_workspace: false
+      module_value: local.project_id_privatelink_byoe
+    - name: gcp_project_id
+      expose_in_workspace: false
+      module_value: var.gcp_project_id
+    - name: gcp_region
+      expose_in_workspace: false
+      module_value: var.gcp_region
+    - name: subnetwork
+      expose_in_workspace: false
+      module_value: local.subnetwork_privatelink_byoe
