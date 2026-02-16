@@ -31,5 +31,5 @@ output "gcp_endpoint_status" {
 
 output "forwarding_rule_id" {
   description = "GCP forwarding rule ID (null for BYOE)"
-  value       = local.create ? google_compute_forwarding_rule.atlas[0].id : null
+  value       = local.module_managed ? google_compute_forwarding_rule.atlas[0].id : null
 }

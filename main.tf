@@ -108,10 +108,10 @@ resource "mongodbatlas_private_endpoint_regional_mode" "this" {
 }
 
 resource "mongodbatlas_privatelink_endpoint" "this" {
-  for_each      = local.privatelink_endpoints_all
-  project_id    = var.project_id
-  provider_name = "GCP"
-  region        = lookup(local.gcp_to_atlas_region, each.value.region, each.value.region)
+  for_each             = local.privatelink_endpoints_all
+  project_id           = var.project_id
+  provider_name        = "GCP"
+  region               = lookup(local.gcp_to_atlas_region, each.value.region, each.value.region)
   port_mapping_enabled = true
 
   depends_on = [mongodbatlas_private_endpoint_regional_mode.this]
@@ -128,7 +128,7 @@ module "privatelink" {
 
   subnetwork  = contains(keys(local.privatelink_module_managed), each.key) ? each.value.subnetwork : null
   byo         = try(var.privatelink_byoe[each.key], null)
-  name_prefix = "atlas-psc-${replace(lower(each.key), "_", "-")}"
+  name_prefix = "atlas-psc-${replace(lower(each.key), "_", "-")}-"
 
   labels = merge(var.gcp_tags, each.value.labels)
 

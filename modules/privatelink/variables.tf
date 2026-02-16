@@ -40,8 +40,8 @@ variable "byo" {
 
 variable "name_prefix" {
   type        = string
-  default     = "atlas-psc"
-  description = "Prefix for GCP resource names (address and forwarding rule)."
+  default     = "atlas-psc-"
+  description = "Name prefix for GCP resources. Appended with 'ip' for address and 'fr' for forwarding rule."
 }
 
 variable "labels" {

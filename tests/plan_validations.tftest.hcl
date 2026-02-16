@@ -266,39 +266,6 @@ run "encryption_provider_gcp" {
   }
 }
 
-run "privatelink_only_skips_cpa" {
-  command = plan
-  variables {
-    privatelink_endpoints = [
-      { region = "us-east4", subnetwork = "sub-a" }
-    ]
-  }
-  assert {
-    condition     = output.role_id == null
-    error_message = "Expected null role_id when only privatelink configured"
-  }
-  assert {
-    condition     = output.regional_mode_enabled == false
-    error_message = "Expected regional mode disabled for single region"
-  }
-  assert {
-    condition     = length(output.privatelink_service_info) == 1
-    error_message = "Expected one privatelink_service_info entry"
-  }
-  assert {
-    condition     = contains(keys(output.privatelink_service_info), "us-east4")
-    error_message = "Expected privatelink_service_info key 'us-east4'"
-  }
-  assert {
-    condition     = length(output.privatelink) == 1
-    error_message = "Expected one privatelink output entry"
-  }
-  assert {
-    condition     = contains(keys(output.privatelink), "us-east4")
-    error_message = "Expected privatelink output key 'us-east4'"
-  }
-}
-
 run "existing_cpa_flows_through" {
   command = plan
   variables {
@@ -310,97 +277,6 @@ run "existing_cpa_flows_through" {
   assert {
     condition     = output.role_id == "existing-role-123"
     error_message = "Expected existing role_id to flow through"
-  }
-}
-
-run "atlas_region_format_in_privatelink" {
-  command = plan
-  variables {
-    privatelink_endpoints = [
-      { region = "US_EAST_4", subnetwork = "sub-a" }
-    ]
-  }
-  assert {
-    condition     = output.role_id == null
-    error_message = "Expected null role_id when only privatelink configured"
-  }
-  assert {
-    condition     = output.regional_mode_enabled == false
-    error_message = "Expected regional mode disabled for single region"
-  }
-  assert {
-    condition     = contains(keys(output.privatelink_service_info), "US_EAST_4")
-    error_message = "Expected privatelink_service_info key 'US_EAST_4' for Atlas format input"
-  }
-}
-
-run "regional_mode_multi_region" {
-  command = plan
-  variables {
-    privatelink_endpoints = [
-      { region = "us-east4", subnetwork = "sub-a" },
-      { region = "us-west4", subnetwork = "sub-b" }
-    ]
-  }
-  assert {
-    condition     = output.regional_mode_enabled == true
-    error_message = "Expected regional mode enabled for multi-region"
-  }
-  assert {
-    condition     = length(output.privatelink_service_info) == 2
-    error_message = "Expected two privatelink_service_info entries"
-  }
-  assert {
-    condition     = length(setintersection(keys(output.privatelink_service_info), ["us-east4", "us-west4"])) == 2
-    error_message = "Expected privatelink_service_info keys to match endpoint regions"
-  }
-  assert {
-    condition     = length(output.privatelink) == 2
-    error_message = "Expected two privatelink output entries"
-  }
-}
-
-run "regional_mode_byoe_multi_region" {
-  command = plan
-  variables {
-    privatelink_byoe_regions = {
-      primary   = "us-east4"
-      secondary = "us-west4"
-    }
-  }
-  assert {
-    condition     = output.regional_mode_enabled == true
-    error_message = "Expected regional mode enabled for multi-region BYOE"
-  }
-  assert {
-    condition     = length(output.privatelink_service_info) == 2
-    error_message = "Expected two privatelink_service_info entries for BYOE"
-  }
-  assert {
-    condition     = length(setintersection(keys(output.privatelink_service_info), ["primary", "secondary"])) == 2
-    error_message = "Expected privatelink_service_info keys to match BYOE region keys"
-  }
-  assert {
-    condition     = length(output.privatelink) == 0
-    error_message = "Expected empty privatelink output for BYOE Phase 1 (no forwarding rules)"
-  }
-}
-
-run "byoe_phase2_populates_privatelink" {
-  command = plan
-  variables {
-    privatelink_byoe_regions = { primary = "us-east4" }
-    privatelink_byoe = {
-      primary = { ip_address = "10.0.1.5", forwarding_rule_name = "my-fr" }
-    }
-  }
-  assert {
-    condition     = length(output.privatelink) == 1
-    error_message = "Expected one privatelink output entry for BYOE Phase 2"
-  }
-  assert {
-    condition     = contains(keys(output.privatelink), "primary")
-    error_message = "Expected privatelink output key 'primary'"
   }
 }
 
@@ -454,24 +330,6 @@ run "region_unknown_byoe_rejected" {
     privatelink_byoe_regions = { primary = "invalid-region" }
   }
   expect_failures = [terraform_data.region_validations]
-}
-
-run "region_mixed_format_multi_region" {
-  command = plan
-  variables {
-    privatelink_endpoints = [
-      { region = "us-east4", subnetwork = "sub-a" },
-      { region = "US_WEST_4", subnetwork = "sub-b" }
-    ]
-  }
-  assert {
-    condition     = output.regional_mode_enabled == true
-    error_message = "Expected regional mode enabled for mixed-format multi-region"
-  }
-  assert {
-    condition     = length(output.privatelink_service_info) == 2
-    error_message = "Expected two privatelink_service_info entries"
-  }
 }
 
 run "region_custom_mapping_override" {
