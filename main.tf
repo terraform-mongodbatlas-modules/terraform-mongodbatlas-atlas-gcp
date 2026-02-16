@@ -126,7 +126,7 @@ module "privatelink" {
   private_link_id         = mongodbatlas_privatelink_endpoint.this[each.key].private_link_id
   service_attachment_name = mongodbatlas_privatelink_endpoint.this[each.key].service_attachment_names[0]
 
-  subnetwork  = contains(keys(local.privatelink_module_managed), each.key) ? each.value.subnetwork : null
+  subnetwork  = contains(keys(local.privatelink_module_managed), each.key) ? { id = each.value.subnetwork } : null
   byo         = try(var.privatelink_byoe[each.key], null)
   name_prefix = "atlas-psc-${replace(lower(each.key), "_", "-")}-"
 

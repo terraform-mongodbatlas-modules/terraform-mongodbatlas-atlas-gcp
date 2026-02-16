@@ -76,7 +76,7 @@ var_groups:
       module_value: var.gcp_project_id
     - name: gcp_region
       expose_in_workspace: false
-      module_value: '""'
+      module_value: var.gcp_region
     - name: privatelink_endpoints
       expose_in_workspace: false
       module_value: local.privatelink_endpoints_multi_region

@@ -19,9 +19,16 @@ variable "service_attachment_name" {
 }
 
 variable "subnetwork" {
-  type        = string
+  type = object({
+    id = string
+  })
   default     = null
-  description = "Subnetwork self_link for module-managed PSC endpoint. Null for BYOE."
+  description = "Subnetwork for module-managed PSC endpoint. Null for BYOE."
+
+  validation {
+    condition     = (var.subnetwork != null) != (var.byo != null)
+    error_message = "Exactly one of subnetwork (module-managed) or byo (BYOE) must be provided."
+  }
 }
 
 variable "byo" {
@@ -31,11 +38,6 @@ variable "byo" {
   })
   default     = null
   description = "BYOE forwarding rule details. Null for module-managed."
-
-  validation {
-    condition     = (var.subnetwork != null) != (var.byo != null)
-    error_message = "Exactly one of subnetwork (module-managed) or byo (BYOE) must be provided."
-  }
 }
 
 variable "name_prefix" {

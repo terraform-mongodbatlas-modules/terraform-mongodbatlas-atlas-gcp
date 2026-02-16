@@ -23,18 +23,24 @@ variable "name_prefix" {
   default = "atlas-workspace-"
 }
 
+variable "create_network" {
+  type    = bool
+  default = true
+}
+
 variable "network_id" {
   type        = string
   default     = null
-  description = "Existing VPC network ID. If null, a new network is created."
-}
+  description = "Existing VPC network ID. Required when create_network = false."
 
-locals {
-  create_network = var.network_id == null
+  validation {
+    condition     = var.create_network || var.network_id != null
+    error_message = "network_id is required when create_network = false."
+  }
 }
 
 resource "google_compute_network" "this" {
-  count                   = local.create_network ? 1 : 0
+  count                   = var.create_network ? 1 : 0
   name                    = "${var.name_prefix}vpc"
   auto_create_subnetworks = false
 }
@@ -43,12 +49,12 @@ resource "google_compute_subnetwork" "this" {
   name          = "${var.name_prefix}subnet"
   ip_cidr_range = var.subnet_cidr
   region        = var.region
-  network       = local.create_network ? google_compute_network.this[0].id : var.network_id
+  network       = var.create_network ? google_compute_network.this[0].id : var.network_id
   purpose       = "PRIVATE_SERVICE_CONNECT"
 }
 
 output "network_id" {
-  value = local.create_network ? google_compute_network.this[0].id : var.network_id
+  value = var.create_network ? google_compute_network.this[0].id : var.network_id
 }
 
 output "subnetwork_self_link" {
