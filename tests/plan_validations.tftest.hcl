@@ -386,25 +386,23 @@ run "regional_mode_byoe_multi_region" {
   }
 }
 
-# TODO(d06-13): uncomment when provider ~> 2.7 is released
-# BYOE Phase 2 sets gcp_project_id + private_endpoint_ip_address which conflicts in 2.6.x schema
-# run "byoe_phase2_populates_privatelink" {
-#   command = plan
-#   variables {
-#     privatelink_byoe_regions = { primary = "us-east4" }
-#     privatelink_byoe = {
-#       primary = { ip_address = "10.0.1.5", forwarding_rule_name = "my-fr" }
-#     }
-#   }
-#   assert {
-#     condition     = length(output.privatelink) == 1
-#     error_message = "Expected one privatelink output entry for BYOE Phase 2"
-#   }
-#   assert {
-#     condition     = contains(keys(output.privatelink), "primary")
-#     error_message = "Expected privatelink output key 'primary'"
-#   }
-# }
+run "byoe_phase2_populates_privatelink" {
+  command = plan
+  variables {
+    privatelink_byoe_regions = { primary = "us-east4" }
+    privatelink_byoe = {
+      primary = { ip_address = "10.0.1.5", forwarding_rule_name = "my-fr" }
+    }
+  }
+  assert {
+    condition     = length(output.privatelink) == 1
+    error_message = "Expected one privatelink output entry for BYOE Phase 2"
+  }
+  assert {
+    condition     = contains(keys(output.privatelink), "primary")
+    error_message = "Expected privatelink output key 'primary'"
+  }
+}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Region Normalization Validations (preconditions on terraform_data)

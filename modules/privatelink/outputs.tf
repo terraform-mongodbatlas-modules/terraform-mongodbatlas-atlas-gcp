@@ -24,11 +24,10 @@ output "error_message" {
 }
 
 
-# TODO(d06-13): uncomment when provider ~> 2.7 is released
-# output "gcp_endpoint_status" {
-#   description = "Port-mapped endpoint status (distinct from overall gcp_status)"
-#   value       = data.mongodbatlas_privatelink_endpoint_service.this.gcp_endpoint_status
-# }
+output "gcp_endpoint_status" {
+  description = "Port-mapped endpoint status (distinct from overall gcp_status)"
+  value       = data.mongodbatlas_privatelink_endpoint_service.this.gcp_endpoint_status
+}
 
 output "forwarding_rule_id" {
   description = "GCP forwarding rule ID (null for BYOE)"
