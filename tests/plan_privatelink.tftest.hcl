@@ -295,15 +295,15 @@ run "privatelink_with_encryption_creates_cpa" {
     }
   }
   assert {
-    condition     = output.role_id != null
-    error_message = "Expected role_id when encryption is enabled alongside privatelink"
+    condition     = output.encryption_at_rest_provider == "GCP"
+    error_message = "Expected GCP encryption provider"
   }
   assert {
     condition     = length(output.privatelink) == 1
     error_message = "Expected one privatelink output entry"
   }
   assert {
-    condition     = output.encryption_at_rest_provider == "GCP"
-    error_message = "Expected GCP encryption provider"
+    condition = length(module.cloud_provider_access) == 1
+    error_message = "Expected one cloud_provider_access module"
   }
 }
