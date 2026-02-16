@@ -1,0 +1,20 @@
+autoclass: []
+cors: []
+custom_placement_config: []
+effective_labels:
+  goog-terraform-provisioned: 'true'
+encryption: []
+force_destroy: <force_destroy>
+hierarchical_namespace: []
+ip_filter: []
+lifecycle_rule: []
+location: US-EAST1
+logging: []
+public_access_prevention: enforced
+retention_policy: []
+storage_class: STANDARD
+terraform_labels:
+  goog-terraform-provisioned: 'true'
+uniform_bucket_level_access: true
+versioning:
+- enabled: true
