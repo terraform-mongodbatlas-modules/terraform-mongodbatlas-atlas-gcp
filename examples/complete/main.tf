@@ -5,10 +5,9 @@ module "atlas_gcp" {
   encryption = {
     enabled = true
     create_kms_key = {
-      enabled         = true
-      key_ring_name   = var.key_ring_name
-      crypto_key_name = "atlas-encryption-key"
-      location        = var.gcp_region
+      enabled       = true
+      key_ring_name = var.key_ring_name
+      location      = var.gcp_region
     }
   }
 
