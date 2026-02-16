@@ -23,7 +23,6 @@ output "error_message" {
   value       = data.mongodbatlas_privatelink_endpoint_service.this.error_message
 }
 
-
 output "gcp_endpoint_status" {
   description = "Port-mapped endpoint status (distinct from overall gcp_status)"
   value       = data.mongodbatlas_privatelink_endpoint_service.this.gcp_endpoint_status

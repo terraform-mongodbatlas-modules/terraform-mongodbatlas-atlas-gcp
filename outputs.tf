@@ -45,6 +45,8 @@ output "privatelink" {
       endpoint_ip         = pl.endpoint_ip
       status              = pl.status
       error_message       = pl.error_message
+      gcp_endpoint_status = pl.gcp_endpoint_status
+      forwarding_rule_id  = pl.forwarding_rule_id
     }
   }
 }

@@ -278,3 +278,32 @@ run "byoe_single_region_no_regional_mode" {
     error_message = "Expected empty privatelink output for BYOE Phase 1"
   }
 }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PrivateLink + Other Features (CPA interaction)
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "privatelink_with_encryption_creates_cpa" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" }
+    ]
+    encryption = {
+      enabled                 = true
+      key_version_resource_id = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+    }
+  }
+  assert {
+    condition     = output.role_id != null
+    error_message = "Expected role_id when encryption is enabled alongside privatelink"
+  }
+  assert {
+    condition     = length(output.privatelink) == 1
+    error_message = "Expected one privatelink output entry"
+  }
+  assert {
+    condition     = output.encryption_at_rest_provider == "GCP"
+    error_message = "Expected GCP encryption provider"
+  }
+}
