@@ -1,4 +1,5 @@
 locals {
+  provider_name  = "GCP"
   module_managed = var.subnetwork != null
 }
 
@@ -38,7 +39,7 @@ locals {
 resource "mongodbatlas_privatelink_endpoint_service" "this" {
   project_id                  = var.project_id
   private_link_id             = var.private_link_id
-  provider_name               = "GCP"
+  provider_name               = local.provider_name
   gcp_project_id              = local.gcp_project
   endpoint_service_id         = local.endpoint_name
   private_endpoint_ip_address = local.endpoint_ip
@@ -48,6 +49,6 @@ data "mongodbatlas_privatelink_endpoint_service" "this" {
   project_id          = var.project_id
   private_link_id     = var.private_link_id
   endpoint_service_id = mongodbatlas_privatelink_endpoint_service.this.endpoint_service_id
-  provider_name       = "GCP"
+  provider_name       = local.provider_name
   depends_on          = [mongodbatlas_privatelink_endpoint_service.this]
 }
