@@ -39,7 +39,7 @@ validate:
 # === DO_NOT_EDIT: path-sync linting ===
 # LINTING
 lint:
-    # tflint -f compact --recursive --minimum-failure-severity=warning # TODO(CLOUDP-381477): temporary until provider ~> 2.7 is released
+    tflint -f compact --recursive --minimum-failure-severity=warning
     terraform fmt -check -recursive
 
 py-check:
