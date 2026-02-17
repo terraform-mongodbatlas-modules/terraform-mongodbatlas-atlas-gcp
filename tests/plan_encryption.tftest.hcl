@@ -215,7 +215,7 @@ run "encryption_search_nodes_enabled_by_default" {
     }
   }
   assert {
-    condition     = module.encryption[0].mongodbatlas_encryption_at_rest.this.enabled_for_search_nodes == true
+    condition     = module.encryption[0].enabled_for_search_nodes == true
     error_message = "Expected enabled_for_search_nodes to default to true"
   }
 }
@@ -230,7 +230,7 @@ run "encryption_search_nodes_explicit_false" {
     }
   }
   assert {
-    condition     = module.encryption[0].mongodbatlas_encryption_at_rest.this.enabled_for_search_nodes == false
+    condition     = module.encryption[0].enabled_for_search_nodes == false
     error_message = "Expected enabled_for_search_nodes to be false when explicitly set"
   }
 }

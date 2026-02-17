@@ -42,3 +42,8 @@ output "kms_location" {
   description = "GCP KMS location (normalized to GCP format)"
   value       = local.kms_location
 }
+
+output "enabled_for_search_nodes" {
+  description = "Whether encryption at rest is enabled for search nodes"
+  value       = mongodbatlas_encryption_at_rest.this.enabled_for_search_nodes
+}
