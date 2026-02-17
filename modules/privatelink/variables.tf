@@ -35,9 +35,10 @@ variable "byo" {
   type = object({
     ip_address           = string
     forwarding_rule_name = string
+    gcp_project_id       = optional(string)
   })
   default     = null
-  description = "BYOE forwarding rule details. Null for module-managed."
+  description = "BYOE forwarding rule details. Null for module-managed. Set gcp_project_id when the forwarding rule lives in a different GCP project than the provider default."
 }
 
 variable "name_prefix" {

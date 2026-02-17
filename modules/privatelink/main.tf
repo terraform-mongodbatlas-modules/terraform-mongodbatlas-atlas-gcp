@@ -33,7 +33,7 @@ resource "google_compute_forwarding_rule" "atlas" {
 locals {
   endpoint_ip   = local.module_managed ? google_compute_address.atlas[0].address : var.byo.ip_address
   endpoint_name = local.module_managed ? google_compute_forwarding_rule.atlas[0].name : var.byo.forwarding_rule_name
-  gcp_project   = local.module_managed ? data.google_compute_subnetwork.atlas[0].project : data.google_client_config.current.project
+  gcp_project   = local.module_managed ? data.google_compute_subnetwork.atlas[0].project : coalesce(var.byo.gcp_project_id, data.google_client_config.current.project)
 }
 
 resource "mongodbatlas_privatelink_endpoint_service" "this" {

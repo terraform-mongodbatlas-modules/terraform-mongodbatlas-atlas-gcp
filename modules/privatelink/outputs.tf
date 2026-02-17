@@ -32,3 +32,8 @@ output "gcp_forwarding_rule_id" {
   description = "GCP forwarding rule ID (null for BYOE)"
   value       = local.module_managed ? google_compute_forwarding_rule.atlas[0].id : null
 }
+
+output "gcp_project_id" {
+  description = "GCP project ID used for the endpoint service"
+  value       = local.gcp_project
+}

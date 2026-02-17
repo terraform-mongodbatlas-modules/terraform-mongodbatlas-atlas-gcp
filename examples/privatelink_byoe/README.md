@@ -56,6 +56,7 @@ module "atlas_gcp" {
     (local.ep1) = {
       ip_address           = google_compute_address.psc.address
       forwarding_rule_name = google_compute_forwarding_rule.psc.name
+      # gcp_project_id     = "my-other-project" # optional: override when forwarding rule is in a different GCP project
     }
   }
   privatelink_byoe_regions = { (local.ep1) = var.gcp_region }

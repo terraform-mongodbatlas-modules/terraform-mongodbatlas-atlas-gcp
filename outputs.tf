@@ -53,6 +53,7 @@ output "privatelink" {
       error_message               = pl.error_message
       gcp_endpoint_status         = pl.gcp_endpoint_status
       gcp_forwarding_rule_id      = pl.gcp_forwarding_rule_id
+      gcp_project_id      = pl.gcp_project_id
     }
   }
 }
