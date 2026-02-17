@@ -408,11 +408,11 @@ The following outputs are exported:
 
 ### <a name="output_backup_export"></a> [backup\_export](#output\_backup\_export)
 
-Description: Backup export configuration
+Description: Backup export configuration and GCS bucket details
 
 ### <a name="output_encryption"></a> [encryption](#output\_encryption)
 
-Description: Encryption at rest status and configuration
+Description: Encryption at rest status and KMS configuration
 
 ### <a name="output_encryption_at_rest_provider"></a> [encryption\_at\_rest\_provider](#output\_encryption\_at\_rest\_provider)
 
@@ -424,23 +424,23 @@ Description: Export bucket ID for backup schedule auto\_export\_enabled
 
 ### <a name="output_privatelink"></a> [privatelink](#output\_privatelink)
 
-Description: PrivateLink status per endpoint key
+Description: PrivateLink status per endpoint key (both module-managed and BYOE)
 
 ### <a name="output_privatelink_service_info"></a> [privatelink\_service\_info](#output\_privatelink\_service\_info)
 
-Description: Atlas PrivateLink service info for BYOE pattern
+Description: Atlas PrivateLink service info per endpoint key (for BYOE - create your GCP PSC endpoint using these values)
 
 ### <a name="output_regional_mode_enabled"></a> [regional\_mode\_enabled](#output\_regional\_mode\_enabled)
 
-Description: Whether private endpoint regional mode is enabled
+Description: Whether private endpoint regional mode is enabled (auto-enabled for multi-region)
 
 ### <a name="output_resource_ids"></a> [resource\_ids](#output\_resource\_ids)
 
-Description: All resource IDs for data source lookups
+Description: GCP resource IDs for data source lookups
 
 ### <a name="output_role_id"></a> [role\_id](#output\_role\_id)
 
-Description: Atlas Cloud Provider Access role ID
+Description: Atlas role ID for reuse with other Atlas-GCP features
 <!-- END_TF_DOCS -->
 
 ## FAQ
