@@ -61,6 +61,7 @@ module "encryption" {
   role_id                     = local.encryption_role_id
   atlas_service_account_email = local.encryption_service_account
   key_version_resource_id     = var.encryption.key_version_resource_id
+  enabled_for_search_nodes    = var.encryption.enabled_for_search_nodes
   labels                      = var.gcp_tags
 
   create_kms_key = merge(var.encryption.create_kms_key, {

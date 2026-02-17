@@ -61,7 +61,8 @@ resource "google_kms_crypto_key_iam_member" "viewer" {
 # Atlas Encryption at Rest
 
 resource "mongodbatlas_encryption_at_rest" "this" {
-  project_id = var.project_id
+  project_id               = var.project_id
+  enabled_for_search_nodes = var.enabled_for_search_nodes
 
   google_cloud_kms_config {
     enabled                 = true
