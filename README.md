@@ -262,8 +262,8 @@ After Phase 1 returns `service_attachment_names`, create your own
 
 - `ip_address` is the internal IP of your `google_compute_address`.
 - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
-- Key must exist in `privatelink_byoe_regions`.
 - `gcp_project_id` is used when the forwarding rule lives in a different GCP project than the provider default.
+- Key must exist in `privatelink_byoe_regions`.
 
 Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
 
