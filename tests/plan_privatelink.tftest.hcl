@@ -231,6 +231,24 @@ run "byoe_phase2" {
   }
 }
 
+run "byoe_custom_gcp_project" {
+  command = plan
+  variables {
+    privatelink_byoe_regions = { primary = "us-east4" }
+    privatelink_byoe = {
+      primary = {
+        ip_address           = "10.0.1.5"
+        forwarding_rule_name = "my-fr"
+        gcp_project_id       = "other-project-123"
+      }
+    }
+  }
+  assert {
+    condition     = output.privatelink["primary"].gcp_project_id == "other-project-123"
+    error_message = "Expected custom gcp_project_id to flow through to privatelink output"
+  }
+}
+
 run "byoe_partial_rollout" {
   command = plan
   variables {
