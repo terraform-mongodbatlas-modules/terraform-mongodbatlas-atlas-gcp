@@ -1,6 +1,6 @@
 aws_kms_config: []
 azure_key_vault_config: []
-enabled_for_search_nodes: false
+enabled_for_search_nodes: true
 google_cloud_kms_config:
 - enabled: true
 project_id: <project_id>
