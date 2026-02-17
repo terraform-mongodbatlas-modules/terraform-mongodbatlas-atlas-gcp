@@ -37,7 +37,38 @@ jobs:
           sudo apt-get install -y mongodb-atlas-cli
 
   # === OK_EDIT: path-sync job-validate ===
-  # ADD GCP/Azure Login and
-  # Validate regions here
-  #   - name: Validate regions
-  #     run: just validate-regions <provider> --output-format variable
+      - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+      - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2
+      - name: Validate regions
+        run: just validate-regions-gcp
+    permissions:
+      id-token: write
+      contents: read
+
+  slack-notification:
+    needs: [validate-regions]
+    if: ${{ github.event_name == 'schedule' && !cancelled() && contains(needs.*.result, 'failure') }}
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "${{ github.event.repository.name }}: Validate Region Mappings scheduled run failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":x: *${{ github.event.repository.name }}: Validate Region Mappings scheduled run failed* ${{ secrets.SLACK_ONCALL_TAG }} <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failed run>"
+                  }
+                }
+              ]
+            }
