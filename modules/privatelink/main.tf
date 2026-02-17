@@ -5,7 +5,7 @@ locals {
 
 data "google_compute_subnetwork" "atlas" {
   count     = local.module_managed ? 1 : 0
-  self_link = var.subnetwork.id
+  self_link = var.subnetwork.self_link
 }
 
 data "google_client_config" "current" {}
@@ -15,7 +15,7 @@ resource "google_compute_address" "atlas" {
   name         = "${var.name_prefix}ip"
   region       = var.gcp_region
   address_type = "INTERNAL"
-  subnetwork   = var.subnetwork.id
+  subnetwork   = var.subnetwork.self_link
   labels       = var.labels
 }
 

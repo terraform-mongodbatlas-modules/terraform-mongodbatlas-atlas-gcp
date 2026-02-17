@@ -20,10 +20,10 @@ variable "service_attachment_name" {
 
 variable "subnetwork" {
   type = object({
-    id = string
+    self_link = string
   })
   default     = null
-  description = "Subnetwork for module-managed PSC endpoint. Null for BYOE."
+  description = "Subnetwork self_link for module-managed PSC endpoint. Null for BYOE."
 
   validation {
     condition     = (var.subnetwork != null) != (var.byo != null)
