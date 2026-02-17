@@ -40,13 +40,13 @@ output "privatelink" {
   description = "PrivateLink status per endpoint key"
   value = {
     for k, pl in module.privatelink : k => {
-      private_link_id     = pl.private_link_id
-      endpoint_service_id = pl.endpoint_service_id
-      endpoint_ip         = pl.endpoint_ip
-      status              = pl.status
-      error_message       = pl.error_message
-      gcp_endpoint_status = pl.gcp_endpoint_status
-      forwarding_rule_id  = pl.forwarding_rule_id
+      atlas_private_link_id       = pl.atlas_private_link_id
+      atlas_endpoint_service_name = pl.atlas_endpoint_service_name
+      gcp_endpoint_ip             = pl.gcp_endpoint_ip
+      status                      = pl.status
+      error_message               = pl.error_message
+      gcp_endpoint_status         = pl.gcp_endpoint_status
+      gcp_forwarding_rule_id      = pl.gcp_forwarding_rule_id
     }
   }
 }
@@ -55,9 +55,9 @@ output "privatelink_service_info" {
   description = "Atlas PrivateLink service info for BYOE pattern"
   value = {
     for k, ep in mongodbatlas_privatelink_endpoint.this : k => {
-      private_link_id          = ep.private_link_id
-      endpoint_service_name    = ep.endpoint_service_name
-      service_attachment_names = ep.service_attachment_names
+      atlas_private_link_id       = ep.private_link_id
+      atlas_endpoint_service_name = ep.endpoint_service_name
+      service_attachment_names    = ep.service_attachment_names
     }
   }
 }
