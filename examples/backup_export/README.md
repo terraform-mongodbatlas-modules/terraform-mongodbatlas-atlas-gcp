@@ -66,7 +66,6 @@ module "atlas_gcp" {
 #   gcp_tags = var.gcp_tags
 # }
 
-# export_bucket_id -- pass to cluster module's backup schedule auto_export_enabled
 output "backup_export" {
   value = module.atlas_gcp.backup_export
 }

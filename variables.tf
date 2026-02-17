@@ -117,7 +117,7 @@ variable "privatelink_endpoints" {
     - `region` accepts both GCP format (`us-east4`) and Atlas format (`US_EAST_4`).
       All regions must be unique -- use `privatelink_endpoints_single_region` for
       multiple VPCs in the same region.
-    - `subnetwork` is a self_link (e.g., `projects/my-project/regions/us-east4/subnetworks/my-subnet`).
+    - `subnetwork` is a self_link (e.g., `google_compute_subnetwork.this.self_link`).
       The VPC network is derived from the subnetwork -- no separate `network` input needed.
     - `labels` are applied to the GCP forwarding rule and compute address resources.
   EOT
@@ -143,7 +143,7 @@ variable "privatelink_endpoints_single_region" {
     the region is identical for all entries.
 
     Same object shape as `privatelink_endpoints`. Mutually exclusive with
-    `privatelink_endpoints` (validated).
+    `privatelink_endpoints`.
   EOT
 
   validation {
@@ -167,7 +167,7 @@ variable "privatelink_byoe_regions" {
     region (`us-east4` or `US_EAST_4`). Atlas creates the endpoint service and returns
     `service_attachment_names` via the `privatelink_service_info` output.
 
-    Regions must not overlap with `privatelink_endpoints` regions (validated).
+    Regions must not overlap with `privatelink_endpoints` regions.
     Phase 2 (`privatelink_byoe`) completes the connection.
   EOT
 
@@ -192,7 +192,7 @@ variable "privatelink_byoe" {
 
     - `ip_address` is the internal IP of your `google_compute_address`.
     - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
-    - Key must exist in `privatelink_byoe_regions` (validated).
+    - Key must exist in `privatelink_byoe_regions`.
 
     Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
   EOT

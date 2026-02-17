@@ -55,9 +55,14 @@ Optional env vars:
 ```bash
 # Run plan snapshot tests
 just plan-snapshot-test-gcp
+# If this fails and you want to update snapshots:
+just ws-reg --force-regen
 
 # Apply examples (creates real resources)
 just apply-examples-gcp --auto-approve
+
+# Check outputs
+just ws-output-assertions
 
 # Destroy resources after testing
 just destroy-examples-gcp --auto-approve
