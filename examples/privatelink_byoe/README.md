@@ -23,8 +23,8 @@ terraform init # this will download the required providers and create a `terrafo
 # configure authentication env-vars (MONGODB_ATLAS_XXX)
 # configure your `vars.tfvars` with `project_id={PROJECT_ID}`
 terraform apply -var-file vars.tfvars
-# View resource IDs created by the module
-terraform output resource_ids
+# View all outputs
+terraform output
 # cleanup
 terraform destroy -var-file vars.tfvars
 ```
@@ -83,6 +83,7 @@ resource "google_compute_forwarding_rule" "psc" {
   load_balancing_scheme = ""
 }
 
+# privatelink -- connection status after BYOE registration
 output "privatelink" {
   description = "PrivateLink connection details"
   value       = module.atlas_gcp.privatelink[local.ep1]
@@ -91,11 +92,6 @@ output "privatelink" {
 output "forwarding_rule_id" {
   description = "GCP forwarding rule ID"
   value       = google_compute_forwarding_rule.psc.id
-}
-
-output "resource_ids" {
-  description = "All resource IDs created by the module"
-  value       = module.atlas_gcp.resource_ids
 }
 ```
 

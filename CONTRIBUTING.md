@@ -1,4 +1,4 @@
-# Contributing to terraform-mongodbatlas-cluster
+# Contributing to terraform-mongodbatlas-atlas-gcp
 
 Thank you for your interest in contributing to this Terraform module!
 

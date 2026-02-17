@@ -108,7 +108,19 @@ variable "privatelink_endpoints" {
     labels     = optional(map(string), {})
   }))
   default     = []
-  description = "Multi-region PrivateLink endpoints via PSC. Region accepts us-east4 or US_EAST_4 format. All regions must be UNIQUE."
+  description = <<-EOT
+    Multi-region PrivateLink endpoints via Private Service Connect (PSC).
+
+    Each entry creates one GCP forwarding rule + address pair. PSC uses a port-mapped
+    architecture: one forwarding rule per region, PSC handles port-to-node routing internally.
+
+    - `region` accepts both GCP format (`us-east4`) and Atlas format (`US_EAST_4`).
+      All regions must be unique -- use `privatelink_endpoints_single_region` for
+      multiple VPCs in the same region.
+    - `subnetwork` is a self_link (e.g., `projects/my-project/regions/us-east4/subnetworks/my-subnet`).
+      The VPC network is derived from the subnetwork -- no separate `network` input needed.
+    - `labels` are applied to the GCP forwarding rule and compute address resources.
+  EOT
 
   validation {
     condition     = length(var.privatelink_endpoints) == length(distinct([for ep in var.privatelink_endpoints : ep.region]))
@@ -124,8 +136,14 @@ variable "privatelink_endpoints_single_region" {
   }))
   default     = []
   description = <<-EOT
-    Single-region multi-endpoint pattern. All regions must MATCH.
-    Use when multiple VPCs in the same region need PSC connectivity to Atlas.
+    Single-region PrivateLink endpoints for multiple VPCs in the same GCP region.
+
+    Use when two or more VPCs in the same region each need PSC connectivity to the
+    same Atlas project. Uses list index as the `for_each` key (not region), since
+    the region is identical for all entries.
+
+    Same object shape as `privatelink_endpoints`. Mutually exclusive with
+    `privatelink_endpoints` (validated).
   EOT
 
   validation {
@@ -142,7 +160,16 @@ variable "privatelink_endpoints_single_region" {
 variable "privatelink_byoe_regions" {
   type        = map(string)
   default     = {}
-  description = "BYOE Phase 1: Key is user identifier, value is GCP region (us-east4 or US_EAST_4)."
+  description = <<-EOT
+    BYOE (Bring Your Own Endpoint) Phase 1: declare regions for Atlas endpoint service creation.
+
+    Key is a user-chosen identifier (not necessarily a region name). Value is a GCP
+    region (`us-east4` or `US_EAST_4`). Atlas creates the endpoint service and returns
+    `service_attachment_names` via the `privatelink_service_info` output.
+
+    Regions must not overlap with `privatelink_endpoints` regions (validated).
+    Phase 2 (`privatelink_byoe`) completes the connection.
+  EOT
 
   validation {
     condition     = length(setintersection(values(var.privatelink_byoe_regions), [for ep in var.privatelink_endpoints : ep.region])) == 0
@@ -156,7 +183,19 @@ variable "privatelink_byoe" {
     forwarding_rule_name = string
   }))
   default     = {}
-  description = "BYOE Phase 2: Forwarding rule details. Key must exist in privatelink_byoe_regions."
+  description = <<-EOT
+    BYOE (Bring Your Own Endpoint) Phase 2: complete the PSC connection.
+
+    After Phase 1 returns `service_attachment_names`, create your own
+    `google_compute_address` + `google_compute_forwarding_rule` targeting
+    `service_attachment_names[0]`, then pass the details here.
+
+    - `ip_address` is the internal IP of your `google_compute_address`.
+    - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
+    - Key must exist in `privatelink_byoe_regions` (validated).
+
+    Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
+  EOT
 
   validation {
     condition     = alltrue([for k in keys(var.privatelink_byoe) : contains(keys(var.privatelink_byoe_regions), k)])

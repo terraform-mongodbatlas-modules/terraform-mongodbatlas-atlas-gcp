@@ -20,8 +20,8 @@ terraform init # this will download the required providers and create a `terrafo
 # configure your `vars.tfvars` with `project_id={PROJECT_ID}`
 {{ .PRODUCTION_CONSIDERATIONS_COMMENT }}
 terraform apply -var-file vars.tfvars
-# View resource IDs created by the module
-terraform output resource_ids
+# View all outputs
+terraform output
 # cleanup
 terraform destroy -var-file vars.tfvars
 ```

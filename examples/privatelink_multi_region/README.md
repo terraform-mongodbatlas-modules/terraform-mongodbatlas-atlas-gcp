@@ -23,8 +23,8 @@ terraform init # this will download the required providers and create a `terrafo
 # configure authentication env-vars (MONGODB_ATLAS_XXX)
 # configure your `vars.tfvars` with `project_id={PROJECT_ID}`
 terraform apply -var-file vars.tfvars
-# View resource IDs created by the module
-terraform output resource_ids
+# View all outputs
+terraform output
 # cleanup
 terraform destroy -var-file vars.tfvars
 ```
@@ -44,6 +44,7 @@ module "atlas_gcp" {
   gcp_tags = var.gcp_tags
 }
 
+# privatelink -- per-region status/IP for DNS configuration
 output "privatelink" {
   description = "PrivateLink status per endpoint key"
   value       = module.atlas_gcp.privatelink
@@ -52,11 +53,6 @@ output "privatelink" {
 output "regional_mode_enabled" {
   description = "Whether private endpoint regional mode is enabled"
   value       = module.atlas_gcp.regional_mode_enabled
-}
-
-output "resource_ids" {
-  description = "All resource IDs created by the module"
-  value       = module.atlas_gcp.resource_ids
 }
 ```
 

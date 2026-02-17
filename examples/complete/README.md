@@ -3,7 +3,7 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# Complete
+# Encryption + Backup Export + PrivateLink
 
 ## Pre Requirements
 
@@ -23,8 +23,8 @@ terraform init # this will download the required providers and create a `terrafo
 # configure authentication env-vars (MONGODB_ATLAS_XXX)
 # configure your `vars.tfvars` with `project_id={PROJECT_ID}`
 terraform apply -var-file vars.tfvars
-# View resource IDs created by the module
-terraform output resource_ids
+# View all outputs
+terraform output
 # cleanup
 terraform destroy -var-file vars.tfvars
 ```

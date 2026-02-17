@@ -29,15 +29,11 @@ module "atlas_gcp" {
 #   gcp_tags = var.gcp_tags
 # }
 
+# export_bucket_id -- pass to cluster module's backup schedule auto_export_enabled
 output "backup_export" {
   value = module.atlas_gcp.backup_export
 }
 
 output "export_bucket_id" {
   value = module.atlas_gcp.export_bucket_id
-}
-
-output "resource_ids" {
-  description = "All resource IDs created by the module"
-  value       = module.atlas_gcp.resource_ids
 }

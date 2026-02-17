@@ -23,6 +23,9 @@ tables:
     columns: ["feature", "name"]
     link_column: name
     example_rows:
+      - folder_name: complete
+        feature: All Features
+        name: Encryption + Backup Export + PrivateLink
       - folder_name: encryption
         feature: Encryption at Rest
         name: GCP Cloud KMS Integration (User-Provided)

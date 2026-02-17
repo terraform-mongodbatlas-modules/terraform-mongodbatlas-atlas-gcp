@@ -46,6 +46,7 @@ resource "google_compute_forwarding_rule" "psc" {
   load_balancing_scheme = ""
 }
 
+# privatelink -- connection status after BYOE registration
 output "privatelink" {
   description = "PrivateLink connection details"
   value       = module.atlas_gcp.privatelink[local.ep1]
@@ -54,9 +55,4 @@ output "privatelink" {
 output "forwarding_rule_id" {
   description = "GCP forwarding rule ID"
   value       = google_compute_forwarding_rule.psc.id
-}
-
-output "resource_ids" {
-  description = "All resource IDs created by the module"
-  value       = module.atlas_gcp.resource_ids
 }

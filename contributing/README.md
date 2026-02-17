@@ -2,7 +2,7 @@
 <!-- === OK_EDIT: path-sync header === -->
 # Contributing Guides
 
-This directory contains guides for contributors to the terraform-mongodbatlas-cluster module.
+This directory contains guides for contributors to the terraform-mongodbatlas-atlas-gcp module.
 
 ## Available Guides
 
