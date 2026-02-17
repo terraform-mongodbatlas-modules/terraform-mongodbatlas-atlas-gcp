@@ -103,6 +103,7 @@ just unit-plan-tests
 | `MONGODB_ATLAS_ORG_ID` | Atlas organization ID |
 | `MONGODB_ATLAS_CLIENT_ID` | Service account client ID |
 | `MONGODB_ATLAS_CLIENT_SECRET` | Service account client secret |
+| `MONGODB_ATLAS_BASE_URL` | Atlas API base URL (optional, for cloud-dev) |
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | Workload identity federation provider |
 | `GCP_SERVICE_ACCOUNT_EMAIL` | GCP service account email |
 
