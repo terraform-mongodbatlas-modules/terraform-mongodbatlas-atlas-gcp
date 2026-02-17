@@ -273,7 +273,7 @@ Type:
 map(object({
   ip_address           = string
   forwarding_rule_name = string
-  gcp_project_id       = optional(string, null)
+  gcp_project_id       = optional(string)
 }))
 ```
 
