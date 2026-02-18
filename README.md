@@ -72,13 +72,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_google"></a> [google](#requirement\_google) (>= 6.0)
 
-- <a name="requirement_mongodbatlas"></a> [mongodbatlas](#requirement\_mongodbatlas) (~> 2.6)
+- <a name="requirement_mongodbatlas"></a> [mongodbatlas](#requirement\_mongodbatlas) (~> 2.7)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_mongodbatlas"></a> [mongodbatlas](#provider\_mongodbatlas) (~> 2.6)
+- <a name="provider_mongodbatlas"></a> [mongodbatlas](#provider\_mongodbatlas) (~> 2.7)
 
 - <a name="provider_terraform"></a> [terraform](#provider\_terraform)
 
@@ -454,9 +454,9 @@ Description: Atlas role ID for reuse with other Atlas-GCP features
 
 ## FAQ
 
-**Why does the module require mongodbatlas provider ~> 2.6?**
+**Why does the module require mongodbatlas provider ~> 2.7?**
 
-Provider >= 2.7.0 (target: Feb 18th) adds `port_mapping_enabled` on `mongodbatlas_privatelink_endpoint`, required for port-mapped PSC architecture. The `~> 2.6` constraint allows this upgrade.
+Provider [v2.7.0](https://github.com/mongodb/terraform-provider-mongodbatlas/blob/master/CHANGELOG.md#270-february-18-2026) added `port_mapping_enabled` on `mongodbatlas_privatelink_endpoint`, required for port-mapped PSC architecture.
 
 **How does region format work?**
 

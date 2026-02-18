@@ -85,16 +85,16 @@ To skip hooks temporarily: `git commit --no-verify` or `git push --no-verify`.
 
 | Workflow | Triggers | Just Targets | Provider |
 |----------|----------|--------------|----------|
-| `code-health.yml` | PR, push main, nightly | `pre-commit`, `unit-plan-tests`, `test-compat`, `plan-snapshot-test` | master |
+| `code-health.yml` | PR, push main, nightly | `pre-commit`, `unit-plan-tests`, `test-compat`, `plan-snapshot-test` | registry (`plan-snapshot-test`: master) |
 | `pre-release-tests.yml` | manual | `tftest-all`, `apply-examples`, `destroy-examples` | registry (or custom branch) |
 | `release.yml` | manual | `check-release-ready`, `release-commit`, `generate-release-body` | N/A |
 | `validate-region-mappings.yml` | PR (region file changes) | `validate-regions-gcp` | N/A |
 
 ### Provider Testing Policy
 
-- **PR/push/nightly**: Uses provider `master` branch via `TF_CLI_CONFIG` dev_overrides
+- **PR/push/nightly (check, plan-tests, compat-tests)**: Uses registry provider
+- **PR/push/nightly (plan-snapshot-tests)**: Uses provider `master` branch via `TF_CLI_CONFIG` dev_overrides; optionally specify `provider_ref` input to test a specific branch
 - **Pre-release**: Uses latest published registry provider by default; optionally specify `provider_branch` input to test with a specific provider branch
-- **Note**: Currently uses `setup-provider-dev` workaround for unreleased `port_mapping_enabled` (CLOUDP-381477)
 
 ### Required Secrets
 
