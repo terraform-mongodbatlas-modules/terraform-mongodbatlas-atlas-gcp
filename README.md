@@ -162,6 +162,12 @@ creates an alert at that cadence. Each rotation causes a plan diff on
 key_version_resource_id on the next terraform apply. Old key versions remain
 enabled -- no data re-encryption is needed.
 
+`enabled_for_search_nodes` (default: `true`) opts the project into BYOK encryption for
+dedicated search nodes. The flag alone is not sufficient -- Atlas also requires cluster-level
+BYOK and an internal feature flag. In projects without search nodes, this is a no-op.
+On existing deployments with search nodes, flipping false->true triggers search node
+reprovisioning and index rebuild (search may be temporarily unavailable).
+
 `dedicated_role_enabled = true` creates a dedicated Atlas service account for encryption.
 
 Type:
@@ -177,7 +183,8 @@ object({
     location        = optional(string, "")
     rotation_period = optional(string)
   }), {})
-  dedicated_role_enabled = optional(bool, false)
+  enabled_for_search_nodes = optional(bool, true)
+  dedicated_role_enabled   = optional(bool, false)
 })
 ```
 

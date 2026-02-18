@@ -201,3 +201,36 @@ run "encryption_create_kms_key_missing_location" {
   }
   expect_failures = [var.encryption]
 }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# enabled_for_search_nodes
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "encryption_search_nodes_enabled_by_default" {
+  command = plan
+  variables {
+    encryption = {
+      enabled                 = true
+      key_version_resource_id = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+    }
+  }
+  assert {
+    condition     = module.encryption[0].enabled_for_search_nodes == true
+    error_message = "Expected enabled_for_search_nodes to default to true"
+  }
+}
+
+run "encryption_search_nodes_explicit_false" {
+  command = plan
+  variables {
+    encryption = {
+      enabled                  = true
+      key_version_resource_id  = "projects/p/locations/l/keyRings/kr/cryptoKeys/ck/cryptoKeyVersions/1"
+      enabled_for_search_nodes = false
+    }
+  }
+  assert {
+    condition     = module.encryption[0].enabled_for_search_nodes == false
+    error_message = "Expected enabled_for_search_nodes to be false when explicitly set"
+  }
+}

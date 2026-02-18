@@ -51,6 +51,12 @@ variable "create_kms_key" {
   EOT
 }
 
+variable "enabled_for_search_nodes" {
+  type        = bool
+  default     = true
+  description = "Enable Encryption at Rest for Dedicated Search Nodes"
+}
+
 variable "labels" {
   type        = map(string)
   default     = {}
