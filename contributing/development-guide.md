@@ -94,7 +94,7 @@ To skip hooks temporarily: `git commit --no-verify` or `git push --no-verify`.
 
 - **PR/push/nightly**: Uses provider `master` branch via `TF_CLI_CONFIG` dev_overrides
 - **Pre-release**: Uses latest published registry provider by default; optionally specify `provider_branch` input to test with a specific provider branch
-- **Note**: Currently uses `setup-provider-dev` workaround for unreleased `port_mapping_enabled` (CLOUDP-381477)
+- **Note**: `setup-provider-dev` is used in `plan-snapshot-tests` to optionally test with a specific provider branch via the `provider_ref` workflow input
 
 ### Required Secrets
 
