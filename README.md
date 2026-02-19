@@ -12,6 +12,7 @@ WARNING: This section is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
 - [Usage](#usage)
+- [Getting Started](#getting-started)
 - [Examples](#examples)
 - [Requirements](#requirements)
 - [Providers](#providers)
@@ -41,6 +42,147 @@ module "atlas_gcp" {
   }
 }
 ```
+
+## Getting Started
+
+This section guides you step-by-step on setting GCP up encryption at rest in MongoDB Atlas with Terraform.
+
+<!-- BEGIN_GETTING_STARTED -->
+<!-- @generated
+WARNING: This section is auto-generated. Do not edit directly.
+Changes will be overwritten when documentation is regenerated.
+Run 'just gen-readme' to regenerate. -->
+### Prerequisites
+
+If you are familiar with Terraform and already have a project configured in MongoDB Atlas, go to [commands](#commands).
+
+To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following requirements:
+
+1. Install [Terraform](https://developer.hashicorp.com/terraform/install) to be able to run `terraform` [commands](#commands).
+2. [Sign in](https://account.mongodb.com/account/login) or [create](https://account.mongodb.com/account/register) your MongoDB Atlas Account.
+3. Configure your [authentication](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs#authentication) method.
+
+   **NOTE**: Service Accounts (SA) are the preferred authentication method. See [Grant Programmatic Access to an Organization](https://www.mongodb.com/docs/atlas/configure-api-access/#grant-programmatic-access-to-an-organization) in the MongoDB Atlas documentation for detailed instructions on configuring SA access to your project.
+
+4. Use an existing [MongoDB Atlas project](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/project) or [create a new Atlas project resource](#optional-create-a-new-atlas-project-resource).
+5. Install and configure the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) (`gcloud init`) and authenticate your session.
+
+### Commands
+
+The following `terraform` commands intiate, apply, and destroy your configuration:
+
+```sh
+terraform init # this will download the required providers and create a `terraform.lock.hcl` file.
+# configure authentication env-vars (MONGODB_ATLAS_XXX, GOOGLE_APPLICATION_CREDENTIALS)
+# configure your `vars.tfvars` with required variables
+terraform apply -var-file vars.tfvars
+# cleanup
+terraform destroy -var-file vars.tfvars
+```
+
+### (Optional) Create a New Atlas Project Resource
+
+Add the following code to the [main.tf](./main.tf) file to set your configuration in a new Atlas project:
+
+```hcl
+variable "org_id" {
+  type    = string
+  default = "{ORG_ID}" # REPLACE with your organization id, for example `65def6ce0f722a1507105aa5`.
+}
+
+resource "mongodbatlas_project" "this" {
+  name   = "cluster-module"
+  org_id = var.org_id
+}
+```
+
+Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](./main.tf) file.
+
+<!-- END_GETTING_STARTED -->
+
+### Set Up Encryption at Rest with Google Cloud KMS
+
+Complete the following steps to configure encryption at rest with Google Cloud KMS:
+
+1. Prepare your terraform files.
+  
+   You can copy the files directly from the examples provided in this module:
+
+    - [examples/encryption/main.tf](examples/encryption/main.tf)
+    - [examples/encryption/variables.tf](examples/encryption/variables.tf)
+    - [examples/encryption/versions.tf](examples/encryption/versions.tf)
+
+   The following code example shows a basic example of a `main.tf` file configuration:
+
+    ```hcl
+    resource "google_kms_key_ring" "atlas" {
+      name     = var.key_ring_name
+      location = var.gcp_region
+      project  = var.gcp_project_id
+    }
+
+    resource "google_kms_crypto_key" "atlas" {
+      name     = "atlas-encryption-key"
+      key_ring = google_kms_key_ring.atlas.id
+      purpose  = "ENCRYPT_DECRYPT"
+    }
+
+    module "atlas_gcp" {
+      source     = "../../"
+      project_id = var.project_id
+
+      encryption = {
+        enabled                 = true
+        key_version_resource_id = google_kms_crypto_key.atlas.primary[0].name
+      }
+    }
+    
+    output "encryption" {
+        value = module.atlas_gcp.encryption
+    }
+    ```
+
+2. Prepare your [variables](#required-variables)
+
+    The following example shows a `vars.tfvars` with the variables to provide at `apply` time:
+
+    ```hcl
+    project_id = "YOUR_PROJECT_ID"
+    gcp_region = "YOUR_GCP_REGION"
+    gcp_project_id = "YOUR_GCP_PROJECT_ID"
+    key_ring_name = "YOUR_KEY_RING_NAME"
+    ```
+
+3. Ensure your authentication environment variables are configured.
+
+    Configure your Google Cloud credentials using one of the [supported methods](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication).
+
+    The following example uses [Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials):
+
+    ```sh
+    gcloud auth application-default login
+    ```
+
+    Then, export your MongoDB Atlas credentials:
+
+    ```sh
+    export MONGODB_ATLAS_CLIENT_ID="your-client-id-goes-here"
+    export MONGODB_ATLAS_CLIENT_SECRET="your-client-secret-goes-here"
+    ```
+
+    For more details on authentication methods, see [Prerequisites](#prerequisites).
+
+4. Initialize and apply your Terraform configuration (See [Commands](#commands)).
+
+5. Verify your [outputs](#outputs).
+
+You now have encryption at rest configured with Google Cloud KMS.
+
+See the [Examples](#examples) section for additional configurations.
+
+### Clean up your configuration
+
+Run `terraform destroy -var-file vars.tfvars` to undo all changes that Terraform made to your infrastructure.
 
 <!-- BEGIN_TABLES -->
 <!-- @generated
