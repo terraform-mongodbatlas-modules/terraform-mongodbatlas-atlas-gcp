@@ -10,7 +10,11 @@ sections:
     title: "GCP Cloud Provider Access"
     level: 2
     description: |
-      Configure the GCP service account used by MongoDB Atlas. See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-unified-gcp-access/) for details.
+      Atlas requires a GCP service account to access your Google Cloud resources (KMS keys for encryption, GCS buckets for backup export). Unlike AWS and Azure, Atlas creates and manages this service account automatically -- you only need to grant it IAM roles on your resources.
+
+      The module creates a shared Cloud Provider Access (CPA) setup by default when encryption or backup export is enabled. You can also reuse an existing CPA by setting `create = false` with `existing.role_id` and `existing.service_account_for_atlas`. PrivateLink-only configurations skip CPA entirely since PSC uses GCP resources only.
+
+      See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-unified-gcp-access/) for details.
     match:
       names:
         - cloud_provider_access
@@ -19,7 +23,11 @@ sections:
     title: "Encryption at Rest"
     level: 2
     description: |
-      Configure encryption at rest using Google Cloud KMS. See the [GCP encryption documentation](https://www.mongodb.com/docs/atlas/security-gcp-kms/) for details.
+      Atlas encrypts data at rest by default with Atlas-managed keys. Enable customer-managed encryption when compliance or regulatory requirements mandate that you control the encryption keys. This gives you full lifecycle control over key rotation, access policies, and key destruction.
+
+      Provide either a user-managed KMS key (`key_version_resource_id`) or let the module create one (`create_kms_key.enabled = true`). The module grants the Atlas service account the necessary IAM roles (`roles/cloudkms.cryptoKeyEncrypterDecrypter`, `roles/cloudkms.viewer`) on the key.
+
+      See the [GCP encryption documentation](https://www.mongodb.com/docs/atlas/security-gcp-kms/) for details.
     match:
       names:
         - encryption
@@ -28,7 +36,15 @@ sections:
     title: "Private Service Connect"
     level: 2
     description: |
-      Configure GCP Private Service Connect (PSC) endpoints for secure connectivity. See the [GCP PrivateLink documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
+      Private Service Connect (PSC) enables private connectivity between your GCP VPCs and MongoDB Atlas, keeping traffic off the public internet. Use PSC when your security policy requires private-only network access to Atlas clusters.
+
+      The module supports two connectivity paths (mutually exclusive):
+      - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
+      - **BYOE (Bring Your Own Endpoint):** For teams that manage GCP networking separately. This is a 2-phase workflow:
+        1. Declare regions via `privatelink_byoe_regions` -- the module creates the Atlas endpoint service and outputs `service_attachment_names`
+        2. Create your own forwarding rules externally, then pass the details via `privatelink_byoe`
+
+      See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
     match:
       names:
         - privatelink_endpoints
@@ -40,7 +56,9 @@ sections:
     title: "Backup Export"
     level: 2
     description: |
-      Configure backup snapshot export to Google Cloud Storage (GCS).
+      Atlas Cloud Backup takes automatic snapshots of your clusters. Enable backup export to copy these snapshots to a GCS bucket you control, providing an independent recovery path outside of Atlas and meeting data residency or retention requirements.
+
+      Provide either an existing bucket (`bucket_name`) or let the module create one with secure defaults (`create_bucket.enabled = true`).
     match:
       names:
         - backup_export
@@ -48,10 +66,15 @@ sections:
   - id: regions
     title: "Regions Mapping"
     level: 2
+    description: |
+      Internal mapping between Atlas region names (`US_EAST_4`) and GCP region names (`us-east4`). The module uses this mapping to normalize all region inputs -- you can use either format in any region variable. Override this variable to restrict allowed regions or add custom mappings.
     match:
       names:
         - atlas_to_gcp_region
+
   - id: optional
     title: "Optional Variables"
     level: 2
+    description: |
+      Additional configuration options that apply across all features.
     is_default: true

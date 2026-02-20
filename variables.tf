@@ -118,14 +118,15 @@ variable "privatelink_endpoints" {
   description = <<-EOT
     Multi-region PrivateLink endpoints via Private Service Connect (PSC).
 
-    Each entry creates one GCP forwarding rule + address pair. PSC uses a port-mapped
-    architecture: one forwarding rule per region, PSC handles port-to-node routing internally.
+    Each entry creates one GCP forwarding rule and address pair per region. PSC uses
+    port-mapped architecture where one forwarding rule handles routing to all MongoDB
+    nodes internally.
 
     - `region` accepts both GCP format (`us-east4`) and Atlas format (`US_EAST_4`).
       All regions must be unique -- use `privatelink_endpoints_single_region` for
       multiple VPCs in the same region.
     - `subnetwork` is a self_link (e.g., `google_compute_subnetwork.this.self_link`).
-      The VPC network is derived from the subnetwork -- no separate `network` input needed.
+      The VPC network is derived from the subnetwork -- no separate `network` input is needed.
     - `labels` are applied to the GCP forwarding rule and compute address resources.
   EOT
 
@@ -145,9 +146,9 @@ variable "privatelink_endpoints_single_region" {
   description = <<-EOT
     Single-region PrivateLink endpoints for multiple VPCs in the same GCP region.
 
-    Use when two or more VPCs in the same region each need PSC connectivity to the
-    same Atlas project. Uses list index as the `for_each` key (not region), since
-    the region is identical for all entries.
+    Use this variable when two or more VPCs in the same region each need PSC
+    connectivity to the same Atlas project. It uses the list index as the `for_each`
+    key (not the region), since the region is identical for all entries.
 
     Same object shape as `privatelink_endpoints`. Mutually exclusive with
     `privatelink_endpoints`.
@@ -170,9 +171,9 @@ variable "privatelink_byoe_regions" {
   description = <<-EOT
     BYOE (Bring Your Own Endpoint) Phase 1: declare regions for Atlas endpoint service creation.
 
-    Key is a user-chosen identifier (not necessarily a region name). Value is a GCP
-    region (`us-east4` or `US_EAST_4`). Atlas creates the endpoint service and returns
-    `service_attachment_names` via the `privatelink_service_info` output.
+    Each key is a user-chosen identifier (not necessarily a region name). Each value
+    is a GCP region (`us-east4` or `US_EAST_4`). Atlas creates the endpoint service
+    and returns `service_attachment_names` via the `privatelink_service_info` output.
 
     Regions must not overlap with `privatelink_endpoints` regions.
     Phase 2 (`privatelink_byoe`) completes the connection.

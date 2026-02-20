@@ -20,21 +20,26 @@ examples_readme:
 
 tables:
   - name: Examples
-    columns: ["feature", "name"]
+    columns: ["feature", "name", "description"]
     link_column: name
     example_rows:
       - folder_name: complete
         feature: All Features
         name: Encryption + Backup Export + PrivateLink
+        description: Full integration using module-managed KMS key, GCS bucket, and single-region PSC
       - folder_name: encryption
         feature: Encryption at Rest
         name: GCP Cloud KMS Integration (User-Provided)
+        description: Encrypt Atlas data at rest using an existing Google Cloud KMS key version
       - folder_name: backup_export
         feature: Backup Export
         name: GCS Bucket Export (Module-Managed)
+        description: Export Atlas backup snapshots to a module-managed GCS bucket
       - folder_name: privatelink_multi_region
         feature: PrivateLink (PSC)
         name: Multi-Region Private Service Connect
+        description: Private connectivity across multiple GCP regions with auto-enabled regional mode
       - folder_name: privatelink_byoe
         feature: PrivateLink (PSC)
         name: BYOE (Bring Your Own Endpoint)
+        description: Two-phase workflow for externally managed GCP forwarding rules
