@@ -26,7 +26,7 @@ tables:
       - folder_name: complete
         feature: All Features
         name: Encryption + Backup Export + PrivateLink
-        description: Full integration using module-managed KMS key, GCS bucket, and single-region PSC
+        description: Full integration using module-managed KMS key, GCS bucket, and PSC connectivity
       - folder_name: encryption
         feature: Encryption at Rest
         name: GCP Cloud KMS Integration (User-Provided)

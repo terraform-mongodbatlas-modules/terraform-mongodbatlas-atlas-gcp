@@ -14,7 +14,7 @@ sections:
 
       The module creates a shared Cloud Provider Access (CPA) setup by default when encryption or backup export is enabled. You can also reuse an existing CPA by setting `create = false` with `existing.role_id` and `existing.service_account_for_atlas`. PrivateLink-only configurations skip CPA entirely since PSC uses GCP resources only.
 
-      See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-unified-gcp-access/) for details.
+      See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-gcp-access/) for details.
     match:
       names:
         - cloud_provider_access
