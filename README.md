@@ -86,70 +86,97 @@ Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf
 
 <!-- END_GETTING_STARTED -->
 
-### Set Up Encryption at Rest with Google Cloud KMS
+### Set Up a Complete GCP Configuration (Encryption, Backup Export, and PrivateLink)
 
-Complete the following steps to configure encryption at rest with Google Cloud KMS:
+Complete the following steps to configure encryption at rest, backup export, and PrivateLink with GCP using this module:
 
 1. Prepare your terraform files.
   
    You can copy the files directly from the examples provided in this module:
 
-    - [examples/encryption/main.tf](examples/encryption/main.tf)
-    - [examples/encryption/variables.tf](examples/encryption/variables.tf)
-    - [examples/encryption/versions.tf](examples/encryption/versions.tf)
+    - [examples/complete/main.tf](examples/complete/main.tf)
+    - [examples/complete/variables.tf](examples/complete/variables.tf)
+    - [examples/complete/versions.tf](examples/complete/versions.tf)
 
    The following code example shows a basic example of a `main.tf` file configuration:
 
     ```hcl
-    resource "google_kms_key_ring" "atlas" {
-      name     = var.key_ring_name
-      location = var.gcp_region
-      project  = var.gcp_project_id
-    }
-
-    resource "google_kms_crypto_key" "atlas" {
-      name     = "atlas-encryption-key"
-      key_ring = google_kms_key_ring.atlas.id
-      purpose  = "ENCRYPT_DECRYPT"
-    }
-
     module "atlas_gcp" {
-      source     = "../../"
+      source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
       project_id = var.project_id
 
       encryption = {
-        enabled                 = true
-        key_version_resource_id = google_kms_crypto_key.atlas.primary[0].name
+        enabled = true
+        create_kms_key = {
+          enabled       = true
+          key_ring_name = var.key_ring_name
+          location      = var.gcp_region
+        }
       }
+
+      backup_export = {
+        enabled = true
+        create_bucket = {
+          enabled       = true
+          name_suffix   = var.bucket_name_suffix
+          location      = var.gcp_region
+          force_destroy = var.force_destroy
+        }
+      }
+
+      privatelink_endpoints = var.privatelink_endpoints
+
+      gcp_tags = var.gcp_tags
     }
-    
+
     output "encryption" {
-        value = module.atlas_gcp.encryption
+      value = module.atlas_gcp.encryption
+    }
+
+    output "encryption_at_rest_provider" {
+      value = module.atlas_gcp.encryption_at_rest_provider
+    }
+
+    output "backup_export" {
+      value = module.atlas_gcp.backup_export
+    }
+
+    output "export_bucket_id" {
+      value = module.atlas_gcp.export_bucket_id
+    }
+
+    output "privatelink" {
+      value = module.atlas_gcp.privatelink
+    }
+
+    output "resource_ids" {
+      description = "All resource IDs created by the module"
+      value       = module.atlas_gcp.resource_ids
     }
     ```
 
-2. Prepare your [variables](#required-variables)
+2. Prepare your [variables](#required-variables).
 
     The following example shows a `vars.tfvars` with the variables to provide at `apply` time:
 
     ```hcl
-    project_id = "YOUR_PROJECT_ID"
-    gcp_region = "YOUR_GCP_REGION"
-    gcp_project_id = "YOUR_GCP_PROJECT_ID"
-    key_ring_name = "YOUR_KEY_RING_NAME"
+    project_id         = "YOUR_ATLAS_PROJECT_ID"
+    gcp_project_id     = "YOUR_GCP_PROJECT_ID"
+    gcp_region         = "YOUR_GCP_REGION"
+    key_ring_name      = "atlas-encryption-keyring"
+    bucket_name_suffix = "-dev"
+    force_destroy      = false
+
+    privatelink_endpoints = [
+      {
+        region     = "US_EAST_4"
+        subnetwork = "projects/YOUR_GCP_PROJECT_ID/regions/YOUR_GCP_REGION/subnetworks/YOUR_SUBNETWORK_NAME"
+        labels     = {}
+      }
+    ]
     ```
 
-3. Ensure your authentication environment variables are configured.
-
-    Configure your Google Cloud credentials using one of the [supported methods](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication).
-
-    The following example uses [Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials):
-
-    ```sh
-    gcloud auth application-default login
-    ```
-
-    Then, export your MongoDB Atlas credentials:
+3. Provide your MongoDB Atlas credentials:
 
     ```sh
     export MONGODB_ATLAS_CLIENT_ID="your-client-id-goes-here"
@@ -162,7 +189,7 @@ Complete the following steps to configure encryption at rest with Google Cloud K
 
 5. Verify your [outputs](#outputs).
 
-You now have encryption at rest configured with Google Cloud KMS.
+You now have encryption at rest, backup export, and PrivateLink configured with this GCD.
 
 See the [Examples](#examples) section for additional configurations.
 
