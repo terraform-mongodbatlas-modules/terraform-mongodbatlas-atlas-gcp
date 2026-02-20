@@ -15,7 +15,17 @@ To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following req
    **NOTE**: Service Accounts (SA) are the preferred authentication method. See [Grant Programmatic Access to an Organization](https://www.mongodb.com/docs/atlas/configure-api-access/#grant-programmatic-access-to-an-organization) in the MongoDB Atlas documentation for detailed instructions on configuring SA access to your project.
 
 4. Use an existing [MongoDB Atlas project](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/project) or [create a new Atlas project resource](#optional-create-a-new-atlas-project-resource).
-5. Install and configure the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) (`gcloud init`) and authenticate your session.
+5. Install and configure the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install). 
+
+   ```sh
+   gcloud init
+   ```
+
+6. Authenticate your GCP session.
+
+   ``` sh
+   gcloud auth application-default login  
+   ```
 
 ## Commands
 
