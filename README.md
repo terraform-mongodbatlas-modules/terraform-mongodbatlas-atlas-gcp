@@ -11,7 +11,6 @@ Integrates MongoDB Atlas with Google Cloud Platform:
 WARNING: This section is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
-- [Usage](#usage)
 - [Getting Started](#getting-started)
 - [Examples](#examples)
 - [Requirements](#requirements)
@@ -46,12 +45,30 @@ To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following req
 
 1. Install [Terraform](https://developer.hashicorp.com/terraform/install) to be able to run `terraform` [commands](#commands).
 2. [Sign in](https://account.mongodb.com/account/login) or [create](https://account.mongodb.com/account/register) your MongoDB Atlas Account.
-3. Configure your [authentication](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs#authentication) method.
+3. Configure your [Atlas authentication](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs#authentication) method.
 
    **NOTE**: Service Accounts (SA) are the preferred authentication method. See [Grant Programmatic Access to an Organization](https://www.mongodb.com/docs/atlas/configure-api-access/#grant-programmatic-access-to-an-organization) in the MongoDB Atlas documentation for detailed instructions on configuring SA access to your project.
 
-4. Use an existing [MongoDB Atlas project](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/project) or [create a new Atlas project resource](#optional-create-a-new-atlas-project-resource).
-5. Install and configure the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) (`gcloud init`) and authenticate your session.
+4. Configure your Google Cloud credentials using one of the [supported methods](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication).
+
+   The following example uses [Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials):
+
+    ```sh
+    gcloud auth application-default login
+    ```
+
+5. Use an existing [MongoDB Atlas project](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/project) or [create a new Atlas project resource](#optional-create-a-new-atlas-project-resource).
+6. Install and configure the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install). 
+
+   ```sh
+   gcloud init
+   ```
+
+6. Authenticate your GCP session.
+
+   ``` sh
+   gcloud auth application-default login  
+   ```
 
 ### Commands
 
@@ -68,7 +85,7 @@ terraform destroy -var-file vars.tfvars
 
 ### (Optional) Create a New Atlas Project Resource
 
-Add the following code to the [main.tf](./main.tf) file to set your configuration in a new Atlas project:
+Add the following code to the `main.tf` file to set your configuration in a new Atlas project:
 
 ```hcl
 variable "org_id" {
