@@ -6,12 +6,21 @@ Integrates MongoDB Atlas with Google Cloud Platform:
 - **PrivateLink** via Private Service Connect (PSC) with port-mapped architecture
 - **Backup Export** to Google Cloud Storage (GCS)
 
+## Public Preview Note
+
+The MongoDB Atlas GCP Module (Public Preview) simplifies Atlas-GCP integrations and applies MongoDB's best practices as intelligent defaults. This preview validates that these patterns meet the needs of most workloads with minimal maintenance or rework. We welcome your feedback and contributions during this preview phase. MongoDB formally supports this module from its v1 release onwards.
+
+## Disclaimer
+
+One of the project's primary objectives is to provide durable modules that support non-breaking migration and upgrade paths. The v0 release (Public Preview) of the MongoDB Atlas GCP Module focuses on gathering feedback and refining the design. Upgrades from v0 to v1 may not be seamless. We plan to deliver a finalized v1 release with long-term upgrade support.
+
 <!-- BEGIN_TOC -->
 <!-- @generated
 WARNING: This section is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
-- [Usage](#usage)
+- [Public Preview Note](#public-preview-note)
+- [Disclaimer](#disclaimer)
 - [Examples](#examples)
 - [Requirements](#requirements)
 - [Providers](#providers)
@@ -28,20 +37,6 @@ Run 'just gen-readme' to regenerate. -->
 - [License](#license)
 <!-- END_TOC -->
 
-## Usage
-
-```hcl
-module "atlas_gcp" {
-  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-  project_id = "64259ee860c43338194b0f8e"
-
-  encryption = {
-    enabled                 = true
-    key_version_resource_id = google_kms_crypto_key_version.atlas.id
-  }
-}
-```
-
 <!-- BEGIN_TABLES -->
 <!-- @generated
 WARNING: This section is auto-generated. Do not edit directly.
@@ -49,13 +44,13 @@ Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
 ## Examples
 
-Feature | Name
---- | ---
-All Features | [Encryption + Backup Export + PrivateLink](./examples/complete)
-Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption)
-Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export)
-PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region)
-PrivateLink (PSC) | [BYOE (Bring Your Own Endpoint)](./examples/privatelink_byoe)
+Feature | Name | Description
+--- | --- | ---
+All Features | [Encryption + Backup Export + PrivateLink](./examples/complete) | Full integration using module-managed KMS key, GCS bucket, and PSC connectivity
+Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
+Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
+PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with auto-enabled regional mode
+PrivateLink (PSC) | [BYOE (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
 
 <!-- END_TABLES -->
 <!-- BEGIN_TF_DOCS -->
@@ -107,7 +102,11 @@ Type: `string`
 
 ## GCP Cloud Provider Access
 
-Configure the GCP service account used by MongoDB Atlas. See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-unified-gcp-access/) for details.
+Atlas requires a GCP service account to access your Google Cloud resources (KMS keys for encryption, GCS buckets for backup export). Unlike AWS and Azure, Atlas creates and manages this service account automatically -- you only need to grant it IAM roles on your resources.
+
+The module creates a shared Cloud Provider Access (CPA) setup by default when encryption or backup export is enabled. You can also reuse an existing CPA by setting `create = false` with `existing.role_id` and `existing.service_account_for_atlas`. PrivateLink-only configurations skip CPA entirely since PSC uses GCP resources only.
+
+See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-gcp-access/) for details.
 
 ### cloud_provider_access
 
@@ -132,7 +131,11 @@ Default: `{}`
 
 ## Encryption at Rest
 
-Configure encryption at rest using Google Cloud KMS. See the [GCP encryption documentation](https://www.mongodb.com/docs/atlas/security-gcp-kms/) for details.
+Atlas encrypts data at rest by default with Atlas-managed keys. Enable customer-managed encryption when compliance or regulatory requirements mandate that you control the encryption keys. This gives you full lifecycle control over key rotation, access policies, and key destruction.
+
+Provide either a user-managed KMS key (`key_version_resource_id`) or let the module create one (`create_kms_key.enabled = true`). The module grants the Atlas service account the necessary IAM roles (`roles/cloudkms.cryptoKeyEncrypterDecrypter`, `roles/cloudkms.viewer`) on the key.
+
+See the [GCP encryption documentation](https://www.mongodb.com/docs/atlas/security-gcp-kms/) for details.
 
 ### encryption
 
@@ -193,20 +196,29 @@ Default: `{}`
 
 ## Private Service Connect
 
-Configure GCP Private Service Connect (PSC) endpoints for secure connectivity. See the [GCP PrivateLink documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
+Private Service Connect (PSC) enables private connectivity between your GCP VPCs and MongoDB Atlas, keeping traffic off the public internet. Use PSC when your security policy requires private-only network access to Atlas clusters.
+
+The module supports two connectivity paths (mutually exclusive):
+- **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
+- **BYOE (Bring Your Own Endpoint):** For teams that manage GCP networking separately. This is a 2-phase workflow:
+  1. Declare regions via `privatelink_byoe_regions` -- the module creates the Atlas endpoint service and outputs `service_attachment_names`
+  2. Create your own forwarding rules externally, then pass the details via `privatelink_byoe`
+
+See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
 
 ### privatelink_endpoints
 
 Multi-region PrivateLink endpoints via Private Service Connect (PSC).
 
-Each entry creates one GCP forwarding rule + address pair. PSC uses a port-mapped
-architecture: one forwarding rule per region, PSC handles port-to-node routing internally.
+Each entry creates one GCP forwarding rule and address pair per region. PSC uses
+port-mapped architecture where one forwarding rule handles routing to all MongoDB
+nodes internally.
 
 - `region` accepts both GCP format (`us-east4`) and Atlas format (`US_EAST_4`).
   All regions must be unique -- use `privatelink_endpoints_single_region` for
   multiple VPCs in the same region.
 - `subnetwork` is a self_link (e.g., `google_compute_subnetwork.this.self_link`).
-  The VPC network is derived from the subnetwork -- no separate `network` input needed.
+  The VPC network is derived from the subnetwork -- no separate `network` input is needed.
 - `labels` are applied to the GCP forwarding rule and compute address resources.
 
 Type:
@@ -225,9 +237,9 @@ Default: `[]`
 
 Single-region PrivateLink endpoints for multiple VPCs in the same GCP region.
 
-Use when two or more VPCs in the same region each need PSC connectivity to the
-same Atlas project. Uses list index as the `for_each` key (not region), since
-the region is identical for all entries.
+Use this variable when two or more VPCs in the same region each need PSC
+connectivity to the same Atlas project. It uses the list index as the `for_each`
+key (not the region), since the region is identical for all entries.
 
 Same object shape as `privatelink_endpoints`. Mutually exclusive with
 `privatelink_endpoints`.
@@ -248,9 +260,9 @@ Default: `[]`
 
 BYOE (Bring Your Own Endpoint) Phase 1: declare regions for Atlas endpoint service creation.
 
-Key is a user-chosen identifier (not necessarily a region name). Value is a GCP
-region (`us-east4` or `US_EAST_4`). Atlas creates the endpoint service and returns
-`service_attachment_names` via the `privatelink_service_info` output.
+Each key is a user-chosen identifier (not necessarily a region name). Each value
+is a GCP region (`us-east4` or `US_EAST_4`). Atlas creates the endpoint service
+and returns `service_attachment_names` via the `privatelink_service_info` output.
 
 Regions must not overlap with `privatelink_endpoints` regions.
 Phase 2 (`privatelink_byoe`) completes the connection.
@@ -289,7 +301,9 @@ Default: `{}`
 
 ## Backup Export
 
-Configure backup snapshot export to Google Cloud Storage (GCS).
+Atlas Cloud Backup takes automatic snapshots of your clusters. Enable backup export to copy these snapshots to a GCS bucket you control, providing an independent recovery path outside of Atlas and meeting data residency or retention requirements.
+
+Provide either an existing bucket (`bucket_name`) or let the module create one with secure defaults (`create_bucket.enabled = true`).
 
 ### backup_export
 
@@ -341,6 +355,8 @@ Default: `{}`
 
 
 ## Regions Mapping
+
+Internal mapping between Atlas region names (`US_EAST_4`) and GCP region names (`us-east4`). The module uses this mapping to normalize all region inputs -- you can use either format in any region variable. Override this variable to restrict allowed regions or add custom mappings.
 
 ### atlas_to_gcp_region
 
@@ -401,6 +417,8 @@ Default:
 
 ## Optional Variables
 
+Additional configuration options that apply across all features.
+
 ### gcp_tags
 
 Labels to apply to all GCP resources created by this module.
@@ -410,6 +428,8 @@ Type: `map(string)`
 Default: `{}`
 
 <!-- END_TF_INPUTS_RAW -->
+
+The module exports outputs grouped by feature. Use `encryption_at_rest_provider` and `export_bucket_id` when configuring your Atlas cluster resource. Use `privatelink_service_info` for the BYOE workflow. Connection strings come from the cluster resource, not this module.
 
 ## Outputs
 

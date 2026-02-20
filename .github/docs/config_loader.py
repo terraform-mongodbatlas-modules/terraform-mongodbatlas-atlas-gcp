@@ -54,6 +54,7 @@ class ExampleRow:
     title_suffix: str = ""
     cluster_type: str = ""
     feature: str = ""
+    description: str = ""
 
     def __post_init__(self):
         if self.folder is None and self.folder_name == "":
