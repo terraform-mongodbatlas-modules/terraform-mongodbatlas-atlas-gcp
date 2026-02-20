@@ -11,7 +11,7 @@ Integrates MongoDB Atlas with Google Cloud Platform:
 WARNING: This section is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
-- [Usage](#usage)
+- [Getting Started](#getting-started)
 - [Examples](#examples)
 - [Requirements](#requirements)
 - [Providers](#providers)
@@ -28,19 +28,191 @@ Run 'just gen-readme' to regenerate. -->
 - [License](#license)
 <!-- END_TOC -->
 
-## Usage
+## Getting Started
+
+This section guides you step-by-step on setting GCP up encryption at rest in MongoDB Atlas with Terraform.
+
+<!-- BEGIN_GETTING_STARTED -->
+<!-- @generated
+WARNING: This section is auto-generated. Do not edit directly.
+Changes will be overwritten when documentation is regenerated.
+Run 'just gen-readme' to regenerate. -->
+### Prerequisites
+
+If you are familiar with Terraform and already have a project configured in MongoDB Atlas, go to [commands](#commands).
+
+To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following requirements:
+
+1. Install [Terraform](https://developer.hashicorp.com/terraform/install) to be able to run `terraform` [commands](#commands).
+2. [Sign in](https://account.mongodb.com/account/login) or [create](https://account.mongodb.com/account/register) your MongoDB Atlas Account.
+3. Configure your [Atlas authentication](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs#authentication) method.
+
+   **NOTE**: Service Accounts (SA) are the preferred authentication method. See [Grant Programmatic Access to an Organization](https://www.mongodb.com/docs/atlas/configure-api-access/#grant-programmatic-access-to-an-organization) in the MongoDB Atlas documentation for detailed instructions on configuring SA access to your project.
+
+4. Configure your Google Cloud credentials using one of the [supported methods](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication).
+
+   The following example uses [Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials):
+
+    ```sh
+    gcloud auth application-default login
+    ```
+
+5. Use an existing [MongoDB Atlas project](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/project) or [create a new Atlas project resource](#optional-create-a-new-atlas-project-resource).
+6. Install and configure the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install). 
+
+   ```sh
+   gcloud init
+   ```
+
+6. Authenticate your GCP session.
+
+   ``` sh
+   gcloud auth application-default login  
+   ```
+
+### Commands
+
+The following `terraform` commands intiate, apply, and destroy your configuration:
+
+```sh
+terraform init # this will download the required providers and create a `terraform.lock.hcl` file.
+# configure authentication env-vars (MONGODB_ATLAS_XXX, GOOGLE_APPLICATION_CREDENTIALS)
+# configure your `vars.tfvars` with required variables
+terraform apply -var-file vars.tfvars
+# cleanup
+terraform destroy -var-file vars.tfvars
+```
+
+### (Optional) Create a New Atlas Project Resource
+
+Add the following code to the `main.tf` file to set your configuration in a new Atlas project:
 
 ```hcl
-module "atlas_gcp" {
-  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-  project_id = "64259ee860c43338194b0f8e"
+variable "org_id" {
+  type    = string
+  default = "{ORG_ID}" # REPLACE with your organization id, for example `65def6ce0f722a1507105aa5`.
+}
 
-  encryption = {
-    enabled                 = true
-    key_version_resource_id = google_kms_crypto_key_version.atlas.id
-  }
+resource "mongodbatlas_project" "this" {
+  name   = "cluster-module"
+  org_id = var.org_id
 }
 ```
+
+Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](./main.tf) file.
+
+<!-- END_GETTING_STARTED -->
+
+### Set Up a Complete GCP Configuration (Encryption, Backup Export, and PrivateLink)
+
+Complete the following steps to configure encryption at rest, backup export, and PrivateLink with GCP using this module:
+
+1. Prepare your terraform files.
+  
+   You can copy the files directly from the examples provided in this module:
+
+    - [examples/complete/main.tf](examples/complete/main.tf)
+    - [examples/complete/variables.tf](examples/complete/variables.tf)
+    - [examples/complete/versions.tf](examples/complete/versions.tf)
+
+   The following code example shows a basic example of a `main.tf` file configuration:
+
+    ```hcl
+    module "atlas_gcp" {
+      source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+      project_id = var.project_id
+
+      encryption = {
+        enabled = true
+        create_kms_key = {
+          enabled       = true
+          key_ring_name = var.key_ring_name
+          location      = var.gcp_region
+        }
+      }
+
+      backup_export = {
+        enabled = true
+        create_bucket = {
+          enabled       = true
+          name_suffix   = var.bucket_name_suffix
+          location      = var.gcp_region
+          force_destroy = var.force_destroy
+        }
+      }
+
+      privatelink_endpoints = var.privatelink_endpoints
+
+      gcp_tags = var.gcp_tags
+    }
+
+    output "encryption" {
+      value = module.atlas_gcp.encryption
+    }
+
+    output "encryption_at_rest_provider" {
+      value = module.atlas_gcp.encryption_at_rest_provider
+    }
+
+    output "backup_export" {
+      value = module.atlas_gcp.backup_export
+    }
+
+    output "export_bucket_id" {
+      value = module.atlas_gcp.export_bucket_id
+    }
+
+    output "privatelink" {
+      value = module.atlas_gcp.privatelink
+    }
+
+    output "resource_ids" {
+      description = "All resource IDs created by the module"
+      value       = module.atlas_gcp.resource_ids
+    }
+    ```
+
+2. Prepare your [variables](#required-variables).
+
+    The following example shows a `vars.tfvars` with the variables to provide at `apply` time:
+
+    ```hcl
+    project_id         = "YOUR_ATLAS_PROJECT_ID"
+    gcp_project_id     = "YOUR_GCP_PROJECT_ID"
+    gcp_region         = "YOUR_GCP_REGION"
+    key_ring_name      = "atlas-encryption-keyring"
+    bucket_name_suffix = "-dev"
+    force_destroy      = false
+
+    privatelink_endpoints = [
+      {
+        region     = "US_EAST_4"
+        subnetwork = "projects/YOUR_GCP_PROJECT_ID/regions/YOUR_GCP_REGION/subnetworks/YOUR_SUBNETWORK_NAME"
+        labels     = {}
+      }
+    ]
+    ```
+
+3. Provide your MongoDB Atlas credentials:
+
+    ```sh
+    export MONGODB_ATLAS_CLIENT_ID="your-client-id-goes-here"
+    export MONGODB_ATLAS_CLIENT_SECRET="your-client-secret-goes-here"
+    ```
+
+    For more details on authentication methods, see [Prerequisites](#prerequisites).
+
+4. Initialize and apply your Terraform configuration (See [Commands](#commands)).
+
+5. Verify your [outputs](#outputs).
+
+You now have encryption at rest, backup export, and PrivateLink configured with this GCD.
+
+See the [Examples](#examples) section for additional configurations.
+
+### Clean up your configuration
+
+Run `terraform destroy -var-file vars.tfvars` to undo all changes that Terraform made to your infrastructure.
 
 <!-- BEGIN_TABLES -->
 <!-- @generated
