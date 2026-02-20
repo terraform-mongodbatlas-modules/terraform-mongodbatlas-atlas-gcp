@@ -29,20 +29,6 @@ Run 'just gen-readme' to regenerate. -->
 - [License](#license)
 <!-- END_TOC -->
 
-## Usage
-
-```hcl
-module "atlas_gcp" {
-  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-  project_id = "64259ee860c43338194b0f8e"
-
-  encryption = {
-    enabled                 = true
-    key_version_resource_id = google_kms_crypto_key_version.atlas.id
-  }
-}
-```
-
 ## Getting Started
 
 This section guides you step-by-step on setting GCP up encryption at rest in MongoDB Atlas with Terraform.
