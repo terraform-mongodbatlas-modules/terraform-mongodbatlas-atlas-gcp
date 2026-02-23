@@ -34,4 +34,6 @@ content: |-
   {{ .Inputs }}
   <!-- END_TF_INPUTS_RAW -->
 
+  The module exports outputs grouped by feature. Use `encryption_at_rest_provider` and `export_bucket_id` when configuring your Atlas cluster resource. Use `privatelink_service_info` for the BYOE workflow. Connection strings come from the cluster resource, not this module.
+
   {{ .Outputs }}

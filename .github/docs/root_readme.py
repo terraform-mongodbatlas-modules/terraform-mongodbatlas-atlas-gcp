@@ -103,6 +103,8 @@ def generate_tables(tables: list[config_loader.TableConfig], examples_dir: Path)
                     row_data.append(row.environment)
                 elif col == "feature":
                     row_data.append(row.feature)
+                elif col == "description":
+                    row_data.append(row.description)
                 elif col == "name":
                     display_name = row.name
                     if row.title_suffix:
