@@ -19,6 +19,8 @@ One of the project's primary objectives is to provide durable modules that suppo
 WARNING: This section is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
+- [Public Preview Note](#public-preview-note)
+- [Disclaimer](#disclaimer)
 - [Getting Started](#getting-started)
 - [Examples](#examples)
 - [Requirements](#requirements)
