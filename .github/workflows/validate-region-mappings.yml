@@ -22,11 +22,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
       - uses: ./.github/actions/setup
         with:
           just: 'true'
           uv: 'true'
           terraform: 'true'
+
+
       - name: Setup AtlasCLI
         uses: mongodb/atlas-github-action@07d212bf80c068dfcfbf6e15b22c61ae6e66d96e # v0.2.0
 
