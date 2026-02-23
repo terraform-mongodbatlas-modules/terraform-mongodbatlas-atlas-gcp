@@ -131,7 +131,7 @@ Default: `{}`
 
 ## Encryption at Rest
 
-Atlas encrypts data at rest by default with Atlas-managed keys. Enable customer-managed encryption when compliance or regulatory requirements mandate that you control the encryption keys. This gives you full lifecycle control over key rotation, access policies, and key destruction.
+Atlas encrypts data at rest by default with Atlas-managed keys. Enable customer-managed encryption when compliance or regulatory requirements mandate that you control the encryption keys. Customer-managed encryption gives you full lifecycle control over key rotation, access policies, and key destruction.
 
 Provide either a user-managed KMS key (`key_version_resource_id`) or let the module create one (`create_kms_key.enabled = true`). The module grants the Atlas service account the necessary IAM roles (`roles/cloudkms.cryptoKeyEncrypterDecrypter`, `roles/cloudkms.viewer`) on the key.
 
@@ -200,7 +200,7 @@ Private Service Connect (PSC) enables private connectivity between your GCP VPCs
 
 The module supports two connectivity paths (mutually exclusive):
 - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
-- **BYOE (Bring Your Own Endpoint):** For teams that manage GCP networking separately. This is a 2-phase workflow:
+- **Bring Your Own Endpoint (BYOE):** Use the BYOE path if you have multiple teams that manage GCP networking separately. This is a 2-phase workflow:
   1. Declare regions via `privatelink_byoe_regions` -- the module creates the Atlas endpoint service and outputs `service_attachment_names`
   2. Create your own forwarding rules externally, then pass the details via `privatelink_byoe`
 
@@ -208,11 +208,13 @@ See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atl
 
 ### privatelink_endpoints
 
-Multi-region PrivateLink endpoints via Private Service Connect (PSC).
+Create multi-region PrivateLink endpoints via Private Service Connect (PSC).
 
 Each entry creates one GCP forwarding rule and address pair per region. PSC uses
 port-mapped architecture where one forwarding rule handles routing to all MongoDB
 nodes internally.
+
+Mutually exclusive with `privatelink_endpoints_single_region`.
 
 - `region` accepts both GCP format (`us-east4`) and Atlas format (`US_EAST_4`).
   All regions must be unique -- use `privatelink_endpoints_single_region` for
@@ -235,7 +237,7 @@ Default: `[]`
 
 ### privatelink_endpoints_single_region
 
-Single-region PrivateLink endpoints for multiple VPCs in the same GCP region.
+Create single-region PrivateLink endpoints for multiple VPCs in the same GCP region.
 
 Use this variable when two or more VPCs in the same region each need PSC
 connectivity to the same Atlas project. It uses the list index as the `for_each`
@@ -301,7 +303,7 @@ Default: `{}`
 
 ## Backup Export
 
-Atlas Cloud Backup takes automatic snapshots of your clusters. Enable backup export to copy these snapshots to a GCS bucket you control, providing an independent recovery path outside of Atlas and meeting data residency or retention requirements.
+Atlas Cloud Backup takes automatic snapshots of your clusters. Enable backup export to copy these snapshots to a Google Cloud Storage (GCS) bucket you control, providing an independent recovery path outside of Atlas and meeting data residency or retention requirements.
 
 Provide either an existing bucket (`bucket_name`) or let the module create one with secure defaults (`create_bucket.enabled = true`).
 

@@ -23,7 +23,7 @@ sections:
     title: "Encryption at Rest"
     level: 2
     description: |
-      Atlas encrypts data at rest by default with Atlas-managed keys. Enable customer-managed encryption when compliance or regulatory requirements mandate that you control the encryption keys. This gives you full lifecycle control over key rotation, access policies, and key destruction.
+      Atlas encrypts data at rest by default with Atlas-managed keys. Enable customer-managed encryption when compliance or regulatory requirements mandate that you control the encryption keys. Customer-managed encryption gives you full lifecycle control over key rotation, access policies, and key destruction.
 
       Provide either a user-managed KMS key (`key_version_resource_id`) or let the module create one (`create_kms_key.enabled = true`). The module grants the Atlas service account the necessary IAM roles (`roles/cloudkms.cryptoKeyEncrypterDecrypter`, `roles/cloudkms.viewer`) on the key.
 
@@ -40,7 +40,7 @@ sections:
 
       The module supports two connectivity paths (mutually exclusive):
       - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
-      - **BYOE (Bring Your Own Endpoint):** For teams that manage GCP networking separately. This is a 2-phase workflow:
+      - **Bring Your Own Endpoint (BYOE):** Use the BYOE path if you have multiple teams that manage GCP networking separately. This is a 2-phase workflow:
         1. Declare regions via `privatelink_byoe_regions` -- the module creates the Atlas endpoint service and outputs `service_attachment_names`
         2. Create your own forwarding rules externally, then pass the details via `privatelink_byoe`
 
@@ -56,7 +56,7 @@ sections:
     title: "Backup Export"
     level: 2
     description: |
-      Atlas Cloud Backup takes automatic snapshots of your clusters. Enable backup export to copy these snapshots to a GCS bucket you control, providing an independent recovery path outside of Atlas and meeting data residency or retention requirements.
+      Atlas Cloud Backup takes automatic snapshots of your clusters. Enable backup export to copy these snapshots to a Google Cloud Storage (GCS) bucket you control, providing an independent recovery path outside of Atlas and meeting data residency or retention requirements.
 
       Provide either an existing bucket (`bucket_name`) or let the module create one with secure defaults (`create_bucket.enabled = true`).
     match:

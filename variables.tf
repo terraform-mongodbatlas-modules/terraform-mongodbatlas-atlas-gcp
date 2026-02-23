@@ -116,11 +116,13 @@ variable "privatelink_endpoints" {
   }))
   default     = []
   description = <<-EOT
-    Multi-region PrivateLink endpoints via Private Service Connect (PSC).
+    Create multi-region PrivateLink endpoints via Private Service Connect (PSC).
 
     Each entry creates one GCP forwarding rule and address pair per region. PSC uses
     port-mapped architecture where one forwarding rule handles routing to all MongoDB
     nodes internally.
+
+    Mutually exclusive with `privatelink_endpoints_single_region`.
 
     - `region` accepts both GCP format (`us-east4`) and Atlas format (`US_EAST_4`).
       All regions must be unique -- use `privatelink_endpoints_single_region` for
@@ -144,7 +146,7 @@ variable "privatelink_endpoints_single_region" {
   }))
   default     = []
   description = <<-EOT
-    Single-region PrivateLink endpoints for multiple VPCs in the same GCP region.
+    Create single-region PrivateLink endpoints for multiple VPCs in the same GCP region.
 
     Use this variable when two or more VPCs in the same region each need PSC
     connectivity to the same Atlas project. It uses the list index as the `for_each`
