@@ -28,7 +28,7 @@ jobs:
           uv: 'true'
           terraform: 'true'
       - name: Setup AtlasCLI
-        uses: mongodb/atlas-github-action@v0.2.0
+        uses: mongodb/atlas-github-action@07d212bf80c068dfcfbf6e15b22c61ae6e66d96e # v0.2.0
 
   # === OK_EDIT: path-sync job-validate ===
       - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
@@ -42,6 +42,7 @@ jobs:
       id-token: write
       contents: read
 
+  # === DO_NOT_EDIT: path-sync job-slack ===
   slack-notification:
     needs: [validate-regions]
     if: ${{ github.event_name == 'schedule' && !cancelled() && contains(needs.*.result, 'failure') }}
@@ -66,3 +67,4 @@ jobs:
                 }
               ]
             }
+  # === OK_EDIT: path-sync job-slack ===
