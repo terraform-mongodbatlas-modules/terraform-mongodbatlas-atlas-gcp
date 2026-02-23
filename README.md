@@ -206,7 +206,7 @@ Complete the following steps to configure encryption at rest, backup export, and
 
 5. Verify your [outputs](#outputs).
 
-You now have encryption at rest, backup export, and PrivateLink configured with this GCD.
+You now have encryption at rest, backup export, and PrivateLink configured with GCP.
 
 See the [Examples](#examples) section for additional configurations.
 
