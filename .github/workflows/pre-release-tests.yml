@@ -31,7 +31,6 @@ env:
   MONGODB_ATLAS_BASE_URL: ${{ secrets.MONGODB_ATLAS_BASE_URL }}
 # === OK_EDIT: path-sync env ===
   GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-  TF_LOG: "debug"
 
 jobs:
   # === DO_NOT_EDIT: path-sync job-tftest ===
