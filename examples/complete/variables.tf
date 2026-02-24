@@ -34,9 +34,10 @@ variable "force_destroy" {
 
 variable "privatelink_endpoints" {
   type = list(object({
-    region     = string
-    subnetwork = string
-    labels     = optional(map(string), {})
+    region      = string
+    subnetwork  = string
+    labels      = optional(map(string), {})
+    name_prefix = optional(string)
   }))
   description = "Multi-region PrivateLink endpoints via PSC. Region accepts us-east4 or US_EAST_4 format. All regions must be UNIQUE."
 }

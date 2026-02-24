@@ -430,8 +430,7 @@ Use this variable when two or more VPCs in the same region each need PSC
 connectivity to the same Atlas project. It uses the list index as the `for_each`
 key (not the region), since the region is identical for all entries.
 
-Same object shape as `privatelink_endpoints`. Mutually exclusive with
-`privatelink_endpoints`.
+Mutually exclusive with `privatelink_endpoints`.
 
 - `name_prefix` sets the prefix for the GCP compute address (`{name_prefix}ip`) and
   forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{index}-`
