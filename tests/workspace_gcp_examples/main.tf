@@ -93,7 +93,7 @@ locals {
   key_ring_name_complete = "atlas-complete-${random_string.suffix.id}"
   # tflint-ignore: terraform_unused_declarations
   privatelink_endpoints_complete = [
-    { region = "us-east4", subnetwork = module.network_us_east4.subnetwork_self_link },
+    { region = "us-east4", subnetwork = module.network_us_east4.subnetwork_self_link, name_prefix = "atlas-psc-cpl-" },
   ]
   # tflint-ignore: terraform_unused_declarations
   privatelink_endpoints_multi_region = [
