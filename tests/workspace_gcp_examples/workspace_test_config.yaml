@@ -31,6 +31,7 @@ examples:
         dump:
           skip_lines:
             substring_attributes: [bucket]
+      - address: module.atlas_gcp.module.backup_export[0].time_sleep.iam_propagation
       - address: module.atlas_gcp.module.backup_export[0].mongodbatlas_cloud_backup_snapshot_export_bucket.this
         dump:
           skip_lines:
@@ -70,6 +71,7 @@ examples:
         dump:
           skip_lines:
             substring_attributes: [bucket]
+      - address: module.atlas_gcp.module.backup_export[0].time_sleep.iam_propagation
       - address: module.atlas_gcp.module.backup_export[0].mongodbatlas_cloud_backup_snapshot_export_bucket.this
         dump:
           skip_lines:

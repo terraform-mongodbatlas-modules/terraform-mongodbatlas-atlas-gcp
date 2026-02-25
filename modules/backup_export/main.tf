@@ -44,11 +44,16 @@ resource "google_storage_bucket_iam_member" "atlas" {
   member = "serviceAccount:${var.atlas_service_account_email}"
 }
 
+resource "time_sleep" "iam_propagation" {
+  depends_on      = [google_storage_bucket_iam_member.atlas, google_storage_bucket.atlas]
+  create_duration = "30s"
+}
+
 resource "mongodbatlas_cloud_backup_snapshot_export_bucket" "this" {
   project_id     = var.project_id
   cloud_provider = "GCP"
   bucket_name    = local.bucket_name
   role_id        = var.role_id
 
-  depends_on = [google_storage_bucket_iam_member.atlas]
+  depends_on = [time_sleep.iam_propagation, google_storage_bucket.atlas]
 }
