@@ -129,7 +129,7 @@ module "privatelink" {
 
   subnetwork  = contains(keys(local.privatelink_module_managed), each.key) ? { self_link = each.value.subnetwork } : null
   byo         = try(var.privatelink_byoe[each.key], null)
-  name_prefix = coalesce(try(each.value.name_prefix, null), "atlas-psc-${replace(lower(each.key), "_", "-")}-")
+  name_prefix = coalesce(try(each.value.name_prefix, null), "atlas-psc-${lookup(local.atlas_to_gcp_region, each.key, each.key)}-")
 
   labels = merge(var.gcp_tags, each.value.labels)
 

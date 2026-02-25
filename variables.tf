@@ -141,6 +141,16 @@ variable "privatelink_endpoints" {
     condition     = length(var.privatelink_endpoints) == length(distinct([for ep in var.privatelink_endpoints : ep.region]))
     error_message = "All regions in privatelink_endpoints must be unique. Use privatelink_endpoints_single_region for multiple endpoints in the same region."
   }
+
+  validation {
+    condition = alltrue([
+      for ep in var.privatelink_endpoints :
+      ep.name_prefix == null || (
+        can(regex("^[a-z][a-z0-9-]*$", ep.name_prefix)) && length(ep.name_prefix) <= 61
+      )
+    ])
+    error_message = "name_prefix must start with a lowercase letter, contain only lowercase letters/digits/hyphens, and be at most 61 characters (63 char GCP limit minus 2 for 'ip'/'fr' suffix)."
+  }
 }
 
 variable "privatelink_endpoints_single_region" {
@@ -174,6 +184,16 @@ variable "privatelink_endpoints_single_region" {
   validation {
     condition     = length(var.privatelink_endpoints_single_region) == 0 || length(var.privatelink_endpoints) == 0
     error_message = "Cannot use both privatelink_endpoints and privatelink_endpoints_single_region."
+  }
+
+  validation {
+    condition = alltrue([
+      for ep in var.privatelink_endpoints_single_region :
+      ep.name_prefix == null || (
+        can(regex("^[a-z][a-z0-9-]*$", ep.name_prefix)) && length(ep.name_prefix) <= 61
+      )
+    ])
+    error_message = "name_prefix must start with a lowercase letter, contain only lowercase letters/digits/hyphens, and be at most 61 characters (63 char GCP limit minus 2 for 'ip'/'fr' suffix)."
   }
 }
 
