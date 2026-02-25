@@ -245,19 +245,19 @@ Run 'just docs' to regenerate.
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9)
+- <a name="requirement_terraform"></a> [terraform](https://developer.hashicorp.com/terraform/install) (>= 1.9)
 
-- <a name="requirement_google"></a> [google](#requirement\_google) (>= 6.0)
+- <a name="requirement_google"></a> [google](https://registry.terraform.io/providers/hashicorp/google/latest/docs) (>= 6.0)
 
-- <a name="requirement_mongodbatlas"></a> [mongodbatlas](#requirement\_mongodbatlas) (~> 2.7)
+- <a name="requirement_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.7)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_mongodbatlas"></a> [mongodbatlas](#provider\_mongodbatlas) (~> 2.7)
+- <a name="provider_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.7)
 
-- <a name="provider_terraform"></a> [terraform](#provider\_terraform)
+- <a name="provider_terraform"></a> [terraform](https://developer.hashicorp.com/terraform/language/resources/terraform-data)
 
 ## Resources
 
@@ -265,7 +265,7 @@ The following resources are used by this module:
 
 - [mongodbatlas_private_endpoint_regional_mode.this](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/private_endpoint_regional_mode) (resource)
 - [mongodbatlas_privatelink_endpoint.this](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/privatelink_endpoint) (resource)
-- [terraform_data.region_validations](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
+- [terraform_data.region_validations](https://developer.hashicorp.com/terraform/language/resources/terraform-data) (resource)
 
 <!-- BEGIN_TF_INPUTS_RAW -->
 <!-- @generated
