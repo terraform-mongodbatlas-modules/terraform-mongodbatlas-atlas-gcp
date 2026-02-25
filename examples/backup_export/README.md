@@ -63,7 +63,7 @@ resource "mongodbatlas_project" "this" {
 }
 ```
 
-Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](./main.tf) file.
+Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/backup_export/main.tf) file.
 
 <!-- END_GETTING_STARTED -->
 
@@ -75,6 +75,7 @@ Copy and use this code to get started quickly:
 ```hcl
 module "atlas_gcp" {
   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+  version = "v0.1.0"
   project_id = var.project_id
 
   backup_export = {
@@ -94,6 +95,7 @@ module "atlas_gcp" {
 # Alternative: user-provided bucket (uncomment and remove create_bucket above)
 # module "atlas_gcp" {
 #   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+  version = "v0.1.0"
 #   project_id = var.project_id
 #
 #   backup_export = {
@@ -116,8 +118,8 @@ output "export_bucket_id" {
 ```
 
 **Additional files needed:**
-- [variables.tf](./variables.tf)
-- [versions.tf](./versions.tf)
+- [variables.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/backup_export/variables.tf)
+- [versions.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/backup_export/versions.tf)
 
 
 

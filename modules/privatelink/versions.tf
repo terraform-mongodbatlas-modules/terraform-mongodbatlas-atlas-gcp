@@ -14,6 +14,6 @@ terraform {
 
   provider_meta "mongodbatlas" {
     module_name    = "atlas-gcp/privatelink"
-    module_version = "local"
+    module_version = "0.1.0"
   }
 }

@@ -104,7 +104,7 @@ resource "mongodbatlas_project" "this" {
 }
 ```
 
-Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](./main.tf) file.
+Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/main.tf) file.
 
 <!-- END_GETTING_STARTED -->
 
@@ -116,9 +116,9 @@ Complete the following steps to configure encryption at rest, backup export, and
   
    You can copy the files directly from the examples provided in this module:
 
-    - [examples/complete/main.tf](examples/complete/main.tf)
-    - [examples/complete/variables.tf](examples/complete/variables.tf)
-    - [examples/complete/versions.tf](examples/complete/versions.tf)
+    - [examples/complete/main.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/complete/main.tf)
+    - [examples/complete/variables.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/complete/variables.tf)
+    - [examples/complete/versions.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/complete/versions.tf)
 
    The following code example shows a basic example of a `main.tf` file configuration:
 
@@ -228,11 +228,11 @@ Run 'just gen-readme' to regenerate. -->
 
 Feature | Name | Description
 --- | --- | ---
-All Features | [Encryption + Backup Export + PrivateLink](./examples/complete) | Full integration using module-managed KMS key, GCS bucket, and PSC connectivity
-Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
-Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
-PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with auto-enabled regional mode
-PrivateLink (PSC) | [BYOE (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
+All Features | [Encryption + Backup Export + PrivateLink](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/complete) | Full integration using module-managed KMS key, GCS bucket, and PSC connectivity
+Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
+Backup Export | [GCS Bucket Export (Module-Managed)](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
+PrivateLink (PSC) | [Multi-Region Private Service Connect](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with auto-enabled regional mode
+PrivateLink (PSC) | [BYOE (Bring Your Own Endpoint)](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
 
 <!-- END_TABLES -->
 <!-- BEGIN_TF_DOCS -->
@@ -686,4 +686,4 @@ Atlas does not support private endpoints for GCP KMS. Only AWS KMS (via PrivateL
 
 ## License
 
-See [LICENSE](LICENSE) for full details.
+See [LICENSE](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/LICENSE) for full details.
