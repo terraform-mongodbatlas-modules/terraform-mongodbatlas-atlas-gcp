@@ -24,9 +24,9 @@ To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following req
 
    The following example uses [Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials):
 
-    ```sh
-    gcloud auth application-default login
-    ```
+   ```sh
+   gcloud auth application-default login
+   ```
 
 5. Use an existing [MongoDB Atlas project](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/project) or [create a new Atlas project resource](#optional-create-a-new-atlas-project-resource).
 
