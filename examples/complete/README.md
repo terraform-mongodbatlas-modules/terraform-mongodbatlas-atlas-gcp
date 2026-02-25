@@ -63,7 +63,7 @@ resource "mongodbatlas_project" "this" {
 }
 ```
 
-Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/complete/main.tf) file.
+Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](./main.tf) file.
 
 <!-- END_GETTING_STARTED -->
 
@@ -75,7 +75,6 @@ Copy and use this code to get started quickly:
 ```hcl
 module "atlas_gcp" {
   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-  version = "v0.1.0"
   project_id = var.project_id
 
   encryption = {
@@ -129,8 +128,8 @@ output "resource_ids" {
 ```
 
 **Additional files needed:**
-- [variables.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/complete/variables.tf)
-- [versions.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.1.0/examples/complete/versions.tf)
+- [variables.tf](./variables.tf)
+- [versions.tf](./versions.tf)
 
 
 
