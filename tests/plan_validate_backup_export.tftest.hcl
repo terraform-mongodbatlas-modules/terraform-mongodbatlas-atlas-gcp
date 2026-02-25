@@ -1,5 +1,6 @@
 mock_provider "mongodbatlas" {}
 mock_provider "google" {}
+mock_provider "time" {}
 
 variables {
   project_id = "000000000000000000000000"
