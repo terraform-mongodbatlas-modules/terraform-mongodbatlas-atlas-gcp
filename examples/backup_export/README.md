@@ -36,7 +36,7 @@ To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following req
 
 ## Commands
 
-The following `terraform` commands intiate, apply, and destroy your configuration:
+The following `terraform` commands initiate, apply, and destroy your configuration:
 
 ```sh
 terraform init # this will download the required providers and create a `terraform.lock.hcl` file.
@@ -123,4 +123,4 @@ output "export_bucket_id" {
 
 ## Feedback or Help
 
-- If you have any feedback or trouble please open a Github Issue.
+- If you have any feedback or trouble, please open a GitHub Issue.
