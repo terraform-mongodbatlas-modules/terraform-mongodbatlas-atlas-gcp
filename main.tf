@@ -24,6 +24,10 @@ resource "terraform_data" "region_validations" {
       condition     = length(local._pl_byoe_overlap) == 0
       error_message = "Overlap between privatelink_endpoints and privatelink_byoe_regions after normalization: [${join(", ", local._pl_byoe_overlap)}]."
     }
+    precondition {
+      condition     = length(local._log_location_unknown) == 0
+      error_message = "Unknown region in log_integration.create_gcs_bucket.location: [${join(", ", local._log_location_unknown)}]. Must be valid Atlas (e.g. US_EAST_4) or GCP (e.g. us-east4) format."
+    }
   }
 }
 

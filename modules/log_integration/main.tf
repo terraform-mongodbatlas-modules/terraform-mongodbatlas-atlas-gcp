@@ -61,9 +61,12 @@ resource "google_storage_bucket" "atlas" {
 resource "google_storage_bucket_iam_member" "atlas" {
   for_each = var.skip_iam_bindings ? {} : local.iam_bucket_targets
 
-  bucket = each.value
+  # Reference the managed bucket resource so IAM waits for creation (each.value alone has no dependency edge).
+  bucket = each.key == "default" && local.create_gcs_bucket ? google_storage_bucket.atlas[0].name : each.value
   role   = "roles/storage.objectCreator"
   member = "serviceAccount:${var.atlas_service_account_email}"
+
+  depends_on = [data.google_storage_bucket.integration_byo]
 }
 
 resource "time_sleep" "iam_propagation" {

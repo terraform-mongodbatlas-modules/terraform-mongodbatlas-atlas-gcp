@@ -18,11 +18,25 @@ locals {
     lookup(local.atlas_to_gcp_region, v,
     contains(values(local.atlas_to_gcp_region), v) ? v : null)
   ]
+  _log_location_normalized = (
+    var.log_integration.enabled && var.log_integration.create_gcs_bucket.enabled
+    ? lookup(
+      local.atlas_to_gcp_region,
+      var.log_integration.create_gcs_bucket.location,
+      contains(values(local.atlas_to_gcp_region), var.log_integration.create_gcs_bucket.location) ? var.log_integration.create_gcs_bucket.location : null
+    )
+    : null
+  )
 
   # Validation helpers: extract bad values for error messages
   _pl_unknown    = [for i, r in local._pl_normalized : var.privatelink_endpoints[i].region if r == null]
   _pl_sr_unknown = [for i, r in local._pl_sr_normalized : var.privatelink_endpoints_single_region[i].region if r == null]
   _byoe_unknown  = [for i, r in local._byoe_normalized : values(var.privatelink_byoe_regions)[i] if r == null]
+  _log_location_unknown = (
+    var.log_integration.enabled && var.log_integration.create_gcs_bucket.enabled && local._log_location_normalized == null
+    ? [var.log_integration.create_gcs_bucket.location]
+    : []
+  )
   _pl_duplicates = toset([
     for r in local._pl_normalized : r if r != null
     && length([for n in local._pl_normalized : n if n == r]) > 1

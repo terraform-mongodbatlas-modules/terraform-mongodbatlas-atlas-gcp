@@ -329,6 +329,21 @@ run "log_bucket_name_and_suffix_conflict" {
   expect_failures = [var.log_integration]
 }
 
+run "log_create_bucket_unknown_location" {
+  command = plan
+  variables {
+    log_integration = {
+      enabled = true
+      create_gcs_bucket = {
+        enabled  = true
+        location = "NOT_A_REAL_REGION"
+      }
+      integrations = [{ log_types = ["MONGOD"] }]
+    }
+  }
+  expect_failures = [terraform_data.region_validations]
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Valid Configuration Assertions
 # ─────────────────────────────────────────────────────────────────────────────
