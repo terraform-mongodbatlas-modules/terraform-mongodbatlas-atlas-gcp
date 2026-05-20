@@ -100,7 +100,7 @@ examples:
         dump:
           skip_lines:
             substring_attributes: [name]
-      - address: module.atlas_gcp.module.log_integration[0].google_storage_bucket_iam_member.atlas["__default__"]
+      - address: module.atlas_gcp.module.log_integration[0].google_storage_bucket_iam_member.atlas["default"]
         dump:
           skip_lines:
             substring_attributes: [bucket]

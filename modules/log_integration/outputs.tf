@@ -1,12 +1,6 @@
-locals {
-  bucket_url = local.create_gcs_bucket ? (
-    google_storage_bucket.atlas[0].url
-  ) : data.google_storage_bucket.byo["__default__"].url
-}
-
 output "bucket_name" {
   description = "Default GCS bucket name (module-managed or root BYO)"
-  value       = local.default_bucket_name
+  value       = local.bucket_name
 }
 
 output "bucket_url" {

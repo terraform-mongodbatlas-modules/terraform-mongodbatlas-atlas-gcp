@@ -1,5 +1,4 @@
 log_types:
 - MONGOD_AUDIT
 - MONGOS_AUDIT
-project_id: <project_id>
 type: GCS_LOG_EXPORT

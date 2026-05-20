@@ -1,29 +1,25 @@
 locals {
-  create_gcs_bucket   = var.create_gcs_bucket.enabled
-  default_name        = "atlas-logs-${var.project_id}${var.create_gcs_bucket.name_suffix}"
-  resolved_name       = var.create_gcs_bucket.name != "" ? var.create_gcs_bucket.name : local.default_name
-  default_bucket_name = local.create_gcs_bucket ? local.resolved_name : var.bucket_name
-  integration_bucket_names = [
-    for i in var.integrations : coalesce(i.bucket_name, local.default_bucket_name)
-  ]
-  # Static for_each keys; values may be unknown until apply (e.g. project_id).
-  iam_bucket_keys = {
-    for idx, integration in var.integrations :
-    coalesce(integration.bucket_name, "__default__") => coalesce(integration.bucket_name, local.default_bucket_name)
-  }
-  # Always include the root BYO bucket so bucket_url can reference it even when
-  # all integrations have per-integration bucket_name overrides.
-  byo_buckets_to_lookup = merge(
-    {
-      for k, v in local.iam_bucket_keys : k => v
-      if !local.create_gcs_bucket || k != "__default__"
-    },
-    !local.create_gcs_bucket && var.bucket_name != null && !contains(keys(local.iam_bucket_keys), "__default__") ? { "__default__" = var.bucket_name } : {}
+  create_gcs_bucket = var.create_gcs_bucket.enabled
+  default_name      = "atlas-logs-${var.project_id}${var.create_gcs_bucket.name_suffix}"
+  resolved_name     = var.create_gcs_bucket.name != "" ? var.create_gcs_bucket.name : local.default_name
+  bucket_name       = local.create_gcs_bucket ? local.resolved_name : var.bucket_name
+  bucket_url        = local.create_gcs_bucket ? google_storage_bucket.atlas[0].url : data.google_storage_bucket.user_provided[0].url
+
+  byo_bucket_names = distinct(compact([for i in var.integrations : i.bucket_name]))
+  # Static for_each keys; bucket names in values may be unknown until apply, so the default name using project_id might not be available yet.
+  iam_bucket_targets = merge(
+    { default = local.bucket_name },
+    { for name in local.byo_bucket_names : name => name },
   )
 }
 
-data "google_storage_bucket" "byo" {
-  for_each = local.byo_buckets_to_lookup
+data "google_storage_bucket" "user_provided" {
+  count = local.create_gcs_bucket ? 0 : 1
+  name  = var.bucket_name
+}
+
+data "google_storage_bucket" "integration_byo" {
+  for_each = toset(local.byo_bucket_names)
   name     = each.value
 }
 
@@ -63,7 +59,7 @@ resource "google_storage_bucket" "atlas" {
 }
 
 resource "google_storage_bucket_iam_member" "atlas" {
-  for_each = var.skip_iam_bindings ? {} : local.iam_bucket_keys
+  for_each = var.skip_iam_bindings ? {} : local.iam_bucket_targets
 
   bucket = each.value
   role   = "roles/storage.objectCreator"
@@ -74,6 +70,8 @@ resource "time_sleep" "iam_propagation" {
   depends_on = [
     google_storage_bucket_iam_member.atlas,
     google_storage_bucket.atlas,
+    data.google_storage_bucket.integration_byo,
+    data.google_storage_bucket.user_provided,
   ]
   create_duration = "30s"
 }
@@ -86,7 +84,7 @@ resource "mongodbatlas_log_integration" "this" {
   role_id     = var.role_id
   log_types   = var.integrations[count.index].log_types
   prefix_path = var.integrations[count.index].prefix_path
-  bucket_name = local.integration_bucket_names[count.index]
+  bucket_name = coalesce(var.integrations[count.index].bucket_name, local.bucket_name)
 
   depends_on = [time_sleep.iam_propagation]
 }
