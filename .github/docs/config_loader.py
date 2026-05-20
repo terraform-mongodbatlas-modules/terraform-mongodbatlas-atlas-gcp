@@ -36,6 +36,10 @@ class VersionsTfConfig:
     generate_when_missing_only: bool = False
     force_generate: bool = False
 
+    def is_name_skipped(self, name: str) -> bool:
+        name_lower = name.lower()
+        return any(pattern.lower() in name_lower for pattern in self.skip_if_name_contains)
+
 
 @dataclass
 class ExamplesReadmeConfig:
@@ -53,6 +57,7 @@ class ExampleRow(BaseModel):
     folder: int | None = None
     folder_name: str = ""
     title_suffix: str = ""
+    description: str = ""
 
     def model_post_init(self, _context) -> None:
         if self.folder is None and self.folder_name == "":
@@ -75,11 +80,12 @@ class TableConfig:
     example_rows: list[ExampleRow] = field(default_factory=list)
     auto_columns: dict[str, AutoColumnConfig] = field(default_factory=dict)
     readme_template: str = ""
+    intro: str = ""
 
 
-def load_examples_config(config_path: Path | None = None) -> dict:
+def load_examples_config(config_path: Path | None = None, *, repo_root: Path | None = None) -> dict:
     if config_path is None:
-        root_dir = Path.cwd()
+        root_dir = repo_root if repo_root is not None else Path.cwd()
         config_path = root_dir / "docs" / "examples.yaml"
     with open(config_path, encoding="utf-8") as f:
         return yaml.safe_load(f)
