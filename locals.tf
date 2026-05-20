@@ -37,6 +37,7 @@ locals {
   skip_cloud_provider_access = (
     !var.encryption.enabled &&
     !var.backup_export.enabled &&
+    !var.log_integration.enabled &&
     local.privatelink_configured
   )
 
@@ -66,6 +67,14 @@ locals {
   ) : local.role_id
   backup_export_service_account = local.create_backup_export_dedicated_role ? (
     module.backup_export_cloud_provider_access[0].service_account_for_atlas
+  ) : local.service_account_for_atlas
+
+  create_log_integration_dedicated_role = var.log_integration.enabled && var.log_integration.dedicated_role_enabled
+  log_integration_role_id = local.create_log_integration_dedicated_role ? (
+    module.log_integration_cloud_provider_access[0].role_id
+  ) : local.role_id
+  log_integration_service_account = local.create_log_integration_dedicated_role ? (
+    module.log_integration_cloud_provider_access[0].service_account_for_atlas
   ) : local.service_account_for_atlas
 
   # PrivateLink: convert lists to maps for for_each

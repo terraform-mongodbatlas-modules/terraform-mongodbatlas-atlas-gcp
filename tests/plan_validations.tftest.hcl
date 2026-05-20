@@ -238,6 +238,69 @@ run "backup_invalid_bucket_name_end" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Log Integration Validations
+# ─────────────────────────────────────────────────────────────────────────────
+
+run "log_byo_and_create_conflict" {
+  command = plan
+  variables {
+    log_integration = {
+      enabled           = true
+      bucket_name       = "my-bucket"
+      create_gcs_bucket = { enabled = true, location = "us-east4" }
+      integrations      = [{ log_types = ["MONGOD"] }]
+    }
+  }
+  expect_failures = [var.log_integration]
+}
+
+run "log_enabled_without_bucket" {
+  command = plan
+  variables {
+    log_integration = {
+      enabled      = true
+      integrations = [{ log_types = ["MONGOD"] }]
+    }
+  }
+  expect_failures = [var.log_integration]
+}
+
+run "log_disabled_with_bucket_conflict" {
+  command = plan
+  variables {
+    log_integration = {
+      enabled     = false
+      bucket_name = "my-bucket"
+    }
+  }
+  expect_failures = [var.log_integration]
+}
+
+run "log_empty_integrations" {
+  command = plan
+  variables {
+    log_integration = {
+      enabled      = true
+      bucket_name  = "my-bucket"
+      integrations = []
+    }
+  }
+  expect_failures = [var.log_integration]
+}
+
+run "log_empty_log_types" {
+  command = plan
+  variables {
+    log_integration = {
+      enabled      = true
+      bucket_name  = "my-bucket"
+      integrations = [{ log_types = [] }]
+    }
+  }
+  expect_failures = [var.log_integration]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Valid Configuration Assertions
 # ─────────────────────────────────────────────────────────────────────────────
 
