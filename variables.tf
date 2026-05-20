@@ -374,7 +374,7 @@ variable "log_integration" {
     **Integrations:**
     Each list entry creates one `mongodbatlas_log_integration`. Valid `log_types`:
     MONGOD, MONGOS, MONGOD_AUDIT, MONGOS_AUDIT. Atlas API validates values.
-    Per-integration `bucket_name` overrides the root bucket (BYO only).
+    Per-integration `bucket_name` overrides the default bucket for that integration (works with both BYO and module-managed buckets).
     Removing an entry from the middle of the list shifts `count` indices and
     recreates subsequent integrations (~1 min delivery gap, no data loss).
 

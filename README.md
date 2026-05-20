@@ -231,6 +231,7 @@ Feature | Name | Description
 All Features | [Encryption + Backup Export + PrivateLink](./examples/complete) | Full integration using module-managed KMS key, GCS bucket, and PSC connectivity
 Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
 Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
+Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
 PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with auto-enabled regional mode
 PrivateLink (PSC) | [BYOE (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
 
@@ -249,13 +250,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_google"></a> [google](https://registry.terraform.io/providers/hashicorp/google/latest/docs) (>= 6.0)
 
-- <a name="requirement_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.7)
+- <a name="requirement_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.8)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.7)
+- <a name="provider_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.8)
 
 - <a name="provider_terraform"></a> [terraform](https://developer.hashicorp.com/terraform/language/resources/terraform-data)
 
@@ -621,6 +622,75 @@ Type: `map(string)`
 
 Default: `{}`
 
+### log_integration
+
+Log integration configuration for exporting Atlas logs to GCS.
+Log exports run at 1-minute intervals.
+
+Provide EITHER:
+- `bucket_name` (user-provided GCS bucket)
+- `create_gcs_bucket.enabled = true` (module-managed GCS bucket)
+
+**Bucket Naming:**
+- `create_gcs_bucket.name` sets an explicit bucket name (must be globally unique in GCS). When omitted, the bucket name is auto-generated as `atlas-logs-{project_id}`.
+- `create_gcs_bucket.name_suffix` is appended to the auto-generated name, resulting in `atlas-logs-{project_id}{name_suffix}`. Include a separator (e.g. `"-dev"` produces `atlas-logs-{project_id}-dev`). Mutually exclusive with `name`.
+
+**Location:**
+`create_gcs_bucket.location` accepts GCP regions (`us-east4`), Atlas format (`US_EAST_4`),
+multi-regions (`US`, `EU`, `ASIA`), or dual-regions (`NAM4`, `EUR4`).
+Atlas format is normalized via `atlas_to_gcp_region`. Choose a region
+colocated with the Atlas cluster for lowest latency.
+
+**Security (module-managed bucket):**
+- Uniform bucket-level access enabled
+- Public access prevention enforced
+- Versioning enabled by default
+
+**IAM:**
+The module grants `roles/storage.objectCreator` on each deduplicated target bucket
+(module-managed and BYO). Uses additive `google_storage_bucket_iam_member`.
+
+**Integrations:**
+Each list entry creates one `mongodbatlas_log_integration`. Valid `log_types`:
+MONGOD, MONGOS, MONGOD_AUDIT, MONGOS_AUDIT. Atlas API validates values.
+Per-integration `bucket_name` overrides the default bucket for that integration (works with both BYO and module-managed buckets).
+Removing an entry from the middle of the list shifts `count` indices and
+recreates subsequent integrations (~1 min delivery gap, no data loss).
+
+**Lifecycle:**
+Module-managed buckets default to `expiration_days = 90`. Set `expiration_days = 0`
+to omit the lifecycle rule (matches Azure/AWS). BYO buckets: manage lifecycle externally.
+
+`dedicated_role_enabled = true` creates a dedicated Atlas service account for log integration.
+
+Type:
+
+```hcl
+object({
+  enabled = optional(bool, false)
+  integrations = optional(list(object({
+    log_types   = list(string)
+    prefix_path = optional(string, "")
+    bucket_name = optional(string)
+  })), [])
+  bucket_name = optional(string)
+  create_gcs_bucket = optional(object({
+    enabled            = optional(bool, false)
+    location           = optional(string, "")
+    name               = optional(string, "")
+    name_suffix        = optional(string, "")
+    storage_class      = optional(string, "STANDARD")
+    force_destroy      = optional(bool, false)
+    versioning_enabled = optional(bool, true)
+    expiration_days    = optional(number, 90)
+  }), {})
+  dedicated_role_enabled = optional(bool, false)
+  labels                 = optional(map(string), {})
+})
+```
+
+Default: `{}`
+
 <!-- END_TF_INPUTS_RAW -->
 
 The module exports outputs grouped by feature. Use `encryption_at_rest_provider` and `export_bucket_id` when configuring your Atlas cluster resource. Use `privatelink_service_info` for the BYOE workflow. Connection strings come from the cluster resource, not this module.
@@ -644,6 +714,10 @@ Description: Value for cluster's encryption\_at\_rest\_provider attribute
 ### <a name="output_export_bucket_id"></a> [export\_bucket\_id](#output\_export\_bucket\_id)
 
 Description: Export bucket ID for backup schedule auto\_export\_enabled
+
+### <a name="output_log_integration"></a> [log\_integration](#output\_log\_integration)
+
+Description: Log integration configuration and GCS bucket details
 
 ### <a name="output_privatelink"></a> [privatelink](#output\_privatelink)
 
