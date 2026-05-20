@@ -2,20 +2,24 @@ locals {
   create_gcs_bucket   = var.create_gcs_bucket.enabled
   default_name        = "atlas-logs-${var.project_id}${var.create_gcs_bucket.name_suffix}"
   resolved_name       = var.create_gcs_bucket.name != "" ? var.create_gcs_bucket.name : local.default_name
-  default_bucket_name = local.create_gcs_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
+  default_bucket_name = local.create_gcs_bucket ? local.resolved_name : var.bucket_name
   integration_bucket_names = [
     for i in var.integrations : coalesce(i.bucket_name, local.default_bucket_name)
   ]
-  unique_target_buckets = toset(local.integration_bucket_names)
+  # Static for_each keys; values may be unknown until apply (e.g. project_id).
+  iam_bucket_keys = {
+    for idx, integration in var.integrations :
+    coalesce(integration.bucket_name, "__default__") => coalesce(integration.bucket_name, local.default_bucket_name)
+  }
   # Always include the root BYO bucket so bucket_url can reference it even when
   # all integrations have per-integration bucket_name overrides.
-  _all_byo_names = !local.create_gcs_bucket && var.bucket_name != null ? (
-    setunion(local.unique_target_buckets, toset([var.bucket_name]))
-  ) : local.unique_target_buckets
-  byo_buckets_to_lookup = {
-    for name in local._all_byo_names : name => name
-    if !local.create_gcs_bucket || name != local.default_bucket_name
-  }
+  byo_buckets_to_lookup = merge(
+    {
+      for k, v in local.iam_bucket_keys : k => v
+      if !local.create_gcs_bucket || k != "__default__"
+    },
+    !local.create_gcs_bucket && var.bucket_name != null && !contains(keys(local.iam_bucket_keys), "__default__") ? { "__default__" = var.bucket_name } : {}
+  )
 }
 
 data "google_storage_bucket" "byo" {
@@ -59,7 +63,7 @@ resource "google_storage_bucket" "atlas" {
 }
 
 resource "google_storage_bucket_iam_member" "atlas" {
-  for_each = var.skip_iam_bindings ? toset([]) : local.unique_target_buckets
+  for_each = var.skip_iam_bindings ? {} : local.iam_bucket_keys
 
   bucket = each.value
   role   = "roles/storage.objectCreator"

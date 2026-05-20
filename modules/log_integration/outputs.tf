@@ -1,7 +1,7 @@
 locals {
   bucket_url = local.create_gcs_bucket ? (
     google_storage_bucket.atlas[0].url
-  ) : data.google_storage_bucket.byo[var.bucket_name].url
+  ) : data.google_storage_bucket.byo["__default__"].url
 }
 
 output "bucket_name" {
