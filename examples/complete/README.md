@@ -135,4 +135,4 @@ output "resource_ids" {
 
 ## Feedback or Help
 
-- If you have any feedback or trouble please open a Github Issue.
+- If you have any feedback or trouble, please open a GitHub Issue.

@@ -102,4 +102,4 @@ output "regional_mode_enabled" {
 
 ## Feedback or Help
 
-- If you have any feedback or trouble please open a Github Issue.
+- If you have any feedback or trouble, please open a GitHub Issue.
