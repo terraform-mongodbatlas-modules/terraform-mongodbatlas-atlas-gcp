@@ -248,7 +248,7 @@ run "log_byo_and_create_conflict" {
       enabled           = true
       bucket_name       = "my-bucket"
       create_gcs_bucket = { enabled = true, location = "us-east4" }
-      integrations      = [{ log_types = ["MONGOD"] }]
+      integrations      = [{ log_types = ["MONGOD"], prefix_path = "logs" }]
     }
   }
   expect_failures = [var.log_integration]
@@ -259,7 +259,7 @@ run "log_enabled_without_bucket" {
   variables {
     log_integration = {
       enabled      = true
-      integrations = [{ log_types = ["MONGOD"] }]
+      integrations = [{ log_types = ["MONGOD"], prefix_path = "logs" }]
     }
   }
   expect_failures = [var.log_integration]
@@ -294,7 +294,7 @@ run "log_empty_log_types" {
     log_integration = {
       enabled      = true
       bucket_name  = "my-bucket"
-      integrations = [{ log_types = [] }]
+      integrations = [{ log_types = [], prefix_path = "logs" }]
     }
   }
   expect_failures = [var.log_integration]
@@ -306,7 +306,7 @@ run "log_create_bucket_missing_location" {
     log_integration = {
       enabled           = true
       create_gcs_bucket = { enabled = true }
-      integrations      = [{ log_types = ["MONGOD"] }]
+      integrations      = [{ log_types = ["MONGOD"], prefix_path = "logs" }]
     }
   }
   expect_failures = [var.log_integration]
@@ -323,7 +323,7 @@ run "log_bucket_name_and_suffix_conflict" {
         name        = "my-explicit-bucket"
         name_suffix = "-dev"
       }
-      integrations = [{ log_types = ["MONGOD"] }]
+      integrations = [{ log_types = ["MONGOD"], prefix_path = "logs" }]
     }
   }
   expect_failures = [var.log_integration]
@@ -338,7 +338,7 @@ run "log_create_bucket_unknown_location" {
         enabled  = true
         location = "NOT_A_REAL_REGION"
       }
-      integrations = [{ log_types = ["MONGOD"] }]
+      integrations = [{ log_types = ["MONGOD"], prefix_path = "logs" }]
     }
   }
   expect_failures = [terraform_data.region_validations]

@@ -27,7 +27,7 @@ run "log_integration_create_bucket_default_name" {
         enabled  = true
         location = "us-east4"
       }
-      integrations = [{ log_types = ["MONGOD"] }]
+      integrations = [{ log_types = ["MONGOD"], prefix_path = "logs" }]
     }
   }
   assert {
@@ -42,7 +42,7 @@ run "log_integration_user_bucket" {
     log_integration = {
       enabled      = true
       bucket_name  = "existing-logs-bucket"
-      integrations = [{ log_types = ["MONGOD", "MONGOS"] }]
+      integrations = [{ log_types = ["MONGOD", "MONGOS"], prefix_path = "logs" }]
     }
   }
   assert {
@@ -60,7 +60,7 @@ run "log_integration_atlas_region_format" {
         enabled  = true
         location = "US_EAST_4"
       }
-      integrations = [{ log_types = ["MONGOD"] }]
+      integrations = [{ log_types = ["MONGOD"], prefix_path = "logs" }]
     }
   }
   assert {
@@ -79,7 +79,7 @@ run "log_integration_expiration_days_zero" {
         location        = "us-east4"
         expiration_days = 0
       }
-      integrations = [{ log_types = ["MONGOD"] }]
+      integrations = [{ log_types = ["MONGOD"], prefix_path = "logs" }]
     }
   }
   assert {

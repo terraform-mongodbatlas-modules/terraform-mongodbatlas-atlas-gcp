@@ -86,7 +86,7 @@ resource "mongodbatlas_log_integration" "this" {
   type        = "GCS_LOG_EXPORT"
   role_id     = var.role_id
   log_types   = var.integrations[count.index].log_types
-  prefix_path = var.integrations[count.index].prefix_path
+  prefix_path = trimsuffix(var.integrations[count.index].prefix_path, "/")
   bucket_name = coalesce(var.integrations[count.index].bucket_name, local.bucket_name)
 
   depends_on = [time_sleep.iam_propagation]
