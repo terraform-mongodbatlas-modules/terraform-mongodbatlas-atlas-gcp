@@ -1,0 +1,6 @@
+```release-note:enhancement
+module: Adds optional log_integration for Atlas GCS log export via mongodbatlas_log_integration
+```
+```release-note:note
+provider/mongodbatlas: Requires minimum version 2.8.0 for mongodbatlas_log_integration support
+```
