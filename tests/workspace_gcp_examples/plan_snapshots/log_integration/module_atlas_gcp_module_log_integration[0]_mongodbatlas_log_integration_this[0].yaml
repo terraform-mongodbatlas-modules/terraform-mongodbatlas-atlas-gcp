@@ -1,0 +1,5 @@
+log_types:
+- MONGOD
+- MONGOS
+prefix_path: logs
+type: GCS_LOG_EXPORT

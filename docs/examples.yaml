@@ -35,6 +35,10 @@ tables:
         feature: Backup Export
         name: GCS Bucket Export (Module-Managed)
         description: Export Atlas backup snapshots to a module-managed GCS bucket
+      - folder_name: log_integration
+        feature: Log Integration
+        name: GCS Log Export (Module-Managed)
+        description: Export Atlas operational and audit logs to a module-managed GCS bucket
       - folder_name: privatelink_multi_region
         feature: PrivateLink (PSC)
         name: Multi-Region Private Service Connect
