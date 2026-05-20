@@ -41,11 +41,11 @@ variable "create_gcs_bucket" {
     versioning_enabled          = optional(bool, true)
     uniform_bucket_level_access = optional(bool, true)
     public_access_prevention    = optional(string, "enforced")
-    expiration_days             = optional(number)
+    expiration_days             = optional(number, 90)
   })
   default     = {}
   nullable    = false
-  description = "Module-managed GCS bucket configuration. When name is omitted, defaults to atlas-logs-{project_id}{name_suffix}."
+  description = "Module-managed GCS bucket configuration. When name is omitted, defaults to atlas-logs-{project_id}{name_suffix}. expiration_days defaults to 90; set 0 to omit the lifecycle rule."
 }
 
 variable "integrations" {

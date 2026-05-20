@@ -338,7 +338,7 @@ variable "log_integration" {
       storage_class      = optional(string, "STANDARD")
       force_destroy      = optional(bool, false)
       versioning_enabled = optional(bool, true)
-      expiration_days    = optional(number)
+      expiration_days    = optional(number, 90)
     }), {})
     dedicated_role_enabled = optional(bool, false)
     labels                 = optional(map(string), {})
@@ -379,8 +379,8 @@ variable "log_integration" {
     recreates subsequent integrations (~1 min delivery gap, no data loss).
 
     **Lifecycle:**
-    Module-managed buckets default to `expiration_days = 90`. Set `expiration_days = null`
-    to omit the lifecycle rule. BYO buckets: manage lifecycle externally.
+    Module-managed buckets default to `expiration_days = 90`. Set `expiration_days = 0`
+    to omit the lifecycle rule (matches Azure/AWS). BYO buckets: manage lifecycle externally.
 
     `dedicated_role_enabled = true` creates a dedicated Atlas service account for log integration.
   EOT

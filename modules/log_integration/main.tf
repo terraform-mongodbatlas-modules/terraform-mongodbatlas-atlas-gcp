@@ -33,14 +33,14 @@ resource "google_storage_bucket" "atlas" {
   }
 
   dynamic "lifecycle_rule" {
-    for_each = local.create_gcs_bucket ? [1] : []
+    for_each = local.create_gcs_bucket && var.create_gcs_bucket.expiration_days > 0 ? [1] : []
 
     content {
       action {
         type = "Delete"
       }
       condition {
-        age = coalesce(var.create_gcs_bucket.expiration_days, 90)
+        age = var.create_gcs_bucket.expiration_days
       }
     }
   }

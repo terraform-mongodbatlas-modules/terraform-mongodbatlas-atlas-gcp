@@ -88,8 +88,12 @@ module "atlas_gcp" {
     }
     integrations = [
       {
-        log_types   = ["MONGOD"]
+        log_types   = ["MONGOD", "MONGOS"]
         prefix_path = "logs"
+      },
+      {
+        log_types   = ["MONGOD_AUDIT", "MONGOS_AUDIT"]
+        prefix_path = "audit"
       },
     ]
   }
