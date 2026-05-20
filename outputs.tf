@@ -25,20 +25,24 @@ output "resource_ids" {
   description = "GCP resource IDs for data source lookups"
   value = {
     # Cloud Provider Access
-    role_id                       = local.role_id
-    service_account_for_atlas     = local.service_account_for_atlas
-    encryption_role_id            = local.encryption_role_id
-    encryption_service_account    = local.encryption_service_account
-    backup_export_role_id         = local.backup_export_role_id
-    backup_export_service_account = local.backup_export_service_account
+    role_id                         = local.role_id
+    service_account_for_atlas       = local.service_account_for_atlas
+    encryption_role_id              = local.encryption_role_id
+    encryption_service_account      = local.encryption_service_account
+    backup_export_role_id           = local.backup_export_role_id
+    backup_export_service_account   = local.backup_export_service_account
+    log_integration_role_id         = local.log_integration_role_id
+    log_integration_service_account = local.log_integration_service_account
 
     # Encryption
     crypto_key_id = try(module.encryption[0].crypto_key_id, null)
     key_ring_id   = try(module.encryption[0].key_ring_id, null)
 
     # Backup Export
-    bucket_name = try(module.backup_export[0].bucket_name, null)
-    bucket_url  = try(module.backup_export[0].bucket_url, null)
+    bucket_name     = try(module.backup_export[0].bucket_name, null)
+    bucket_url      = try(module.backup_export[0].bucket_url, null)
+    log_bucket_name = try(module.log_integration[0].bucket_name, null)
+    log_bucket_url  = try(module.log_integration[0].bucket_url, null)
   }
 }
 
@@ -88,5 +92,14 @@ output "backup_export" {
     bucket_name      = module.backup_export[0].bucket_name
     bucket_location  = module.backup_export[0].bucket_location
     bucket_url       = module.backup_export[0].bucket_url
+  } : null
+}
+
+output "log_integration" {
+  description = "Log integration configuration and GCS bucket details"
+  value = var.log_integration.enabled ? {
+    bucket_name     = module.log_integration[0].bucket_name
+    bucket_url      = module.log_integration[0].bucket_url
+    integration_ids = module.log_integration[0].integration_ids
   } : null
 }
