@@ -300,6 +300,35 @@ run "log_empty_log_types" {
   expect_failures = [var.log_integration]
 }
 
+run "log_create_bucket_missing_location" {
+  command = plan
+  variables {
+    log_integration = {
+      enabled           = true
+      create_gcs_bucket = { enabled = true }
+      integrations      = [{ log_types = ["MONGOD"] }]
+    }
+  }
+  expect_failures = [var.log_integration]
+}
+
+run "log_bucket_name_and_suffix_conflict" {
+  command = plan
+  variables {
+    log_integration = {
+      enabled = true
+      create_gcs_bucket = {
+        enabled     = true
+        location    = "us-east4"
+        name        = "my-explicit-bucket"
+        name_suffix = "-dev"
+      }
+      integrations = [{ log_types = ["MONGOD"] }]
+    }
+  }
+  expect_failures = [var.log_integration]
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Valid Configuration Assertions
 # ─────────────────────────────────────────────────────────────────────────────

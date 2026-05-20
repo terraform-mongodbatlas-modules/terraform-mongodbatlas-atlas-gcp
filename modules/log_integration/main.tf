@@ -7,8 +7,13 @@ locals {
     for i in var.integrations : coalesce(i.bucket_name, local.default_bucket_name)
   ]
   unique_target_buckets = toset(local.integration_bucket_names)
+  # Always include the root BYO bucket so bucket_url can reference it even when
+  # all integrations have per-integration bucket_name overrides.
+  _all_byo_names = !local.create_gcs_bucket && var.bucket_name != null ? (
+    setunion(local.unique_target_buckets, toset([var.bucket_name]))
+  ) : local.unique_target_buckets
   byo_buckets_to_lookup = {
-    for name in local.unique_target_buckets : name => name
+    for name in local._all_byo_names : name => name
     if !local.create_gcs_bucket || name != local.default_bucket_name
   }
 }
