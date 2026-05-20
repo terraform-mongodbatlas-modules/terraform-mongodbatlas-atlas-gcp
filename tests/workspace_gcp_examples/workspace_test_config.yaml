@@ -109,6 +109,10 @@ examples:
         dump:
           skip_lines:
             substring_attributes: [bucket_name]
+      - address: module.atlas_gcp.module.log_integration[0].mongodbatlas_log_integration.this[1]
+        dump:
+          skip_lines:
+            substring_attributes: [bucket_name, prefix_path]
   - name: privatelink_byoe
     var_groups: [privatelink_byoe]
     plan_regressions:

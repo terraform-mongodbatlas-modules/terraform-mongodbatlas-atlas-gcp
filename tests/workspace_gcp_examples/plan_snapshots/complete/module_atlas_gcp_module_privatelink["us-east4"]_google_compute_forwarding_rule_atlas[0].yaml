@@ -1,3 +1,4 @@
+deletion_policy: DELETE
 load_balancing_scheme: ''
 name: atlas-psc-cpl-fr
 project: tf-lz-module-gcp-ci

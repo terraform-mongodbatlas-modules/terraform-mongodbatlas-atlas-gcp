@@ -1,3 +1,4 @@
+deletion_policy: DELETE
 effective_labels:
   goog-terraform-provisioned: 'true'
 name: atlas-encryption-key
