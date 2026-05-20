@@ -653,6 +653,7 @@ The module grants `roles/storage.objectCreator` on each deduplicated target buck
 **Integrations:**
 Each list entry creates one `mongodbatlas_log_integration`. Valid `log_types`:
 MONGOD, MONGOS, MONGOD_AUDIT, MONGOS_AUDIT. Atlas API validates values.
+`prefix_path` (required) sets the GCS object prefix for log delivery.
 Per-integration `bucket_name` overrides the default bucket for that integration (works with both BYO and module-managed buckets).
 Removing an entry from the middle of the list shifts `count` indices and
 recreates subsequent integrations (~1 min delivery gap, no data loss).
@@ -669,8 +670,8 @@ Type:
 object({
   enabled = optional(bool, false)
   integrations = optional(list(object({
-    log_types   = list(string)
-    prefix_path = optional(string, "")
+    log_types   = set(string)
+    prefix_path = string
     bucket_name = optional(string)
   })), [])
   bucket_name = optional(string)
