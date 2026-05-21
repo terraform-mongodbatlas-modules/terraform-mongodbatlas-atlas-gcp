@@ -39,24 +39,28 @@ module "cloud_provider_access" {
   count      = local.create_cloud_provider_access ? 1 : 0
   source     = "./modules/cloud_provider_access"
   project_id = var.project_id
+  timeouts   = var.timeouts
 }
 
 module "encryption_cloud_provider_access" {
   count      = local.create_encryption_dedicated_role ? 1 : 0
   source     = "./modules/cloud_provider_access"
   project_id = var.project_id
+  timeouts   = var.timeouts
 }
 
 module "backup_export_cloud_provider_access" {
   count      = local.create_backup_export_dedicated_role ? 1 : 0
   source     = "./modules/cloud_provider_access"
   project_id = var.project_id
+  timeouts   = var.timeouts
 }
 
 module "log_integration_cloud_provider_access" {
   count      = local.create_log_integration_dedicated_role ? 1 : 0
   source     = "./modules/cloud_provider_access"
   project_id = var.project_id
+  timeouts   = var.timeouts
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -81,6 +85,7 @@ module "encryption" {
       var.encryption.create_kms_key.location
     )
   })
+  timeouts = var.timeouts
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -105,6 +110,7 @@ module "backup_export" {
     )
   })
 
+  timeouts   = var.timeouts
   depends_on = [module.cloud_provider_access, module.backup_export_cloud_provider_access]
 }
 
@@ -132,6 +138,7 @@ module "log_integration" {
     )
   })
 
+  timeouts   = var.timeouts
   depends_on = [module.cloud_provider_access, module.log_integration_cloud_provider_access]
 }
 
@@ -143,6 +150,15 @@ resource "mongodbatlas_private_endpoint_regional_mode" "this" {
   count      = local.enable_regional_mode ? 1 : 0
   project_id = var.project_id
   enabled    = true
+
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 resource "mongodbatlas_privatelink_endpoint" "this" {
@@ -151,6 +167,15 @@ resource "mongodbatlas_privatelink_endpoint" "this" {
   provider_name        = "GCP"
   region               = lookup(local.gcp_to_atlas_region, each.value.region, each.value.region)
   port_mapping_enabled = true
+
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
 
   depends_on = [mongodbatlas_private_endpoint_regional_mode.this]
 }
@@ -168,7 +193,8 @@ module "privatelink" {
   byo         = try(var.privatelink_byoe[each.key], null)
   name_prefix = coalesce(try(each.value.name_prefix, null), "atlas-psc-${lookup(local.atlas_to_gcp_region, each.key, each.key)}-")
 
-  labels = merge(var.gcp_tags, each.value.labels)
+  labels   = merge(var.gcp_tags, each.value.labels)
+  timeouts = var.timeouts
 
   depends_on = [mongodbatlas_private_endpoint_regional_mode.this]
 }

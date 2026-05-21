@@ -33,6 +33,14 @@ resource "google_kms_key_ring" "atlas" {
   count    = local.create_kms_key ? 1 : 0
   name     = local.key_ring_name
   location = var.create_kms_key.location
+
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 resource "google_kms_crypto_key" "atlas" {
@@ -42,6 +50,15 @@ resource "google_kms_crypto_key" "atlas" {
   purpose         = "ENCRYPT_DECRYPT"
   rotation_period = var.create_kms_key.rotation_period
   labels          = var.labels
+
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 # IAM Bindings (grants Atlas SA access to KMS key)

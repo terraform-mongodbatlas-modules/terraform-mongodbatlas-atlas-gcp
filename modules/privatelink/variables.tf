@@ -52,3 +52,12 @@ variable "labels" {
   default     = {}
   description = "Labels to apply to GCP resources."
 }
+
+variable "timeouts" {
+  type = object({
+    create = optional(string, "30m")
+    update = optional(string, "30m")
+    delete = optional(string, "30m")
+  })
+  nullable = true
+}
