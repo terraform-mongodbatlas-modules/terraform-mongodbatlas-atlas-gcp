@@ -31,7 +31,7 @@ resource "google_storage_bucket" "atlas" {
   }
 
   dynamic "lifecycle_rule" {
-    for_each = var.create_gcs_bucket.expiration_days != null && var.create_gcs_bucket.expiration_days > 0 ? [1] : []
+    for_each = var.create_gcs_bucket.expiration_days > 0 ? [1] : []
 
     content {
       action {

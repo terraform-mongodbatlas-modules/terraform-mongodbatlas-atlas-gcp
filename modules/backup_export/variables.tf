@@ -35,11 +35,11 @@ variable "create_gcs_bucket" {
     versioning_enabled          = optional(bool, true)
     uniform_bucket_level_access = optional(bool, true)
     public_access_prevention    = optional(string, "enforced")
-    expiration_days             = optional(number)
+    expiration_days             = optional(number, 365)
   })
   default     = {}
   nullable    = false
-  description = "Module-managed GCS bucket. Default name atlas-backup-{project_id}{name_suffix}. Set expiration_days for lifecycle Delete rule; omit for no rule."
+  description = "Module-managed GCS bucket. Default name atlas-backup-{project_id}{name_suffix}. expiration_days defaults to 365; set 0 to omit the lifecycle rule."
 }
 
 variable "labels" {

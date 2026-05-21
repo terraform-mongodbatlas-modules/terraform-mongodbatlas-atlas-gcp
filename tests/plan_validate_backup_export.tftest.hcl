@@ -186,7 +186,7 @@ run "backup_export_dedicated_role_with_encryption" {
   # dedicated CPA modules -- verified via non-null feature outputs above.
 }
 
-run "backup_export_expiration_days" {
+run "backup_export_expiration_days_zero" {
   command = plan
   variables {
     backup_export = {
@@ -194,12 +194,12 @@ run "backup_export_expiration_days" {
       create_gcs_bucket = {
         enabled         = true
         location        = "us-east4"
-        expiration_days = 365
+        expiration_days = 0
       }
     }
   }
   assert {
     condition     = output.backup_export != null
-    error_message = "Expected non-null backup_export with expiration_days set"
+    error_message = "Expected non-null backup_export when expiration_days = 0"
   }
 }

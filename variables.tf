@@ -259,7 +259,7 @@ variable "backup_export" {
       versioning_enabled          = optional(bool, true)
       uniform_bucket_level_access = optional(bool, true)
       public_access_prevention    = optional(string, "enforced")
-      expiration_days             = optional(number)
+      expiration_days             = optional(number, 365)
     }), {})
     dedicated_role_enabled = optional(bool, false)
   })
@@ -283,7 +283,7 @@ variable "backup_export" {
     Atlas format is normalized via `atlas_to_gcp_region`.
 
     **Lifecycle:**
-    Set `expiration_days` on module-managed buckets for a Delete lifecycle rule (typical value `365`). Omit the field for no lifecycle rule (v0-compatible).
+    Module-managed buckets default to `expiration_days = 365`. Set `expiration_days = 0` to omit the lifecycle rule.
 
     **Security:**
     - `uniform_bucket_level_access` defaults to `true`.
