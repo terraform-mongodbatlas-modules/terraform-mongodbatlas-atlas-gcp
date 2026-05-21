@@ -1,33 +1,46 @@
 locals {
-  create_bucket = var.create_bucket.enabled
-  default_name  = "atlas-backup-${var.project_id}${var.create_bucket.name_suffix}"
-  resolved_name = var.create_bucket.name != "" ? var.create_bucket.name : local.default_name
-  bucket_name   = local.create_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
+  create_gcs_bucket = var.create_gcs_bucket.enabled
+  default_name      = "atlas-backup-${var.project_id}${var.create_gcs_bucket.name_suffix}"
+  resolved_name     = var.create_gcs_bucket.name != "" ? var.create_gcs_bucket.name : local.default_name
+  bucket_name       = local.create_gcs_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
   bucket_location = (
-    local.create_bucket ? var.create_bucket.location : data.google_storage_bucket.user_provided[0].location
+    local.create_gcs_bucket ? var.create_gcs_bucket.location : data.google_storage_bucket.user_provided[0].location
   )
-  bucket_url = local.create_bucket ? (
+  bucket_url = local.create_gcs_bucket ? (
     google_storage_bucket.atlas[0].url
   ) : data.google_storage_bucket.user_provided[0].url
 }
 
 data "google_storage_bucket" "user_provided" {
-  count = local.create_bucket ? 0 : 1
+  count = local.create_gcs_bucket ? 0 : 1
   name  = var.bucket_name
 }
 
 resource "google_storage_bucket" "atlas" {
-  count                       = local.create_bucket ? 1 : 0
+  count                       = local.create_gcs_bucket ? 1 : 0
   name                        = local.resolved_name
-  location                    = var.create_bucket.location
-  storage_class               = var.create_bucket.storage_class
-  force_destroy               = var.create_bucket.force_destroy
-  uniform_bucket_level_access = var.create_bucket.uniform_bucket_level_access
-  public_access_prevention    = var.create_bucket.public_access_prevention
+  location                    = var.create_gcs_bucket.location
+  storage_class               = var.create_gcs_bucket.storage_class
+  force_destroy               = var.create_gcs_bucket.force_destroy
+  uniform_bucket_level_access = var.create_gcs_bucket.uniform_bucket_level_access
+  public_access_prevention    = var.create_gcs_bucket.public_access_prevention
   labels                      = var.labels
 
   versioning {
-    enabled = var.create_bucket.versioning_enabled
+    enabled = var.create_gcs_bucket.versioning_enabled
+  }
+
+  dynamic "lifecycle_rule" {
+    for_each = var.create_gcs_bucket.expiration_days != null && var.create_gcs_bucket.expiration_days > 0 ? [1] : []
+
+    content {
+      action {
+        type = "Delete"
+      }
+      condition {
+        age = var.create_gcs_bucket.expiration_days
+      }
+    }
   }
 
   lifecycle {
@@ -39,8 +52,8 @@ resource "google_storage_bucket" "atlas" {
 }
 
 resource "google_storage_bucket_iam_member" "atlas" {
-  bucket = local.create_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
-  role   = "roles/storage.objectCreator"
+  bucket = local.create_gcs_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
+  role   = "roles/storage.objectUser"
   member = "serviceAccount:${var.atlas_service_account_email}"
 }
 

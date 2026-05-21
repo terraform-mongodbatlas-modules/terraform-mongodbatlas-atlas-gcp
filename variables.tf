@@ -249,7 +249,7 @@ variable "backup_export" {
   type = object({
     enabled     = optional(bool, false)
     bucket_name = optional(string)
-    create_bucket = optional(object({
+    create_gcs_bucket = optional(object({
       enabled                     = optional(bool, false)
       name                        = optional(string, "")
       name_suffix                 = optional(string, "")
@@ -259,6 +259,7 @@ variable "backup_export" {
       versioning_enabled          = optional(bool, true)
       uniform_bucket_level_access = optional(bool, true)
       public_access_prevention    = optional(string, "enforced")
+      expiration_days             = optional(number)
     }), {})
     dedicated_role_enabled = optional(bool, false)
   })
@@ -268,54 +269,58 @@ variable "backup_export" {
 
     Provide EITHER:
     - `bucket_name` (user-provided GCS bucket)
-    - `create_bucket.enabled = true` (module-managed GCS bucket)
+    - `create_gcs_bucket.enabled = true` (module-managed GCS bucket)
+
+    The module grants `roles/storage.objectUser` on the target bucket to the Atlas service account.
+    Learn more about backup export in the [MongoDB Docs](https://www.mongodb.com/docs/atlas/backup/cloud-backup/export/?cloud-provider=gcp&connection-type=public&interface=atlas-cli#export-cloud-backup-snapshot).
 
     **Bucket Naming:**
-    - `name` accepts a string to set an explicit bucket name (must be globally unique in GCS). When omitted, the bucket name is auto-generated as `atlas-backup-{project_id}`.
-    - `name_suffix` accepts a string appended to the auto-generated name, resulting in `atlas-backup-{project_id}{name_suffix}`. Include a separator (e.g. `"-dev"` produces `atlas-backup-{project_id}-dev`). Mutually exclusive with `name`.
+    - `name` sets an explicit bucket name (globally unique). When omitted, defaults to `atlas-backup-{project_id}`.
+    - `name_suffix` appends to the auto-generated name (e.g. `"-dev"` → `atlas-backup-{project_id}-dev`). Mutually exclusive with `name`.
 
     **Location:**
-    `location` accepts GCP regions (`us-east4`), Atlas format (`US_EAST_4`),
-    multi-regions (`US`, `EU`, `ASIA`), or dual-regions (`NAM4`, `EUR4`).
-    Atlas format is normalized via `atlas_to_gcp_region`. Choose a region
-    colocated with the Atlas cluster for lowest latency.
+    `location` accepts GCP regions (`us-east4`), Atlas format (`US_EAST_4`), multi-regions (`US`, `EU`, `ASIA`), or dual-regions (`NAM4`, `EUR4`).
+    Atlas format is normalized via `atlas_to_gcp_region`.
+
+    **Lifecycle:**
+    Set `expiration_days` on module-managed buckets for a Delete lifecycle rule (typical value `365`). Omit the field for no lifecycle rule (v0-compatible).
 
     **Security:**
-    - `uniform_bucket_level_access` accepts `true` or `false` to control IAM-only access (no per-object ACLs). Defaults to `true`.
-    - `public_access_prevention` accepts `"enforced"` to block public access or `"inherited"` to use project-level settings. Defaults to `"enforced"`.
-    - `versioning_enabled` accepts `true` or `false` to enable or disable object versioning for backup recovery. Defaults to `true`.
+    - `uniform_bucket_level_access` defaults to `true`.
+    - `public_access_prevention` defaults to `"enforced"`.
+    - `versioning_enabled` defaults to `true`.
 
     `dedicated_role_enabled = true` creates a dedicated Atlas service account for backup export.
   EOT
 
   validation {
-    condition     = !(var.backup_export.bucket_name != null && var.backup_export.create_bucket.enabled)
-    error_message = "Cannot use both bucket_name (user-provided) and create_bucket.enabled = true (module-managed)."
+    condition     = !(var.backup_export.bucket_name != null && var.backup_export.create_gcs_bucket.enabled)
+    error_message = "Cannot use both bucket_name (user-provided) and create_gcs_bucket.enabled = true (module-managed)."
   }
 
   validation {
-    condition     = !var.backup_export.enabled || (var.backup_export.bucket_name != null || var.backup_export.create_bucket.enabled)
-    error_message = "backup_export.enabled = true requires bucket_name OR create_bucket.enabled = true."
+    condition     = !var.backup_export.enabled || (var.backup_export.bucket_name != null || var.backup_export.create_gcs_bucket.enabled)
+    error_message = "backup_export.enabled = true requires bucket_name OR create_gcs_bucket.enabled = true."
   }
 
   validation {
-    condition     = var.backup_export.enabled || (var.backup_export.bucket_name == null && !var.backup_export.create_bucket.enabled)
-    error_message = "bucket_name and create_bucket.enabled may only be set when backup_export.enabled = true."
+    condition     = var.backup_export.enabled || (var.backup_export.bucket_name == null && !var.backup_export.create_gcs_bucket.enabled)
+    error_message = "bucket_name and create_gcs_bucket.enabled may only be set when backup_export.enabled = true."
   }
 
   validation {
-    condition     = !var.backup_export.create_bucket.enabled || var.backup_export.create_bucket.location != ""
-    error_message = "create_bucket.location is required when create_bucket.enabled = true."
+    condition     = !var.backup_export.create_gcs_bucket.enabled || var.backup_export.create_gcs_bucket.location != ""
+    error_message = "create_gcs_bucket.location is required when create_gcs_bucket.enabled = true."
   }
 
   validation {
-    condition     = !(var.backup_export.create_bucket.name != "" && var.backup_export.create_bucket.name_suffix != "")
-    error_message = "Cannot use both create_bucket.name and create_bucket.name_suffix."
+    condition     = !(var.backup_export.create_gcs_bucket.name != "" && var.backup_export.create_gcs_bucket.name_suffix != "")
+    error_message = "Cannot use both create_gcs_bucket.name and create_gcs_bucket.name_suffix."
   }
 
   validation {
-    condition = var.backup_export.create_bucket.name == "" || can(
-      regex("^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$", var.backup_export.create_bucket.name)
+    condition = var.backup_export.create_gcs_bucket.name == "" || can(
+      regex("^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$", var.backup_export.create_gcs_bucket.name)
     )
     error_message = "Bucket name must be 3-63 characters, contain only lowercase letters, numbers, dots (.), underscores (_), and hyphens (-), and must start and end with a lowercase letter or number."
   }

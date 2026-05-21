@@ -88,7 +88,7 @@ module "atlas_gcp" {
 
   backup_export = {
     enabled = true
-    create_bucket = {
+    create_gcs_bucket = {
       enabled       = true
       name_suffix   = var.bucket_name_suffix
       location      = var.gcp_region

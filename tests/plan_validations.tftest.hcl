@@ -144,9 +144,9 @@ run "backup_byo_and_create_conflict" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      bucket_name   = "my-bucket"
-      create_bucket = { enabled = true, name = "new-bucket", location = "us-east4" }
+      enabled           = true
+      bucket_name       = "my-bucket"
+      create_gcs_bucket = { enabled = true, name = "new-bucket", location = "us-east4" }
     }
   }
   expect_failures = [var.backup_export]
@@ -171,12 +171,12 @@ run "backup_disabled_with_bucket_conflict" {
   expect_failures = [var.backup_export]
 }
 
-run "backup_create_bucket_missing_location" {
+run "backup_create_gcs_bucket_missing_location" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true }
+      enabled           = true
+      create_gcs_bucket = { enabled = true }
     }
   }
   expect_failures = [var.backup_export]
@@ -186,8 +186,8 @@ run "backup_name_and_suffix_conflict" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, name = "my-bucket", name_suffix = "-dev", location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, name = "my-bucket", name_suffix = "-dev", location = "us-east4" }
     }
   }
   expect_failures = [var.backup_export]
@@ -197,8 +197,8 @@ run "backup_invalid_bucket_name_start" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, name = "-invalid", location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, name = "-invalid", location = "us-east4" }
     }
   }
   expect_failures = [var.backup_export]
@@ -208,8 +208,8 @@ run "backup_invalid_bucket_name_uppercase" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, name = "myBucket", location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, name = "myBucket", location = "us-east4" }
     }
   }
   expect_failures = [var.backup_export]
@@ -219,8 +219,8 @@ run "backup_invalid_bucket_name_too_short" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, name = "ab", location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, name = "ab", location = "us-east4" }
     }
   }
   expect_failures = [var.backup_export]
@@ -230,8 +230,8 @@ run "backup_invalid_bucket_name_end" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, name = "my-bucket-", location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, name = "my-bucket-", location = "us-east4" }
     }
   }
   expect_failures = [var.backup_export]
@@ -300,7 +300,7 @@ run "log_empty_log_types" {
   expect_failures = [var.log_integration]
 }
 
-run "log_create_bucket_missing_location" {
+run "log_create_gcs_bucket_missing_location" {
   command = plan
   variables {
     log_integration = {
@@ -329,7 +329,7 @@ run "log_bucket_name_and_suffix_conflict" {
   expect_failures = [var.log_integration]
 }
 
-run "log_create_bucket_unknown_location" {
+run "log_create_gcs_bucket_unknown_location" {
   command = plan
   variables {
     log_integration = {

@@ -138,7 +138,7 @@ Complete the following steps to configure encryption at rest, backup export, and
 
       backup_export = {
         enabled = true
-        create_bucket = {
+        create_gcs_bucket = {
           enabled       = true
           name_suffix   = var.bucket_name_suffix
           location      = var.gcp_region
@@ -498,7 +498,9 @@ Default: `{}`
 
 Atlas Cloud Backup takes automatic snapshots of your clusters. Enable backup export to copy these snapshots to a Google Cloud Storage (GCS) bucket you control, providing an independent recovery path outside of Atlas and meeting data residency or retention requirements.
 
-Provide either an existing bucket (`bucket_name`) or let the module create one with secure defaults (`create_bucket.enabled = true`).
+Provide either an existing bucket (`bucket_name`) or let the module create one with secure defaults (`create_gcs_bucket.enabled = true`).
+
+See the [Export cloud backup snapshot documentation](https://www.mongodb.com/docs/atlas/backup/cloud-backup/export/?cloud-provider=gcp&connection-type=public&interface=atlas-cli#export-cloud-backup-snapshot) for details.
 
 ### backup_export
 
@@ -506,22 +508,26 @@ Backup snapshot export to GCS configuration.
 
 Provide EITHER:
 - `bucket_name` (user-provided GCS bucket)
-- `create_bucket.enabled = true` (module-managed GCS bucket)
+- `create_gcs_bucket.enabled = true` (module-managed GCS bucket)
+
+The module grants `roles/storage.objectUser` on the target bucket to the Atlas service account.
+Learn more about backup export in the [MongoDB Docs](https://www.mongodb.com/docs/atlas/backup/cloud-backup/export/?cloud-provider=gcp&connection-type=public&interface=atlas-cli#export-cloud-backup-snapshot).
 
 **Bucket Naming:**
-- `name` accepts a string to set an explicit bucket name (must be globally unique in GCS). When omitted, the bucket name is auto-generated as `atlas-backup-{project_id}`.
-- `name_suffix` accepts a string appended to the auto-generated name, resulting in `atlas-backup-{project_id}{name_suffix}`. Include a separator (e.g. `"-dev"` produces `atlas-backup-{project_id}-dev`). Mutually exclusive with `name`.
+- `name` sets an explicit bucket name (globally unique). When omitted, defaults to `atlas-backup-{project_id}`.
+- `name_suffix` appends to the auto-generated name (e.g. `"-dev"` → `atlas-backup-{project_id}-dev`). Mutually exclusive with `name`.
 
 **Location:**
-`location` accepts GCP regions (`us-east4`), Atlas format (`US_EAST_4`),
-multi-regions (`US`, `EU`, `ASIA`), or dual-regions (`NAM4`, `EUR4`).
-Atlas format is normalized via `atlas_to_gcp_region`. Choose a region
-colocated with the Atlas cluster for lowest latency.
+`location` accepts GCP regions (`us-east4`), Atlas format (`US_EAST_4`), multi-regions (`US`, `EU`, `ASIA`), or dual-regions (`NAM4`, `EUR4`).
+Atlas format is normalized via `atlas_to_gcp_region`.
+
+**Lifecycle:**
+Set `expiration_days` on module-managed buckets for a Delete lifecycle rule (typical value `365`). Omit the field for no lifecycle rule (v0-compatible).
 
 **Security:**
-- `uniform_bucket_level_access` accepts `true` or `false` to control IAM-only access (no per-object ACLs). Defaults to `true`.
-- `public_access_prevention` accepts `"enforced"` to block public access or `"inherited"` to use project-level settings. Defaults to `"enforced"`.
-- `versioning_enabled` accepts `true` or `false` to enable or disable object versioning for backup recovery. Defaults to `true`.
+- `uniform_bucket_level_access` defaults to `true`.
+- `public_access_prevention` defaults to `"enforced"`.
+- `versioning_enabled` defaults to `true`.
 
 `dedicated_role_enabled = true` creates a dedicated Atlas service account for backup export.
 
@@ -531,7 +537,7 @@ Type:
 object({
   enabled     = optional(bool, false)
   bucket_name = optional(string)
-  create_bucket = optional(object({
+  create_gcs_bucket = optional(object({
     enabled                     = optional(bool, false)
     name                        = optional(string, "")
     name_suffix                 = optional(string, "")
@@ -541,6 +547,7 @@ object({
     versioning_enabled          = optional(bool, true)
     uniform_bucket_level_access = optional(bool, true)
     public_access_prevention    = optional(string, "enforced")
+    expiration_days             = optional(number)
   }), {})
   dedicated_role_enabled = optional(bool, false)
 })
