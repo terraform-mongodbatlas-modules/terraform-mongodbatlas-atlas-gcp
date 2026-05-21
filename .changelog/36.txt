@@ -1,0 +1,3 @@
+```release-note:enhancement
+example/log_integration: Adds log_integration example with MONGOD, MONGOS, and audit logs under separate prefix paths
+```
