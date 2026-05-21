@@ -527,7 +527,7 @@ Module-managed buckets default to `expiration_days = 365`. Set `expiration_days 
 **Security:**
 - `uniform_bucket_level_access` defaults to `true`.
 - `public_access_prevention` defaults to `"enforced"`.
-- `versioning_enabled` defaults to `true`.
+- `versioning_enabled` defaults to `false`. Atlas writes unique object keys.
 
 `dedicated_role_enabled = true` creates a dedicated Atlas service account for backup export.
 
@@ -544,7 +544,7 @@ object({
     location                    = optional(string, "")
     force_destroy               = optional(bool, false)
     storage_class               = optional(string, "STANDARD")
-    versioning_enabled          = optional(bool, true)
+    versioning_enabled          = optional(bool, false)
     uniform_bucket_level_access = optional(bool, true)
     public_access_prevention    = optional(string, "enforced")
     expiration_days             = optional(number, 365)
@@ -651,7 +651,7 @@ colocated with the Atlas cluster for lowest latency.
 **Security (module-managed bucket):**
 - Uniform bucket-level access enabled
 - Public access prevention enforced
-- Versioning enabled by default
+- Versioning disabled by default (Atlas writes unique object keys)
 
 **IAM:**
 The module grants `roles/storage.objectCreator` on each deduplicated target bucket
@@ -689,7 +689,7 @@ object({
     name_suffix        = optional(string, "")
     storage_class      = optional(string, "STANDARD")
     force_destroy      = optional(bool, false)
-    versioning_enabled = optional(bool, true)
+    versioning_enabled = optional(bool, false)
     expiration_days    = optional(number, 90)
   }), {})
   dedicated_role_enabled = optional(bool, false)

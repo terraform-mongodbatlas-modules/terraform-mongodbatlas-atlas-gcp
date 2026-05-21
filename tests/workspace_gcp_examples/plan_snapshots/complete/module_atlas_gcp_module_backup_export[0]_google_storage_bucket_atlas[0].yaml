@@ -18,4 +18,4 @@ terraform_labels:
   goog-terraform-provisioned: 'true'
 uniform_bucket_level_access: true
 versioning:
-- enabled: true
+- enabled: false

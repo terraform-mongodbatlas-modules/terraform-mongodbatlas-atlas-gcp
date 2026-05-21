@@ -32,7 +32,7 @@ variable "create_gcs_bucket" {
     location                    = optional(string, "")
     force_destroy               = optional(bool, false)
     storage_class               = optional(string, "STANDARD")
-    versioning_enabled          = optional(bool, true)
+    versioning_enabled          = optional(bool, false)
     uniform_bucket_level_access = optional(bool, true)
     public_access_prevention    = optional(string, "enforced")
     expiration_days             = optional(number, 365)

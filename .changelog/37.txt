@@ -7,3 +7,6 @@ variable/backup_export: Adds optional expiration_days lifecycle on module-manage
 ```release-note:bug
 submodule/backup_export: Grants roles/storage.objectUser instead of roles/storage.objectCreator for snapshot export
 ```
+```release-note:breaking-change
+variable/create_gcs_bucket: Changes versioning_enabled default to false on backup_export and log_integration module-managed GCS buckets
+```
