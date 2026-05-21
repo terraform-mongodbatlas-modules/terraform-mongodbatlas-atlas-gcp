@@ -321,6 +321,116 @@ variable "backup_export" {
   }
 }
 
+variable "log_integration" {
+  type = object({
+    enabled = optional(bool, false)
+    integrations = optional(list(object({
+      log_types   = set(string)
+      prefix_path = string
+      bucket_name = optional(string)
+    })), [])
+    bucket_name = optional(string)
+    create_gcs_bucket = optional(object({
+      enabled            = optional(bool, false)
+      location           = optional(string, "")
+      name               = optional(string, "")
+      name_suffix        = optional(string, "")
+      storage_class      = optional(string, "STANDARD")
+      force_destroy      = optional(bool, false)
+      versioning_enabled = optional(bool, true)
+      expiration_days    = optional(number, 90)
+    }), {})
+    dedicated_role_enabled = optional(bool, false)
+    labels                 = optional(map(string), {})
+  })
+  default     = {}
+  description = <<-EOT
+    Log integration configuration for exporting Atlas logs to GCS.
+    Log exports run at 1-minute intervals.
+
+    Provide EITHER:
+    - `bucket_name` (user-provided GCS bucket)
+    - `create_gcs_bucket.enabled = true` (module-managed GCS bucket)
+
+    **Bucket Naming:**
+    - `create_gcs_bucket.name` sets an explicit bucket name (must be globally unique in GCS). When omitted, the bucket name is auto-generated as `atlas-logs-{project_id}`.
+    - `create_gcs_bucket.name_suffix` is appended to the auto-generated name, resulting in `atlas-logs-{project_id}{name_suffix}`. Include a separator (e.g. `"-dev"` produces `atlas-logs-{project_id}-dev`). Mutually exclusive with `name`.
+
+    **Location:**
+    `create_gcs_bucket.location` accepts GCP regions (`us-east4`), Atlas format (`US_EAST_4`),
+    multi-regions (`US`, `EU`, `ASIA`), or dual-regions (`NAM4`, `EUR4`).
+    Atlas format is normalized via `atlas_to_gcp_region`. Choose a region
+    colocated with the Atlas cluster for lowest latency.
+
+    **Security (module-managed bucket):**
+    - Uniform bucket-level access enabled
+    - Public access prevention enforced
+    - Versioning enabled by default
+
+    **IAM:**
+    The module grants `roles/storage.objectCreator` on each deduplicated target bucket
+    (module-managed and BYO). Uses additive `google_storage_bucket_iam_member`.
+
+    **Integrations:**
+    Each list entry creates one `mongodbatlas_log_integration`. Valid `log_types`:
+    MONGOD, MONGOS, MONGOD_AUDIT, MONGOS_AUDIT. Atlas API validates values.
+    `prefix_path` (required) sets the GCS object prefix for log delivery.
+    Per-integration `bucket_name` overrides the default bucket for that integration (works with both BYO and module-managed buckets).
+    Removing an entry from the middle of the list shifts `count` indices and
+    recreates subsequent integrations (~1 min delivery gap, no data loss).
+
+    **Lifecycle:**
+    Module-managed buckets default to `expiration_days = 90`. Set `expiration_days = 0`
+    to omit the lifecycle rule (matches Azure/AWS). BYO buckets: manage lifecycle externally.
+
+    `dedicated_role_enabled = true` creates a dedicated Atlas service account for log integration.
+  EOT
+
+  validation {
+    condition     = !var.log_integration.enabled || length(var.log_integration.integrations) > 0
+    error_message = "log_integration.enabled = true requires at least one entry in integrations."
+  }
+
+  validation {
+    condition = alltrue([
+      for i in var.log_integration.integrations : length(i.log_types) > 0
+    ])
+    error_message = "Each integration must have at least one log_types entry."
+  }
+
+  validation {
+    condition     = !(var.log_integration.bucket_name != null && var.log_integration.create_gcs_bucket.enabled)
+    error_message = "Cannot use both bucket_name (user-provided) and create_gcs_bucket.enabled = true (module-managed)."
+  }
+
+  validation {
+    condition     = !var.log_integration.enabled || (var.log_integration.bucket_name != null || var.log_integration.create_gcs_bucket.enabled)
+    error_message = "log_integration.enabled = true requires bucket_name OR create_gcs_bucket.enabled = true."
+  }
+
+  validation {
+    condition     = var.log_integration.enabled || (var.log_integration.bucket_name == null && !var.log_integration.create_gcs_bucket.enabled)
+    error_message = "bucket_name and create_gcs_bucket.enabled may only be set when log_integration.enabled = true."
+  }
+
+  validation {
+    condition     = !var.log_integration.create_gcs_bucket.enabled || var.log_integration.create_gcs_bucket.location != ""
+    error_message = "create_gcs_bucket.location is required when create_gcs_bucket.enabled = true."
+  }
+
+  validation {
+    condition     = !(var.log_integration.create_gcs_bucket.name != "" && var.log_integration.create_gcs_bucket.name_suffix != "")
+    error_message = "Cannot use both create_gcs_bucket.name and create_gcs_bucket.name_suffix."
+  }
+
+  validation {
+    condition = var.log_integration.create_gcs_bucket.name == "" || can(
+      regex("^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$", var.log_integration.create_gcs_bucket.name)
+    )
+    error_message = "Bucket name must be 3-63 characters, contain only lowercase letters, numbers, dots (.), underscores (_), and hyphens (-), and must start and end with a lowercase letter or number."
+  }
+}
+
 variable "gcp_tags" {
   type        = map(string)
   default     = {}

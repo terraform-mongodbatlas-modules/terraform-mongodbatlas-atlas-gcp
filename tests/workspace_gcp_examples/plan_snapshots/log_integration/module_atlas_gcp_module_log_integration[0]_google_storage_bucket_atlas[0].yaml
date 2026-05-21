@@ -1,0 +1,32 @@
+autoclass: []
+cors: []
+custom_placement_config: []
+deletion_policy: DELETE
+effective_labels:
+  goog-terraform-provisioned: 'true'
+encryption: []
+force_destroy: <force_destroy>
+hierarchical_namespace: []
+ip_filter: []
+lifecycle_rule:
+- action:
+  - storage_class: ''
+    type: Delete
+  condition:
+  - age: 90
+    created_before: ''
+    custom_time_before: ''
+    matches_prefix: []
+    matches_storage_class: []
+    matches_suffix: []
+    noncurrent_time_before: ''
+location: US-EAST1
+logging: []
+public_access_prevention: enforced
+retention_policy: []
+storage_class: STANDARD
+terraform_labels:
+  goog-terraform-provisioned: 'true'
+uniform_bucket_level_access: true
+versioning:
+- enabled: true
