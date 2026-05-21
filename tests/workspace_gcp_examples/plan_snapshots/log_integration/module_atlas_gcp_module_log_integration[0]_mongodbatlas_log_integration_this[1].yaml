@@ -1,0 +1,5 @@
+log_types:
+- MONGOD_AUDIT
+- MONGOS_AUDIT
+prefix_path: audit
+type: GCS_LOG_EXPORT

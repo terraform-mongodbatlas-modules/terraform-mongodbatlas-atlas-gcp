@@ -3,7 +3,7 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# GCS Bucket Export (Module-Managed)
+# GCS Log Export (Module-Managed)
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
@@ -77,41 +77,36 @@ module "atlas_gcp" {
   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
   project_id = var.project_id
 
-  backup_export = {
+  log_integration = {
     enabled = true
-    create_bucket = {
+    create_gcs_bucket = {
       enabled       = true
       name          = var.bucket_name
       name_suffix   = var.bucket_name_suffix
       location      = var.gcp_region
       force_destroy = var.force_destroy
     }
+    integrations = [
+      {
+        log_types   = ["MONGOD", "MONGOS"]
+        prefix_path = "logs"
+      },
+      {
+        log_types   = ["MONGOD_AUDIT", "MONGOS_AUDIT"]
+        prefix_path = "audit"
+      },
+    ]
   }
 
   gcp_tags = var.gcp_tags
 }
 
-# Alternative: user-provided bucket (uncomment and remove create_bucket above)
-# module "atlas_gcp" {
-#   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-#   project_id = var.project_id
-#
-#   backup_export = {
-#     enabled     = true
-#     bucket_name = "my-existing-bucket"
-#   }
-#
-#   gcp_tags = var.gcp_tags
-# }
-
-# backup export configuration and GCS bucket details
-output "backup_export" {
-  value = module.atlas_gcp.backup_export
+output "log_integration" {
+  value = module.atlas_gcp.log_integration
 }
 
-# export_bucket_id -- pass to cluster module's backup schedule export { export_bucket_id = ... }
-output "export_bucket_id" {
-  value = module.atlas_gcp.export_bucket_id
+output "integration_ids" {
+  value = module.atlas_gcp.log_integration.integration_ids
 }
 ```
 

@@ -24,6 +24,10 @@ resource "terraform_data" "region_validations" {
       condition     = length(local._pl_byoe_overlap) == 0
       error_message = "Overlap between privatelink_endpoints and privatelink_byoe_regions after normalization: [${join(", ", local._pl_byoe_overlap)}]."
     }
+    precondition {
+      condition     = length(local._log_location_unknown) == 0
+      error_message = "Unknown region in log_integration.create_gcs_bucket.location: [${join(", ", local._log_location_unknown)}]. Must be valid Atlas (e.g. US_EAST_4) or GCP (e.g. us-east4) format."
+    }
   }
 }
 
@@ -45,6 +49,12 @@ module "encryption_cloud_provider_access" {
 
 module "backup_export_cloud_provider_access" {
   count      = local.create_backup_export_dedicated_role ? 1 : 0
+  source     = "./modules/cloud_provider_access"
+  project_id = var.project_id
+}
+
+module "log_integration_cloud_provider_access" {
+  count      = local.create_log_integration_dedicated_role ? 1 : 0
   source     = "./modules/cloud_provider_access"
   project_id = var.project_id
 }
@@ -96,6 +106,33 @@ module "backup_export" {
   })
 
   depends_on = [module.cloud_provider_access, module.backup_export_cloud_provider_access]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Log Integration
+# ─────────────────────────────────────────────────────────────────────────────
+
+module "log_integration" {
+  count  = var.log_integration.enabled ? 1 : 0
+  source = "./modules/log_integration"
+
+  project_id                  = var.project_id
+  role_id                     = local.log_integration_role_id
+  atlas_service_account_email = local.log_integration_service_account
+  bucket_name                 = var.log_integration.bucket_name
+  integrations                = var.log_integration.integrations
+  skip_iam_bindings           = false
+  labels                      = merge(var.gcp_tags, var.log_integration.labels)
+
+  create_gcs_bucket = merge(var.log_integration.create_gcs_bucket, {
+    location = lookup(
+      local.atlas_to_gcp_region,
+      var.log_integration.create_gcs_bucket.location,
+      var.log_integration.create_gcs_bucket.location
+    )
+  })
+
+  depends_on = [module.cloud_provider_access, module.log_integration_cloud_provider_access]
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@ terraform {
   required_providers {
     mongodbatlas = {
       source  = "mongodb/mongodbatlas"
-      version = "~> 2.7"
+      version = "~> 2.8"
     }
     google = {
       source  = "hashicorp/google"
@@ -41,6 +41,7 @@ variable "project_ids" {
     complete                 = optional(string)
     encryption               = optional(string)
     backup_export            = optional(string)
+    log_integration          = optional(string)
     privatelink_multi_region = optional(string)
     privatelink_byoe         = optional(string)
   })
@@ -83,6 +84,8 @@ locals {
   project_id_encryption = local.project_ids.encryption
   # tflint-ignore: terraform_unused_declarations
   project_id_backup_export = local.project_ids.backup_export
+  # tflint-ignore: terraform_unused_declarations
+  project_id_log_integration = local.project_ids.log_integration
   # tflint-ignore: terraform_unused_declarations
   project_id_privatelink_multi_region = local.project_ids.privatelink_multi_region
   # tflint-ignore: terraform_unused_declarations
