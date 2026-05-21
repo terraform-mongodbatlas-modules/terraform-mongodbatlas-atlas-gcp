@@ -2,5 +2,4 @@ log_types:
 - MONGOD_AUDIT
 - MONGOS_AUDIT
 prefix_path: audit
-project_id: <project_id>
 type: GCS_LOG_EXPORT
