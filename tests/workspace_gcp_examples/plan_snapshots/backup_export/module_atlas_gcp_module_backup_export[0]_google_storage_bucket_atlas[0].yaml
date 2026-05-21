@@ -16,6 +16,9 @@ retention_policy: []
 storage_class: STANDARD
 terraform_labels:
   goog-terraform-provisioned: 'true'
+timeouts:
+  create: 30m
+  update: 30m
 uniform_bucket_level_access: true
 versioning:
 - enabled: true

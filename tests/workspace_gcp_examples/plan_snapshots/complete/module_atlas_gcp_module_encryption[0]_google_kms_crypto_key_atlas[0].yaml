@@ -5,3 +5,7 @@ name: atlas-encryption-key
 purpose: ENCRYPT_DECRYPT
 terraform_labels:
   goog-terraform-provisioned: 'true'
+timeouts:
+  create: 30m
+  delete: 30m
+  update: 30m
