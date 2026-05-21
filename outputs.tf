@@ -92,6 +92,7 @@ output "backup_export" {
     bucket_name      = module.backup_export[0].bucket_name
     bucket_location  = module.backup_export[0].bucket_location
     bucket_url       = module.backup_export[0].bucket_url
+    expiration_days  = module.backup_export[0].expiration_days
   } : null
 }
 
