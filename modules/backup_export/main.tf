@@ -35,7 +35,6 @@ resource "google_storage_bucket" "atlas" {
     content {
       create = timeouts.value.create
       update = timeouts.value.update
-      read   = timeouts.value.update
     }
   }
 
