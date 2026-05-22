@@ -21,6 +21,7 @@ ENHANCEMENTS:
 * variable/backup_export: Adds optional expiration_days lifecycle on module-managed GCS buckets ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
 * variable/skip_iam_bindings: Adds skip flag to omit module-managed GCP IAM bindings when roles are pre-granted externally ([#39](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/39))
 * variable/timeouts: Adds nullable flat timeouts object with 30m defaults for module-managed Atlas and GCP resources, set `timeouts = null` for zero-diff upgrades from v0.x ([#38](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/38))
+* variable/privatelink_endpoints: Adds optional allow_psc_global_access on module-managed PSC forwarding rules ([#32](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/32))
 
 BUG FIXES:
 

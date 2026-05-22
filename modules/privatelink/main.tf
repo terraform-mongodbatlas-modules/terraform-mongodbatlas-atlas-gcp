@@ -29,14 +29,15 @@ resource "google_compute_address" "atlas" {
 }
 
 resource "google_compute_forwarding_rule" "atlas" {
-  count                 = local.module_managed ? 1 : 0
-  name                  = "${var.name_prefix}fr"
-  region                = var.gcp_region
-  network               = data.google_compute_subnetwork.atlas[0].network
-  ip_address            = google_compute_address.atlas[0].id
-  load_balancing_scheme = ""
-  target                = var.service_attachment_name
-  labels                = var.labels
+  count                   = local.module_managed ? 1 : 0
+  name                    = "${var.name_prefix}fr"
+  region                  = var.gcp_region
+  network                 = data.google_compute_subnetwork.atlas[0].network
+  ip_address              = google_compute_address.atlas[0].id
+  load_balancing_scheme   = ""
+  target                  = var.service_attachment_name
+  labels                  = var.labels
+  allow_psc_global_access = var.allow_psc_global_access
 
   dynamic "timeouts" {
     for_each = var.timeouts[*]
