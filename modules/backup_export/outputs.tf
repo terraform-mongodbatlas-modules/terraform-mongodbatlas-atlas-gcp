@@ -17,3 +17,8 @@ output "bucket_url" {
   description = "GCS bucket URL (gs://bucket-name)"
   value       = local.bucket_url
 }
+
+output "expiration_days" {
+  description = "Configured lifecycle expiration in days for module-managed GCS buckets; null for user-provided buckets"
+  value       = local.create_gcs_bucket ? var.create_gcs_bucket.expiration_days : null
+}

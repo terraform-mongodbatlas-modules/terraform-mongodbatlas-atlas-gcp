@@ -34,12 +34,12 @@ run "backup_export_disabled_default" {
 # Module-Managed Bucket
 # ─────────────────────────────────────────────────────────────────────────────
 
-run "backup_export_create_bucket_explicit_name" {
+run "backup_export_create_gcs_bucket_explicit_name" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, name = "my-atlas-bucket", location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, name = "my-atlas-bucket", location = "us-east4" }
     }
   }
   assert {
@@ -48,12 +48,12 @@ run "backup_export_create_bucket_explicit_name" {
   }
 }
 
-run "backup_export_create_bucket_default_name" {
+run "backup_export_create_gcs_bucket_default_name" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, location = "us-east4" }
     }
   }
   assert {
@@ -66,12 +66,12 @@ run "backup_export_create_bucket_default_name" {
   }
 }
 
-run "backup_export_create_bucket_with_suffix" {
+run "backup_export_create_gcs_bucket_with_suffix" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, name_suffix = "-dev", location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, name_suffix = "-dev", location = "us-east4" }
     }
   }
   assert {
@@ -92,8 +92,8 @@ run "backup_export_atlas_region_format" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, location = "US_EAST_4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, location = "US_EAST_4" }
     }
   }
   assert {
@@ -110,8 +110,8 @@ run "backup_export_gcp_region_passthrough" {
   command = plan
   variables {
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, location = "us-west4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, location = "us-west4" }
     }
   }
   assert {
@@ -184,4 +184,57 @@ run "backup_export_dedicated_role_with_encryption" {
   }
   # role_id and service_account outputs are unknown at plan time for both
   # dedicated CPA modules -- verified via non-null feature outputs above.
+}
+
+run "backup_export_expiration_days_default" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled = true
+      create_gcs_bucket = {
+        enabled  = true
+        location = "us-east4"
+      }
+    }
+  }
+  assert {
+    condition     = output.backup_export.expiration_days == 365
+    error_message = "Expected default expiration_days = 365, got: ${output.backup_export.expiration_days}"
+  }
+}
+
+run "backup_export_expiration_days_set" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled = true
+      create_gcs_bucket = {
+        enabled         = true
+        location        = "us-east4"
+        expiration_days = 90
+      }
+    }
+  }
+  assert {
+    condition     = output.backup_export.expiration_days == 90
+    error_message = "Expected expiration_days = 90, got: ${output.backup_export.expiration_days}"
+  }
+}
+
+run "backup_export_expiration_days_zero" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled = true
+      create_gcs_bucket = {
+        enabled         = true
+        location        = "us-east4"
+        expiration_days = 0
+      }
+    }
+  }
+  assert {
+    condition     = output.backup_export.expiration_days == 0
+    error_message = "Expected expiration_days = 0, got: ${output.backup_export.expiration_days}"
+  }
 }

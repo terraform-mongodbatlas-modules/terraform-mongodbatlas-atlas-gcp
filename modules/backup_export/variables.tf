@@ -19,12 +19,12 @@ variable "bucket_name" {
   description = "User-provided GCS bucket name"
 
   validation {
-    condition     = var.create_bucket.enabled || var.bucket_name != null
-    error_message = "bucket_name is required when create_bucket.enabled = false."
+    condition     = var.create_gcs_bucket.enabled || var.bucket_name != null
+    error_message = "bucket_name is required when create_gcs_bucket.enabled = false."
   }
 }
 
-variable "create_bucket" {
+variable "create_gcs_bucket" {
   type = object({
     enabled                     = optional(bool, false)
     name                        = optional(string, "")
@@ -32,13 +32,19 @@ variable "create_bucket" {
     location                    = optional(string, "")
     force_destroy               = optional(bool, false)
     storage_class               = optional(string, "STANDARD")
-    versioning_enabled          = optional(bool, true)
+    versioning_enabled          = optional(bool, false)
     uniform_bucket_level_access = optional(bool, true)
     public_access_prevention    = optional(string, "enforced")
+    expiration_days             = optional(number, 365)
   })
   default     = {}
   nullable    = false
-  description = "Module-managed GCS bucket configuration. When name is omitted, defaults to atlas-backup-{project_id}{name_suffix}."
+  description = "Module-managed GCS bucket. Default name atlas-backup-{project_id}{name_suffix}. expiration_days defaults to 365; set 0 to omit the lifecycle rule."
+
+  validation {
+    condition     = var.create_gcs_bucket.expiration_days >= 0
+    error_message = "create_gcs_bucket.expiration_days must be >= 0 (0 = no lifecycle rule)."
+  }
 }
 
 variable "labels" {

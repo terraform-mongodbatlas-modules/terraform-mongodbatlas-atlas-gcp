@@ -72,8 +72,8 @@ run "timeouts_null_all_features" {
       { region = "us-west4", subnetwork = "https://www.googleapis.com/compute/v1/projects/p/regions/us-west4/subnetworks/sub-b" },
     ]
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, location = "us-east4" }
     }
     log_integration = {
       enabled           = true
@@ -116,8 +116,8 @@ run "timeouts_all_resources_plan_succeeds" {
       { region = "us-west4", subnetwork = "https://www.googleapis.com/compute/v1/projects/p/regions/us-west4/subnetworks/sub-b" },
     ]
     backup_export = {
-      enabled       = true
-      create_bucket = { enabled = true, location = "us-east4" }
+      enabled           = true
+      create_gcs_bucket = { enabled = true, location = "us-east4" }
     }
     log_integration = {
       enabled           = true

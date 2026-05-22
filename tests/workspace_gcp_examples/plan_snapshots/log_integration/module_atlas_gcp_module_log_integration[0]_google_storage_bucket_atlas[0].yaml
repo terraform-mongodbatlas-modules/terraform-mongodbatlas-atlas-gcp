@@ -32,4 +32,4 @@ timeouts:
   update: 30m
 uniform_bucket_level_access: true
 versioning:
-- enabled: true
+- enabled: false

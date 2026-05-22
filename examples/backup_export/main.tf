@@ -4,7 +4,7 @@ module "atlas_gcp" {
 
   backup_export = {
     enabled = true
-    create_bucket = {
+    create_gcs_bucket = {
       enabled       = true
       name          = var.bucket_name
       name_suffix   = var.bucket_name_suffix
@@ -16,7 +16,7 @@ module "atlas_gcp" {
   gcp_tags = var.gcp_tags
 }
 
-# Alternative: user-provided bucket (uncomment and remove create_bucket above)
+# Alternative: user-provided bucket (uncomment and remove create_gcs_bucket above)
 # module "atlas_gcp" {
 #   source     = "../../"
 #   project_id = var.project_id
