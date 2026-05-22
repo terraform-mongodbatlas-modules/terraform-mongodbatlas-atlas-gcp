@@ -458,7 +458,7 @@ Key is a user-defined identifier; `region` is the Atlas service region
 (accepts us-east4 or US_EAST_4 format).
 
 Type is map(object) (not map(string)) to allow additive fields in future minor
-versions without another breaking change.
+versions.
 
 Type:
 
