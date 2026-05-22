@@ -20,14 +20,14 @@ examples:
           skip_lines:
             substring_attributes: [name] # uses random suffix in key ring name
       - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key.atlas[0]
-      - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.encrypter
-      - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.viewer
+      - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.encrypter[0]
+      - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.viewer[0]
       - address: module.atlas_gcp.module.encryption[0].mongodbatlas_encryption_at_rest.this
       - address: module.atlas_gcp.module.backup_export[0].google_storage_bucket.atlas[0]
         dump:
           skip_lines:
             substring_attributes: [name] # bucket name contains dynamic project_id
-      - address: module.atlas_gcp.module.backup_export[0].google_storage_bucket_iam_member.atlas
+      - address: module.atlas_gcp.module.backup_export[0].google_storage_bucket_iam_member.atlas[0]
         dump:
           skip_lines:
             substring_attributes: [bucket]
@@ -51,8 +51,8 @@ examples:
       - address: module.atlas_gcp.module.cloud_provider_access[0].mongodbatlas_cloud_provider_access_setup.this
       - address: module.atlas_gcp.module.cloud_provider_access[0].mongodbatlas_cloud_provider_access_authorization.this
       - address: module.atlas_gcp.module.encryption[0].mongodbatlas_encryption_at_rest.this
-      - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.encrypter
-      - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.viewer
+      - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.encrypter[0]
+      - address: module.atlas_gcp.module.encryption[0].google_kms_crypto_key_iam_member.viewer[0]
   - name: backup_export
     var_groups: [backup_export]
     output_assertions:
@@ -67,7 +67,7 @@ examples:
         dump:
           skip_lines:
             substring_attributes: [name] # bucket name contains dynamic project_id
-      - address: module.atlas_gcp.module.backup_export[0].google_storage_bucket_iam_member.atlas
+      - address: module.atlas_gcp.module.backup_export[0].google_storage_bucket_iam_member.atlas[0]
         dump:
           skip_lines:
             substring_attributes: [bucket]
@@ -120,6 +120,33 @@ examples:
       - address: module.atlas_gcp.module.privatelink["ep1"].mongodbatlas_privatelink_endpoint_service.this
       - address: google_compute_address.psc
       - address: google_compute_forwarding_rule.psc
+  - name: gcp_read_only
+    var_groups: [gcp_read_only]
+    module_depends_on:
+      - time_sleep.gcp_read_only_atlas
+    output_assertions:
+      - output: encryption
+        not_empty: true
+      - output: backup_export
+        not_empty: true
+      - output: log_integration
+        not_empty: true
+    plan_regressions:
+      - address: module.atlas_gcp.module.encryption[0].mongodbatlas_encryption_at_rest.this
+      - address: module.atlas_gcp.module.backup_export[0].time_sleep.iam_propagation
+      - address: module.atlas_gcp.module.backup_export[0].mongodbatlas_cloud_backup_snapshot_export_bucket.this
+        dump:
+          skip_lines:
+            substring_attributes: [bucket_name]
+      - address: module.atlas_gcp.module.log_integration[0].time_sleep.iam_propagation
+      - address: module.atlas_gcp.module.log_integration[0].mongodbatlas_log_integration.this[0]
+        dump:
+          skip_lines:
+            substring_attributes: [bucket_name]
+      - address: module.atlas_gcp.module.log_integration[0].mongodbatlas_log_integration.this[1]
+        dump:
+          skip_lines:
+            substring_attributes: [bucket_name]
 
 var_groups:
   complete:
@@ -215,3 +242,28 @@ var_groups:
     - name: subnetwork
       expose_in_workspace: false
       module_value: local.subnetwork_privatelink_byoe
+  gcp_read_only:
+    - name: project_id
+      expose_in_workspace: false
+      module_value: local.project_id_gcp_read_only
+    - name: gcp_project_id
+      expose_in_workspace: false
+      module_value: var.gcp_project_id
+    - name: gcp_region
+      expose_in_workspace: false
+      module_value: var.gcp_region
+    - name: atlas_role_id
+      expose_in_workspace: false
+      module_value: local.atlas_role_id_gcp_read_only
+    - name: atlas_service_account_email
+      expose_in_workspace: false
+      module_value: local.atlas_service_account_email_gcp_read_only
+    - name: kms_key_version_resource_id
+      expose_in_workspace: false
+      module_value: local.kms_key_version_resource_id_gcp_read_only
+    - name: backup_bucket_name
+      expose_in_workspace: false
+      module_value: local.backup_bucket_name_gcp_read_only
+    - name: log_bucket_name
+      expose_in_workspace: false
+      module_value: local.log_bucket_name_gcp_read_only

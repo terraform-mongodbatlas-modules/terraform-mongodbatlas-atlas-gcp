@@ -234,6 +234,7 @@ Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) |
 Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
 PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with auto-enabled regional mode
 PrivateLink (PSC) | [BYOE (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
+Read-Only GCP | [BYO CPA + Pre-Granted IAM](./examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
 
 <!-- END_TABLES -->
 <!-- BEGIN_TF_DOCS -->
@@ -289,6 +290,8 @@ Atlas requires a GCP service account to access your Google Cloud resources (KMS 
 
 The module creates a shared Cloud Provider Access (CPA) setup by default when encryption or backup export is enabled. You can also reuse an existing CPA by setting `create = false` with `existing.role_id` and `existing.service_account_for_atlas`. PrivateLink-only configurations skip CPA entirely since PSC uses GCP resources only.
 
+Set `skip_iam_bindings = true` only when your platform team pre-grants the required GCP IAM roles on KMS keys and GCS buckets. In that case you must use user-provided KMS and buckets (`key_version_resource_id`, `bucket_name`); the module cannot create module-managed KMS or GCS without IAM bindings. `skip_iam_bindings = true` also requires BYO CPA (`cloud_provider_access.create = false`), because a module-created CPA still needs IAM bindings.
+
 See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-gcp-access/) for details.
 
 ### cloud_provider_access
@@ -310,6 +313,27 @@ object({
 ```
 
 Default: `{}`
+
+### skip_iam_bindings
+
+Skip all module-managed GCP IAM bindings (google_kms_crypto_key_iam_member,
+google_storage_bucket_iam_member) in encryption, backup_export, and log_integration.
+Set true when the Atlas-managed service account already has the required roles
+pre-granted externally.
+
+Required roles when true:
+- KMS: roles/cloudkms.cryptoKeyEncrypterDecrypter, roles/cloudkms.viewer on the crypto key
+- GCS backup export: roles/storage.objectUser on each backup export bucket
+- GCS log integration: roles/storage.objectCreator on each log integration bucket
+
+Requires BYO resources: create_kms_key.enabled, create_gcs_bucket.enabled, and
+cloud_provider_access.create = true are disallowed when skip_iam_bindings = true,
+because module-managed resources need bindings to function and a module-created
+CPA pairs with module-managed bindings.
+
+Type: `bool`
+
+Default: `false`
 
 
 ## Encryption at Rest

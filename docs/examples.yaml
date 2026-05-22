@@ -47,3 +47,7 @@ tables:
         feature: PrivateLink (PSC)
         name: BYOE (Bring Your Own Endpoint)
         description: Two-phase workflow for externally managed GCP forwarding rules
+      - folder_name: gcp_read_only
+        feature: Read-Only GCP
+        name: BYO CPA + Pre-Granted IAM
+        description: Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
