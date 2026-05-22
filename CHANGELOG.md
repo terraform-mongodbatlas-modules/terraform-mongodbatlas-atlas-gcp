@@ -1,5 +1,10 @@
 ## (Unreleased)
 
+BREAKING CHANGES:
+
+* variable/backup_export: Renames create_bucket to create_gcs_bucket ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
+* variable/create_gcs_bucket: Changes versioning_enabled default to false on backup_export and log_integration module-managed GCS buckets ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
+
 NOTES:
 
 * provider/mongodbatlas: Requires minimum version 2.8.0 for mongodbatlas_log_integration support ([#35](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/35))
@@ -8,7 +13,13 @@ ENHANCEMENTS:
 
 * example/log_integration: Adds log_integration example with MONGOD, MONGOS, and audit logs under separate prefix paths ([#36](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/36))
 * module: Adds optional log_integration for Atlas GCS log export via mongodbatlas_log_integration ([#35](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/35))
+* output/backup_export: Adds expiration_days to backup_export output ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
+* variable/backup_export: Adds optional expiration_days lifecycle on module-managed GCS buckets ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
 * variable/timeouts: Adds nullable flat timeouts object with 30m defaults for module-managed Atlas and GCP resources, set `timeouts = null` for zero-diff upgrades from v0.x ([#38](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/38))
+
+BUG FIXES:
+
+* submodule/backup_export: Grants roles/storage.objectUser instead of roles/storage.objectCreator for snapshot export ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
 
 ## 0.1.0 (February 25, 2026)
 * Initial release
