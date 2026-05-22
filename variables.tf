@@ -110,10 +110,11 @@ variable "encryption" {
 
 variable "privatelink_endpoints" {
   type = list(object({
-    region      = string
-    subnetwork  = string
-    labels      = optional(map(string), {})
-    name_prefix = optional(string)
+    region                  = string
+    subnetwork              = string
+    labels                  = optional(map(string), {})
+    name_prefix             = optional(string)
+    allow_psc_global_access = optional(bool)
   }))
   default     = []
   description = <<-EOT
@@ -135,6 +136,9 @@ variable "privatelink_endpoints" {
       forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{region}-`
       where region is in GCP format (e.g., `atlas-psc-us-east4-`). Set a custom prefix when
       multiple deployments share the same GCP project and region to avoid name collisions.
+    - `allow_psc_global_access`: when true, enables cross-region VPC client access to this PSC
+      endpoint IP. When omitted, same-region-only access (v0 behavior). Use
+      `allow_psc_global_access`, not `allow_global_access` (ILB-only). Not for BYOE rules.
   EOT
 
   validation {
@@ -155,10 +159,11 @@ variable "privatelink_endpoints" {
 
 variable "privatelink_endpoints_single_region" {
   type = list(object({
-    region      = string
-    subnetwork  = string
-    labels      = optional(map(string), {})
-    name_prefix = optional(string)
+    region                  = string
+    subnetwork              = string
+    labels                  = optional(map(string), {})
+    name_prefix             = optional(string)
+    allow_psc_global_access = optional(bool)
   }))
   default     = []
   description = <<-EOT
@@ -174,6 +179,7 @@ variable "privatelink_endpoints_single_region" {
       forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{index}-`
       where index is the list position (e.g., `atlas-psc-0-`). Recommended to set explicitly
       since index-based defaults are not descriptive.
+    - `allow_psc_global_access`: same semantics as `privatelink_endpoints`.
   EOT
 
   validation {
@@ -229,6 +235,9 @@ variable "privatelink_byo_service" {
     - `ip_address` is the internal IP of your `google_compute_address`.
     - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
     - `gcp_project_id` is used when the forwarding rule lives in a different GCP project than the provider default.
+
+    For cross-region clients, set allow_psc_global_access on your forwarding rule before
+    registration (gcloud --allow-psc-global-access). The module does not create BYOE rules.
 
     Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
   EOT
