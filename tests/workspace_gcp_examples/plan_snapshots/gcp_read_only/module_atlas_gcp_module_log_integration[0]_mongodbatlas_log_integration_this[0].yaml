@@ -1,6 +1,6 @@
 log_types:
 - MONGOD
-- MONGOS
-prefix_path: logs
+prefix_path: operational
 project_id: <project_id>
+role_id: '000000000000000000000001'
 type: GCS_LOG_EXPORT

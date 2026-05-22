@@ -1,4 +1,5 @@
 azure_config: []
+project_id: <project_id>
 provider_name: GCP
 timeouts:
   create: 30m

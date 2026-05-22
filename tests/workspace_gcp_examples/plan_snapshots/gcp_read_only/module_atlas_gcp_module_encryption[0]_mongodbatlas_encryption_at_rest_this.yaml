@@ -1,0 +1,7 @@
+aws_kms_config: []
+azure_key_vault_config: []
+enabled_for_search_nodes: true
+google_cloud_kms_config:
+- enabled: true
+  role_id: '000000000000000000000001'
+project_id: <project_id>
