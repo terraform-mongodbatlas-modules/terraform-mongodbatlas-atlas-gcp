@@ -1,0 +1,3 @@
+```release-note:enhancement
+variable/timeouts: Adds nullable flat timeouts object with 30m defaults for module-managed Atlas and GCP resources, set `timeouts = null` for zero-diff upgrades from v0.x
+```

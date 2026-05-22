@@ -17,6 +17,15 @@ resource "google_compute_address" "atlas" {
   address_type = "INTERNAL"
   subnetwork   = var.subnetwork.self_link
   labels       = var.labels
+
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 resource "google_compute_forwarding_rule" "atlas" {
@@ -28,6 +37,15 @@ resource "google_compute_forwarding_rule" "atlas" {
   load_balancing_scheme = ""
   target                = var.service_attachment_name
   labels                = var.labels
+
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 locals {
@@ -43,6 +61,14 @@ resource "mongodbatlas_privatelink_endpoint_service" "this" {
   gcp_project_id              = local.gcp_project
   endpoint_service_id         = local.endpoint_name
   private_endpoint_ip_address = local.endpoint_ip
+
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 data "mongodbatlas_privatelink_endpoint_service" "this" {

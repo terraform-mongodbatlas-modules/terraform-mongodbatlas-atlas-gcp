@@ -1,2 +1,4 @@
 condition: []
 role: roles/storage.objectUser
+timeouts:
+  create: 30m

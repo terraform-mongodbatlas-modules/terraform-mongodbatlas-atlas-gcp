@@ -43,6 +43,14 @@ resource "google_storage_bucket" "atlas" {
     }
   }
 
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+    }
+  }
+
   lifecycle {
     precondition {
       condition     = length(local.resolved_name) >= 3 && length(local.resolved_name) <= 63
@@ -55,6 +63,13 @@ resource "google_storage_bucket_iam_member" "atlas" {
   bucket = local.create_gcs_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
   role   = "roles/storage.objectUser"
   member = "serviceAccount:${var.atlas_service_account_email}"
+
+  dynamic "timeouts" {
+    for_each = var.timeouts[*]
+    content {
+      create = timeouts.value.create
+    }
+  }
 }
 
 resource "time_sleep" "iam_propagation" {

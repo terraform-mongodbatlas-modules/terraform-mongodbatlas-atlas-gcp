@@ -699,6 +699,30 @@ object({
 
 Default: `{}`
 
+### timeouts
+
+Timeout defaults applied to module-managed Atlas and GCP resources that support provider timeouts.
+Timeout strings use Go duration format (e.g., "30m", "1h").
+
+Set `timeouts = null` to skip all module-managed timeout blocks and use provider defaults.
+Useful after `terraform import` and for zero-diff upgrades from v0.x.
+
+- `timeouts = {}` or omitted: 30m create/update/delete (module defaults)
+- `timeouts = null`: no timeout blocks emitted (provider defaults)
+- `timeouts = { create = "1h" }`: custom create, 30m update/delete
+
+Type:
+
+```hcl
+object({
+  create = optional(string, "30m")
+  update = optional(string, "30m")
+  delete = optional(string, "30m")
+})
+```
+
+Default: `{}`
+
 <!-- END_TF_INPUTS_RAW -->
 
 The module exports outputs grouped by feature. Use `encryption_at_rest_provider` and `export_bucket_id` when configuring your Atlas cluster resource. Use `privatelink_service_info` for the BYOE workflow. Connection strings come from the cluster resource, not this module.

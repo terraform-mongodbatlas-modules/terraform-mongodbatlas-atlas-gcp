@@ -451,3 +451,24 @@ variable "gcp_tags" {
   default     = {}
   description = "Labels to apply to all GCP resources created by this module."
 }
+
+variable "timeouts" {
+  type = object({
+    create = optional(string, "30m")
+    update = optional(string, "30m")
+    delete = optional(string, "30m")
+  })
+  default     = {}
+  nullable    = true
+  description = <<-EOT
+    Timeout defaults applied to module-managed Atlas and GCP resources that support provider timeouts.
+    Timeout strings use Go duration format (e.g., "30m", "1h").
+
+    Set `timeouts = null` to skip all module-managed timeout blocks and use provider defaults.
+    Useful after `terraform import` and for zero-diff upgrades from v0.x.
+
+    - `timeouts = {}` or omitted: 30m create/update/delete (module defaults)
+    - `timeouts = null`: no timeout blocks emitted (provider defaults)
+    - `timeouts = { create = "1h" }`: custom create, 30m update/delete
+  EOT
+}
