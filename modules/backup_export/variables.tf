@@ -40,6 +40,11 @@ variable "create_gcs_bucket" {
   default     = {}
   nullable    = false
   description = "Module-managed GCS bucket. Default name atlas-backup-{project_id}{name_suffix}. expiration_days defaults to 365; set 0 to omit the lifecycle rule."
+
+  validation {
+    condition     = var.create_gcs_bucket.expiration_days >= 0
+    error_message = "create_gcs_bucket.expiration_days must be >= 0 (0 = no lifecycle rule)."
+  }
 }
 
 variable "labels" {

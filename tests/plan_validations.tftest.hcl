@@ -237,6 +237,17 @@ run "backup_invalid_bucket_name_end" {
   expect_failures = [var.backup_export]
 }
 
+run "backup_expiration_days_negative" {
+  command = plan
+  variables {
+    backup_export = {
+      enabled           = true
+      create_gcs_bucket = { enabled = true, location = "us-east4", expiration_days = -1 }
+    }
+  }
+  expect_failures = [var.backup_export]
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Log Integration Validations
 # ─────────────────────────────────────────────────────────────────────────────

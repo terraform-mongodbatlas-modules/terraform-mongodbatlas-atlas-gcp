@@ -324,6 +324,11 @@ variable "backup_export" {
     )
     error_message = "Bucket name must be 3-63 characters, contain only lowercase letters, numbers, dots (.), underscores (_), and hyphens (-), and must start and end with a lowercase letter or number."
   }
+
+  validation {
+    condition     = var.backup_export.create_gcs_bucket.expiration_days >= 0
+    error_message = "backup_export.create_gcs_bucket.expiration_days must be >= 0 (0 = no lifecycle rule)."
+  }
 }
 
 variable "log_integration" {
@@ -433,6 +438,11 @@ variable "log_integration" {
       regex("^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$", var.log_integration.create_gcs_bucket.name)
     )
     error_message = "Bucket name must be 3-63 characters, contain only lowercase letters, numbers, dots (.), underscores (_), and hyphens (-), and must start and end with a lowercase letter or number."
+  }
+
+  validation {
+    condition     = var.log_integration.create_gcs_bucket.expiration_days >= 0
+    error_message = "log_integration.create_gcs_bucket.expiration_days must be >= 0 (0 = no lifecycle rule)."
   }
 }
 
