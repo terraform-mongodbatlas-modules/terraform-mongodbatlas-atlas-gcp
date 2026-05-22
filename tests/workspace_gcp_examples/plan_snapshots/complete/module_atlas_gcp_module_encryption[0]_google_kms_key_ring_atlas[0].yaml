@@ -1,2 +1,5 @@
 location: us-east1
 project: tf-lz-module-gcp-ci
+timeouts:
+  create: 30m
+  delete: 30m

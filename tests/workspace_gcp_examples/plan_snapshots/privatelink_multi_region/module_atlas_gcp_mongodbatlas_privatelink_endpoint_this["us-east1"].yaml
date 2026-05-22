@@ -2,3 +2,7 @@ port_mapping_enabled: true
 project_id: <project_id>
 provider_name: GCP
 region: EASTERN_US
+timeouts:
+  create: 30m
+  delete: 30m
+  update: 30m

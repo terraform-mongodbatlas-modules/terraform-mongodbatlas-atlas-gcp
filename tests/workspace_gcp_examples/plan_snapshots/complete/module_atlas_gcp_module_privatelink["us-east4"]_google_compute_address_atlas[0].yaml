@@ -7,3 +7,7 @@ project: tf-lz-module-gcp-ci
 region: us-east4
 terraform_labels:
   goog-terraform-provisioned: 'true'
+timeouts:
+  create: 30m
+  delete: 30m
+  update: 30m
