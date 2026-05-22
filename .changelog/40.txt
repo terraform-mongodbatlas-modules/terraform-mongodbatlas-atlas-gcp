@@ -1,0 +1,9 @@
+```release-note:breaking-change
+module: Normalizes module-managed multi-region PrivateLink endpoint for_each keys to lowercase GCP region format
+```
+```release-note:breaking-change
+variable/privatelink_byo_endpoint: Renames privatelink_byoe_regions and changes type to map(object({ region = string }))
+```
+```release-note:breaking-change
+variable/privatelink_byo_service: Renames privatelink_byoe
+```

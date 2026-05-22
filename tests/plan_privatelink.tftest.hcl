@@ -100,8 +100,8 @@ run "atlas_region_format" {
     error_message = "Expected regional mode disabled for single region"
   }
   assert {
-    condition     = contains(keys(output.privatelink_service_info), "US_EAST_4")
-    error_message = "Expected privatelink_service_info key preserves Atlas format 'US_EAST_4'"
+    condition     = contains(keys(output.privatelink_service_info), "us-east4")
+    error_message = "Expected privatelink_service_info key normalized to GCP format"
   }
   assert {
     condition     = length(output.privatelink) == 1
@@ -130,8 +130,8 @@ run "mixed_format_multi_region" {
     error_message = "Expected two privatelink output entries"
   }
   assert {
-    condition     = sort(keys(output.privatelink_service_info)) == sort(["US_WEST_4", "us-east4"])
-    error_message = "Expected privatelink_service_info keys to match endpoint regions inputted by the user"
+    condition     = sort(keys(output.privatelink_service_info)) == sort(["us-east4", "us-west4"])
+    error_message = "Expected privatelink_service_info keys normalized to GCP format"
   }
 }
 
@@ -190,9 +190,9 @@ run "single_region_multi_vpc" {
 run "byoe_phase1_only" {
   command = plan
   variables {
-    privatelink_byoe_regions = {
-      primary   = "us-east4"
-      secondary = "us-west4"
+    privatelink_byo_endpoint = {
+      primary   = { region = "us-east4" }
+      secondary = { region = "us-west4" }
     }
   }
   assert {
@@ -216,8 +216,8 @@ run "byoe_phase1_only" {
 run "byoe_phase2" {
   command = plan
   variables {
-    privatelink_byoe_regions = { primary = "us-east4" }
-    privatelink_byoe = {
+    privatelink_byo_endpoint = { primary = { region = "us-east4" } }
+    privatelink_byo_service = {
       primary = { ip_address = "10.0.1.5", forwarding_rule_name = "my-fr" }
     }
   }
@@ -234,8 +234,8 @@ run "byoe_phase2" {
 run "byoe_custom_gcp_project" {
   command = plan
   variables {
-    privatelink_byoe_regions = { primary = "us-east4" }
-    privatelink_byoe = {
+    privatelink_byo_endpoint = { primary = { region = "us-east4" } }
+    privatelink_byo_service = {
       primary = {
         ip_address           = "10.0.1.5"
         forwarding_rule_name = "my-fr"
@@ -252,11 +252,11 @@ run "byoe_custom_gcp_project" {
 run "byoe_partial_rollout" {
   command = plan
   variables {
-    privatelink_byoe_regions = {
-      primary   = "us-east4"
-      secondary = "us-west4"
+    privatelink_byo_endpoint = {
+      primary   = { region = "us-east4" }
+      secondary = { region = "us-west4" }
     }
-    privatelink_byoe = {
+    privatelink_byo_service = {
       primary = { ip_address = "10.0.1.5", forwarding_rule_name = "fr-primary" }
     }
   }
@@ -281,7 +281,7 @@ run "byoe_partial_rollout" {
 run "byoe_single_region_no_regional_mode" {
   command = plan
   variables {
-    privatelink_byoe_regions = { primary = "us-east4" }
+    privatelink_byo_endpoint = { primary = { region = "us-east4" } }
   }
   assert {
     condition     = output.regional_mode_enabled == false

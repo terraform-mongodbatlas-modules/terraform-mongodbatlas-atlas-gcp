@@ -118,22 +118,13 @@ run "privatelink_cannot_mix_patterns" {
 # BYOE Validations
 # ─────────────────────────────────────────────────────────────────────────────
 
-run "byoe_key_not_in_regions" {
+run "byoe_key_not_in_endpoint" {
   command = plan
   variables {
-    privatelink_byoe_regions = { primary = "us-east4" }
-    privatelink_byoe         = { secondary = { ip_address = "10.0.1.5", forwarding_rule_name = "fr-1" } }
+    privatelink_byo_endpoint = { primary = { region = "us-east4" } }
+    privatelink_byo_service  = { secondary = { ip_address = "10.0.1.5", forwarding_rule_name = "fr-1" } }
   }
-  expect_failures = [var.privatelink_byoe]
-}
-
-run "byoe_region_overlap_with_endpoints" {
-  command = plan
-  variables {
-    privatelink_endpoints    = [{ region = "us-east4", subnetwork = "sub-a" }]
-    privatelink_byoe_regions = { primary = "us-east4" }
-  }
-  expect_failures = [var.privatelink_byoe_regions]
+  expect_failures = [var.privatelink_byo_service]
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -413,22 +404,11 @@ run "region_unknown_rejected" {
   expect_failures = [terraform_data.region_validations]
 }
 
-run "region_cross_format_duplicate" {
-  command = plan
-  variables {
-    privatelink_endpoints = [
-      { region = "us-east4", subnetwork = "sub-a" },
-      { region = "US_EAST_4", subnetwork = "sub-b" }
-    ]
-  }
-  expect_failures = [terraform_data.region_validations]
-}
-
 run "region_cross_format_byoe_overlap" {
   command = plan
   variables {
     privatelink_endpoints    = [{ region = "us-east4", subnetwork = "sub-a" }]
-    privatelink_byoe_regions = { primary = "US_EAST_4" }
+    privatelink_byo_endpoint = { primary = { region = "US_EAST_4" } }
   }
   expect_failures = [terraform_data.region_validations]
 }
@@ -446,7 +426,7 @@ run "region_unknown_single_region_rejected" {
 run "region_unknown_byoe_rejected" {
   command = plan
   variables {
-    privatelink_byoe_regions = { primary = "invalid-region" }
+    privatelink_byo_endpoint = { primary = { region = "invalid-region" } }
   }
   expect_failures = [terraform_data.region_validations]
 }

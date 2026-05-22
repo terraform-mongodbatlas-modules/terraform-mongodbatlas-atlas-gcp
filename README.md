@@ -384,8 +384,8 @@ Private Service Connect (PSC) enables private connectivity between your GCP VPCs
 The module supports two connectivity paths (mutually exclusive):
 - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
 - **Bring Your Own Endpoint (BYOE):** Use the BYOE path if you have multiple teams that manage GCP networking separately. This is a 2-phase workflow:
-  1. Declare regions via `privatelink_byoe_regions` -- the module creates the Atlas endpoint service and outputs `service_attachment_names`
-  2. Create your own forwarding rules externally, then pass the details via `privatelink_byoe`
+  1. Declare regions via `privatelink_byo_endpoint` -- the module creates the Atlas endpoint service and outputs `service_attachment_names`
+  2. Create your own forwarding rules externally, then pass the details via `privatelink_byo_service`
 
 See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
 
@@ -451,33 +451,33 @@ list(object({
 
 Default: `[]`
 
-### privatelink_byoe_regions
+### privatelink_byo_endpoint
 
-BYOE (Bring Your Own Endpoint) Phase 1: declare regions for Atlas endpoint service creation.
+BYOE Phase 1: Declare regions for which the module creates Atlas PrivateLink endpoints.
+Key is a user-defined identifier; `region` is the Atlas service region
+(accepts us-east4 or US_EAST_4 format).
 
-Each key is a user-chosen identifier (not necessarily a region name). Each value
-is a GCP region (`us-east4` or `US_EAST_4`). Atlas creates the endpoint service
-and returns `service_attachment_names` via the `privatelink_service_info` output.
+Type is map(object) (not map(string)) to allow additive fields in future minor
+versions without another breaking change.
 
-Regions must not overlap with `privatelink_endpoints` regions.
-Phase 2 (`privatelink_byoe`) completes the connection.
+Type:
 
-Type: `map(string)`
+```hcl
+map(object({
+  region = string
+}))
+```
 
 Default: `{}`
 
-### privatelink_byoe
+### privatelink_byo_service
 
-BYOE (Bring Your Own Endpoint) Phase 2: complete the PSC connection.
-
-After Phase 1 returns `service_attachment_names`, create your own
-`google_compute_address` + `google_compute_forwarding_rule` targeting
-`service_attachment_names[0]`, then pass the details here.
+BYOE Phase 2: Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
+Keys must exist in privatelink_byo_endpoint.
 
 - `ip_address` is the internal IP of your `google_compute_address`.
 - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
 - `gcp_project_id` is used when the forwarding rule lives in a different GCP project than the provider default.
-- Key must exist in `privatelink_byoe_regions`.
 
 Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
 
