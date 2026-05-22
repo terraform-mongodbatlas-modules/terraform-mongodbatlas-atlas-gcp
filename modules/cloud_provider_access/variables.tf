@@ -9,5 +9,7 @@ variable "timeouts" {
     update = optional(string, "30m")
     delete = optional(string, "30m")
   })
-  nullable = true
+  default     = null
+  nullable    = true
+  description = "Timeout configuration for module-managed resources. Set to null to use provider defaults."
 }
