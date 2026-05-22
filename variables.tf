@@ -207,6 +207,9 @@ variable "privatelink_byo_endpoint" {
     Key is a user-defined identifier; `region` is the Atlas service region
     (accepts us-east4 or US_EAST_4 format).
 
+    Regions must not overlap with `privatelink_endpoints` (enforced via plan-time
+    precondition after normalization to GCP format).
+
     Type is map(object) (not map(string)) to allow additive fields in future minor
     versions.
   EOT

@@ -384,7 +384,7 @@ Private Service Connect (PSC) enables private connectivity between your GCP VPCs
 The module supports two connectivity paths (mutually exclusive):
 - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
 - **Bring Your Own Endpoint (BYOE):** Use the BYOE path if you have multiple teams that manage GCP networking separately. This is a 2-phase workflow:
-  1. Declare regions via `privatelink_byo_endpoint` -- the module creates the Atlas endpoint service and outputs `service_attachment_names`
+  1. Declare regions via `privatelink_byo_endpoint`: the module creates the Atlas endpoint service and outputs `service_attachment_names`
   2. Create your own forwarding rules externally, then pass the details via `privatelink_byo_service`
 
 See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
@@ -456,6 +456,9 @@ Default: `[]`
 BYOE Phase 1: Declare regions for which the module creates Atlas PrivateLink endpoints.
 Key is a user-defined identifier; `region` is the Atlas service region
 (accepts us-east4 or US_EAST_4 format).
+
+Regions must not overlap with `privatelink_endpoints` (enforced via plan-time
+precondition after normalization to GCP format).
 
 Type is map(object) (not map(string)) to allow additive fields in future minor
 versions.
