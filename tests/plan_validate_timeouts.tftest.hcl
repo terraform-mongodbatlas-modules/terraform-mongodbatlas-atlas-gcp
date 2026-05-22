@@ -73,7 +73,7 @@ run "timeouts_null_all_features" {
     ]
     backup_export = {
       enabled       = true
-      create_bucket = { enabled = true, location = "us-east4" }
+      create_gcs_bucket = { enabled = true, location = "us-east4" }
     }
     log_integration = {
       enabled           = true
@@ -117,7 +117,7 @@ run "timeouts_all_resources_plan_succeeds" {
     ]
     backup_export = {
       enabled       = true
-      create_bucket = { enabled = true, location = "us-east4" }
+      create_gcs_bucket = { enabled = true, location = "us-east4" }
     }
     log_integration = {
       enabled           = true
