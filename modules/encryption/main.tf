@@ -63,13 +63,25 @@ resource "google_kms_crypto_key" "atlas" {
 
 # IAM Bindings (grants Atlas SA access to KMS key)
 
+moved {
+  from = google_kms_crypto_key_iam_member.encrypter
+  to   = google_kms_crypto_key_iam_member.encrypter[0]
+}
+
+moved {
+  from = google_kms_crypto_key_iam_member.viewer
+  to   = google_kms_crypto_key_iam_member.viewer[0]
+}
+
 resource "google_kms_crypto_key_iam_member" "encrypter" {
+  count         = var.skip_iam_bindings ? 0 : 1
   crypto_key_id = local.crypto_key_id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${var.atlas_service_account_email}"
 }
 
 resource "google_kms_crypto_key_iam_member" "viewer" {
+  count         = var.skip_iam_bindings ? 0 : 1
   crypto_key_id = local.crypto_key_id
   role          = "roles/cloudkms.viewer"
   member        = "serviceAccount:${var.atlas_service_account_email}"
@@ -96,6 +108,6 @@ resource "mongodbatlas_encryption_at_rest" "this" {
 
   depends_on = [
     google_kms_crypto_key_iam_member.encrypter,
-    google_kms_crypto_key_iam_member.viewer
+    google_kms_crypto_key_iam_member.viewer,
   ]
 }

@@ -14,10 +14,13 @@ sections:
 
       The module creates a shared Cloud Provider Access (CPA) setup by default when encryption or backup export is enabled. You can also reuse an existing CPA by setting `create = false` with `existing.role_id` and `existing.service_account_for_atlas`. PrivateLink-only configurations skip CPA entirely since PSC uses GCP resources only.
 
+      Set `skip_iam_bindings = true` only when your platform team pre-grants the required GCP IAM roles on KMS keys and GCS buckets. In that case you must use user-provided KMS and buckets (`key_version_resource_id`, `bucket_name`); the module cannot create module-managed KMS or GCS without IAM bindings. `skip_iam_bindings = true` also requires BYO CPA (`cloud_provider_access.create = false`), because a module-created CPA still needs IAM bindings.
+
       See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-gcp-access/) for details.
     match:
       names:
         - cloud_provider_access
+        - skip_iam_bindings
 
   - id: encryption
     title: "Encryption at Rest"

@@ -440,6 +440,47 @@ variable "log_integration" {
   }
 }
 
+variable "skip_iam_bindings" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Skip all module-managed GCP IAM bindings (google_kms_crypto_key_iam_member,
+    google_storage_bucket_iam_member) in encryption, backup_export, and log_integration.
+    Set true when the Atlas-managed service account already has the required roles
+    pre-granted externally.
+
+    Required roles when true:
+    - KMS: roles/cloudkms.cryptoKeyEncrypterDecrypter, roles/cloudkms.viewer on the crypto key
+    - GCS backup export: roles/storage.objectUser on each backup export bucket
+    - GCS log integration: roles/storage.objectCreator on each log integration bucket
+
+    Requires BYO resources. The following are disallowed when skip_iam_bindings = true:
+    create_kms_key.enabled, create_gcs_bucket.enabled, and cloud_provider_access.create = true,
+    because module-managed resources need bindings to function and a module-created
+    CPA pairs with module-managed bindings.
+  EOT
+
+  validation {
+    condition     = !var.skip_iam_bindings || !try(var.encryption.create_kms_key.enabled, false)
+    error_message = "skip_iam_bindings = true requires BYO KMS key (key_version_resource_id). Module-managed KMS keys need IAM bindings."
+  }
+
+  validation {
+    condition     = !var.skip_iam_bindings || !try(var.backup_export.create_gcs_bucket.enabled, false)
+    error_message = "skip_iam_bindings = true requires BYO backup bucket (bucket_name). Module-managed buckets need IAM bindings."
+  }
+
+  validation {
+    condition     = !var.skip_iam_bindings || !try(var.log_integration.create_gcs_bucket.enabled, false)
+    error_message = "skip_iam_bindings = true requires BYO log bucket (bucket_name). Module-managed buckets need IAM bindings."
+  }
+
+  validation {
+    condition     = !var.skip_iam_bindings || !try(var.cloud_provider_access.create, true)
+    error_message = "skip_iam_bindings = true requires BYO CPA (cloud_provider_access.create = false with existing set)."
+  }
+}
+
 variable "gcp_tags" {
   type        = map(string)
   default     = {}

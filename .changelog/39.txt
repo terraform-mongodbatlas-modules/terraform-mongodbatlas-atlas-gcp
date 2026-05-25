@@ -1,0 +1,6 @@
+```release-note:enhancement
+variable/skip_iam_bindings: Adds skip flag to omit module-managed GCP IAM bindings when roles are pre-granted externally
+```
+```release-note:enhancement
+example/gcp_read_only: Adds read-only GCP example with BYO CPA and pre-granted IAM
+```

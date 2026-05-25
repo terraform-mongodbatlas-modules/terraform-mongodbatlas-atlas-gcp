@@ -57,6 +57,12 @@ variable "enabled_for_search_nodes" {
   description = "Enable Encryption at Rest for Dedicated Search Nodes"
 }
 
+variable "skip_iam_bindings" {
+  type        = bool
+  default     = false
+  description = "Skip google_kms_crypto_key_iam_member when IAM is pre-granted externally"
+}
+
 variable "labels" {
   type        = map(string)
   default     = {}

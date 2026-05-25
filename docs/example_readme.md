@@ -32,7 +32,7 @@ To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following req
 
 ## Commands
 
-The following `terraform` commands initiate, apply, and destroy your configuration:
+Use the following `terraform` commands to initiate, apply, or destroy your configuration:
 
 ```sh
 terraform init # this will download the required providers and create a `terraform.lock.hcl` file.
@@ -45,7 +45,7 @@ terraform destroy -var-file vars.tfvars
 
 ## (Optional) Create a New Atlas Project Resource
 
-Add the following code to the `main.tf` file to set your configuration in a new Atlas project:
+To set your configuration in a new Atlas project, add the following code to the `main.tf` file:
 
 ```hcl
 variable "org_id" {
@@ -67,4 +67,4 @@ Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf
 
 ## Feedback or Help
 
-- If you have any feedback or trouble, please open a GitHub Issue.
+- If you have any feedback or found an error, open a GitHub Issue.

@@ -85,7 +85,8 @@ module "encryption" {
       var.encryption.create_kms_key.location
     )
   })
-  timeouts = var.timeouts
+  skip_iam_bindings = var.skip_iam_bindings
+  timeouts          = var.timeouts
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -110,8 +111,9 @@ module "backup_export" {
     )
   })
 
-  timeouts   = var.timeouts
-  depends_on = [module.cloud_provider_access, module.backup_export_cloud_provider_access]
+  skip_iam_bindings = var.skip_iam_bindings
+  timeouts          = var.timeouts
+  depends_on        = [module.cloud_provider_access, module.backup_export_cloud_provider_access]
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -127,7 +129,7 @@ module "log_integration" {
   atlas_service_account_email = local.log_integration_service_account
   bucket_name                 = var.log_integration.bucket_name
   integrations                = var.log_integration.integrations
-  skip_iam_bindings           = false
+  skip_iam_bindings           = var.skip_iam_bindings
   labels                      = merge(var.gcp_tags, var.log_integration.labels)
 
   create_gcs_bucket = merge(var.log_integration.create_gcs_bucket, {

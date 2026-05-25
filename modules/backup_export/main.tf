@@ -59,7 +59,13 @@ resource "google_storage_bucket" "atlas" {
   }
 }
 
+moved {
+  from = google_storage_bucket_iam_member.atlas
+  to   = google_storage_bucket_iam_member.atlas[0]
+}
+
 resource "google_storage_bucket_iam_member" "atlas" {
+  count  = var.skip_iam_bindings ? 0 : 1
   bucket = local.create_gcs_bucket ? google_storage_bucket.atlas[0].name : var.bucket_name
   role   = "roles/storage.objectUser"
   member = "serviceAccount:${var.atlas_service_account_email}"
@@ -73,7 +79,13 @@ resource "google_storage_bucket_iam_member" "atlas" {
 }
 
 resource "time_sleep" "iam_propagation" {
-  depends_on      = [google_storage_bucket_iam_member.atlas, google_storage_bucket.atlas]
+  count = var.skip_iam_bindings ? 0 : 1
+
+  depends_on = [
+    google_storage_bucket_iam_member.atlas,
+    google_storage_bucket.atlas,
+    data.google_storage_bucket.user_provided,
+  ]
   create_duration = "30s"
 }
 

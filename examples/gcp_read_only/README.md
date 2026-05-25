@@ -3,7 +3,7 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# GCS Bucket Export (Module-Managed)
+# BYO CPA + Pre-Granted IAM
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
@@ -77,41 +77,54 @@ module "atlas_gcp" {
   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
   project_id = var.project_id
 
-  backup_export = {
-    enabled = true
-    create_gcs_bucket = {
-      enabled       = true
-      name          = var.bucket_name
-      name_suffix   = var.bucket_name_suffix
-      location      = var.gcp_region
-      force_destroy = var.force_destroy
+  skip_iam_bindings = true
+
+  cloud_provider_access = {
+    create = false
+    existing = {
+      role_id                   = var.atlas_role_id
+      service_account_for_atlas = var.atlas_service_account_email
     }
   }
 
-  gcp_tags = var.gcp_tags
+  encryption = {
+    enabled                 = true
+    key_version_resource_id = var.kms_key_version_resource_id
+  }
+
+  backup_export = {
+    enabled     = true
+    bucket_name = var.backup_bucket_name
+  }
+
+  log_integration = {
+    enabled     = true
+    bucket_name = var.log_bucket_name
+    integrations = [
+      { log_types = ["MONGOD"], prefix_path = "operational/" },
+      { log_types = ["MONGOD_AUDIT"], prefix_path = "audit/" },
+    ]
+  }
 }
 
-# Alternative: user-provided bucket (uncomment and remove create_gcs_bucket above)
-# module "atlas_gcp" {
-#   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-#   project_id = var.project_id
-#
-#   backup_export = {
-#     enabled     = true
-#     bucket_name = "my-existing-bucket"
-#   }
-#
-#   gcp_tags = var.gcp_tags
-# }
+output "encryption_at_rest_provider" {
+  value = module.atlas_gcp.encryption_at_rest_provider
+}
 
-# backup export configuration and GCS bucket details
+output "encryption" {
+  value = module.atlas_gcp.encryption
+}
+
 output "backup_export" {
   value = module.atlas_gcp.backup_export
 }
 
-# export_bucket_id -- pass to cluster module's backup schedule export { export_bucket_id = ... }
 output "export_bucket_id" {
   value = module.atlas_gcp.export_bucket_id
+}
+
+output "log_integration" {
+  value = module.atlas_gcp.log_integration
 }
 ```
 

@@ -47,6 +47,12 @@ variable "create_gcs_bucket" {
   }
 }
 
+variable "skip_iam_bindings" {
+  type        = bool
+  default     = false
+  description = "Skip google_storage_bucket_iam_member when IAM is pre-granted externally"
+}
+
 variable "labels" {
   type        = map(string)
   default     = {}
