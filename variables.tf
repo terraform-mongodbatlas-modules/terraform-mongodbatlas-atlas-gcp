@@ -110,11 +110,11 @@ variable "encryption" {
 
 variable "privatelink_endpoints" {
   type = list(object({
-    region                  = string
-    subnetwork              = string
-    labels                  = optional(map(string), {})
-    name_prefix             = optional(string)
-    allow_psc_global_access = optional(bool)
+    region          = string
+    subnetwork      = string
+    labels          = optional(map(string), {})
+    name_prefix     = optional(string)
+    all_region_mode = optional(bool)
   }))
   default     = []
   description = <<-EOT
@@ -136,9 +136,9 @@ variable "privatelink_endpoints" {
       forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{region}-`
       where region is in GCP format (e.g., `atlas-psc-us-east4-`). Set a custom prefix when
       multiple deployments share the same GCP project and region to avoid name collisions.
-    - `allow_psc_global_access`: when true, enables cross-region VPC client access to this PSC
-      endpoint IP. When omitted, same-region-only access (v0 behavior). Use
-      `allow_psc_global_access`, not `allow_global_access` (ILB-only). Not for BYOE rules.
+    - `all_region_mode`: when true, enables cross-region VPC client access to this PSC endpoint IP
+      by setting `allow_psc_global_access` on the forwarding rule. When omitted, same-region-only
+      access (v0 behavior). Do not use `allow_global_access` (ILB-only). Not for BYO Endpoint rules.
   EOT
 
   validation {
@@ -159,11 +159,11 @@ variable "privatelink_endpoints" {
 
 variable "privatelink_endpoints_single_region" {
   type = list(object({
-    region                  = string
-    subnetwork              = string
-    labels                  = optional(map(string), {})
-    name_prefix             = optional(string)
-    allow_psc_global_access = optional(bool)
+    region          = string
+    subnetwork      = string
+    labels          = optional(map(string), {})
+    name_prefix     = optional(string)
+    all_region_mode = optional(bool)
   }))
   default     = []
   description = <<-EOT
@@ -179,7 +179,7 @@ variable "privatelink_endpoints_single_region" {
       forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{index}-`
       where index is the list position (e.g., `atlas-psc-0-`). Recommended to set explicitly
       since index-based defaults are not descriptive.
-    - `allow_psc_global_access`: same semantics as `privatelink_endpoints`.
+    - `all_region_mode`: same semantics as `privatelink_endpoints`.
   EOT
 
   validation {

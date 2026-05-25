@@ -64,7 +64,7 @@ variable "timeouts" {
   description = "Timeout configuration for module-managed resources. Set to null to use provider defaults."
 }
 
-variable "allow_psc_global_access" {
+variable "all_region_mode" {
   type        = bool
   default     = null
   description = <<-EOT

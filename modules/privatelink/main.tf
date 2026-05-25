@@ -37,7 +37,7 @@ resource "google_compute_forwarding_rule" "atlas" {
   load_balancing_scheme   = ""
   target                  = var.service_attachment_name
   labels                  = var.labels
-  allow_psc_global_access = var.allow_psc_global_access
+  allow_psc_global_access = var.all_region_mode
 
   dynamic "timeouts" {
     for_each = var.timeouts[*]
