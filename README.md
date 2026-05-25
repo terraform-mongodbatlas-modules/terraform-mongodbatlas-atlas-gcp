@@ -77,7 +77,7 @@ To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following req
 
 ### Commands
 
-The following `terraform` commands initiate, apply, and destroy your configuration:
+Use the following `terraform` commands to initiate, apply, or destroy your configuration:
 
 ```sh
 terraform init # this will download the required providers and create a `terraform.lock.hcl` file.
@@ -90,7 +90,7 @@ terraform destroy -var-file vars.tfvars
 
 ### (Optional) Create a New Atlas Project Resource
 
-Add the following code to the `main.tf` file to set your configuration in a new Atlas project:
+To set your configuration in a new Atlas project, add the following code to the `main.tf` file:
 
 ```hcl
 variable "org_id" {
@@ -326,8 +326,8 @@ Required roles when true:
 - GCS backup export: roles/storage.objectUser on each backup export bucket
 - GCS log integration: roles/storage.objectCreator on each log integration bucket
 
-Requires BYO resources: create_kms_key.enabled, create_gcs_bucket.enabled, and
-cloud_provider_access.create = true are disallowed when skip_iam_bindings = true,
+Requires BYO resources. The following are disallowed when skip_iam_bindings = true:
+create_kms_key.enabled, create_gcs_bucket.enabled, and cloud_provider_access.create = true,
 because module-managed resources need bindings to function and a module-created
 CPA pairs with module-managed bindings.
 

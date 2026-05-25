@@ -85,6 +85,8 @@ resource "google_storage_bucket_iam_member" "atlas" {
 }
 
 resource "time_sleep" "iam_propagation" {
+  count = var.skip_iam_bindings ? 0 : 1
+
   depends_on = [
     google_storage_bucket_iam_member.atlas,
     google_storage_bucket.atlas,

@@ -460,8 +460,8 @@ variable "skip_iam_bindings" {
     - GCS backup export: roles/storage.objectUser on each backup export bucket
     - GCS log integration: roles/storage.objectCreator on each log integration bucket
 
-    Requires BYO resources: create_kms_key.enabled, create_gcs_bucket.enabled, and
-    cloud_provider_access.create = true are disallowed when skip_iam_bindings = true,
+    Requires BYO resources. The following are disallowed when skip_iam_bindings = true:
+    create_kms_key.enabled, create_gcs_bucket.enabled, and cloud_provider_access.create = true,
     because module-managed resources need bindings to function and a module-created
     CPA pairs with module-managed bindings.
   EOT
