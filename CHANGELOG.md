@@ -14,10 +14,12 @@ NOTES:
 
 ENHANCEMENTS:
 
+* example/gcp_read_only: Adds read-only GCP example with BYO CPA and pre-granted IAM ([#39](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/39))
 * example/log_integration: Adds log_integration example with MONGOD, MONGOS, and audit logs under separate prefix paths ([#36](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/36))
 * module: Adds optional log_integration for Atlas GCS log export via mongodbatlas_log_integration ([#35](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/35))
 * output/backup_export: Adds expiration_days to backup_export output ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
 * variable/backup_export: Adds optional expiration_days lifecycle on module-managed GCS buckets ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
+* variable/skip_iam_bindings: Adds skip flag to omit module-managed GCP IAM bindings when roles are pre-granted externally ([#39](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/39))
 * variable/timeouts: Adds nullable flat timeouts object with 30m defaults for module-managed Atlas and GCP resources, set `timeouts = null` for zero-diff upgrades from v0.x ([#38](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/38))
 
 BUG FIXES:
