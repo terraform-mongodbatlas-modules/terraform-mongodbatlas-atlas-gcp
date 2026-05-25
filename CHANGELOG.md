@@ -7,6 +7,7 @@ BREAKING CHANGES:
 * variable/create_gcs_bucket: Changes versioning_enabled default to false on backup_export and log_integration module-managed GCS buckets ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
 * variable/privatelink_byo_endpoint: Renames privatelink_byoe_regions to privatelink_byo_endpoint and changes type to map(object({ region = string })) ([#40](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/40))
 * variable/privatelink_byo_service: Renames privatelink_byoe to privatelink_byo_service ([#40](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/40))
+* variable/privatelink_regional_mode: Makes private endpoint regional mode opt-in; default `"disabled"` replaces automatic enablement for multi-region PrivateLink
 
 NOTES:
 

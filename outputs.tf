@@ -76,7 +76,7 @@ output "privatelink_service_info" {
 }
 
 output "regional_mode_enabled" {
-  description = "Whether private endpoint regional mode is enabled (auto-enabled for multi-region)"
+  description = "Whether private endpoint regional mode is enabled (true when privatelink_regional_mode = \"auto\" and PrivateLink spans multiple Atlas service regions)"
   value       = local.enable_regional_mode
 }
 

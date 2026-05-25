@@ -2,7 +2,8 @@ module "atlas_gcp" {
   source     = "../../"
   project_id = var.project_id
 
-  privatelink_endpoints = var.privatelink_endpoints
+  privatelink_endpoints     = var.privatelink_endpoints
+  privatelink_regional_mode = "auto"
 
   gcp_tags = var.gcp_tags
 }

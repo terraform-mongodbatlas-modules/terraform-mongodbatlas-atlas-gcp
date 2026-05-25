@@ -232,7 +232,7 @@ All Features | [Encryption + Backup Export + PrivateLink](./examples/complete) |
 Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
 Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
 Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
-PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with auto-enabled regional mode
+PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with privatelink_regional_mode = "auto"
 PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
 Read-Only GCP | [BYO CPA + Pre-Granted IAM](./examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
 
@@ -411,6 +411,8 @@ The module supports two connectivity paths (mutually exclusive):
   1. Declare regions via `privatelink_byo_endpoint`: the module creates the Atlas endpoint service and outputs `service_attachment_names`
   2. Create your own forwarding rules externally, then pass the details via `privatelink_byo_service`
 
+Set `privatelink_regional_mode = "auto"` to enable Atlas private endpoint regional mode when PrivateLink spans multiple Atlas service regions. Default is `"disabled"`.
+
 See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
 
 ### privatelink_endpoints
@@ -528,6 +530,22 @@ map(object({
 ```
 
 Default: `{}`
+
+### privatelink_regional_mode
+
+Controls Atlas private endpoint regional mode for multi-region PrivateLink.
+
+- `"disabled"` (default): Do not create `mongodbatlas_private_endpoint_regional_mode`.
+- `"auto"`: Create regional mode when PrivateLink spans more than one distinct Atlas service region.
+
+Regional mode affects project-wide private connection strings (regional SRV records for sharded
+clusters). Enable only when apps consume per-region URIs. Omit or leave `"disabled"` for
+single-region clusters, replicaset multi-region setups that use one global URI via peering,
+or when regional mode is managed outside this module.
+
+Type: `string`
+
+Default: `"disabled"`
 
 
 ## Backup Export
@@ -797,7 +815,7 @@ Description: Atlas PrivateLink service info per endpoint key (for BYO Endpoint -
 
 ### <a name="output_regional_mode_enabled"></a> [regional\_mode\_enabled](#output\_regional\_mode\_enabled)
 
-Description: Whether private endpoint regional mode is enabled (auto-enabled for multi-region)
+Description: Whether private endpoint regional mode is enabled (true when privatelink\_regional\_mode = "auto" and PrivateLink spans multiple Atlas service regions)
 
 ### <a name="output_resource_ids"></a> [resource\_ids](#output\_resource\_ids)
 

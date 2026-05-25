@@ -42,7 +42,7 @@ tables:
       - folder_name: privatelink_multi_region
         feature: PrivateLink (PSC)
         name: Multi-Region Private Service Connect
-        description: Private connectivity across multiple GCP regions with auto-enabled regional mode
+        description: Private connectivity across multiple GCP regions with privatelink_regional_mode = "auto"
       - folder_name: privatelink_byoe
         feature: PrivateLink (PSC)
         name: BYO Endpoint (Bring Your Own Endpoint)

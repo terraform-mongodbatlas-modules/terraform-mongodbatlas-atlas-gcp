@@ -248,6 +248,27 @@ variable "privatelink_byo_service" {
   }
 }
 
+variable "privatelink_regional_mode" {
+  type        = string
+  default     = "disabled"
+  description = <<-EOT
+    Controls Atlas private endpoint regional mode for multi-region PrivateLink.
+
+    - `"disabled"` (default): Do not create `mongodbatlas_private_endpoint_regional_mode`.
+    - `"auto"`: Create regional mode when PrivateLink spans more than one distinct Atlas service region.
+
+    Regional mode affects project-wide private connection strings (regional SRV records for sharded
+    clusters). Enable only when apps consume per-region URIs. Omit or leave `"disabled"` for
+    single-region clusters, replicaset multi-region setups that use one global URI via peering,
+    or when regional mode is managed outside this module.
+  EOT
+
+  validation {
+    condition     = contains(["auto", "disabled"], var.privatelink_regional_mode)
+    error_message = "privatelink_regional_mode must be \"auto\" or \"disabled\"."
+  }
+}
+
 variable "backup_export" {
   type = object({
     enabled     = optional(bool, false)

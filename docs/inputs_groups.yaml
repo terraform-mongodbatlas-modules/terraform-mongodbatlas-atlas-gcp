@@ -47,6 +47,8 @@ sections:
         1. Declare regions via `privatelink_byo_endpoint`: the module creates the Atlas endpoint service and outputs `service_attachment_names`
         2. Create your own forwarding rules externally, then pass the details via `privatelink_byo_service`
 
+      Set `privatelink_regional_mode = "auto"` to enable Atlas private endpoint regional mode when PrivateLink spans multiple Atlas service regions. Default is `"disabled"`.
+
       See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
     match:
       names:
@@ -54,6 +56,7 @@ sections:
         - privatelink_endpoints_single_region
         - privatelink_byo_endpoint
         - privatelink_byo_service
+        - privatelink_regional_mode
 
   - id: backup
     title: "Backup Export"
