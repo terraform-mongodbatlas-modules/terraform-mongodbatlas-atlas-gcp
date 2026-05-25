@@ -92,11 +92,18 @@ locals {
   ) : local.service_account_for_atlas
 
   # PrivateLink: convert lists to maps for for_each
-  privatelink_endpoints_map = {
+  _pl_endpoint_keys = [
     for ep in var.privatelink_endpoints :
     lookup(local.atlas_to_gcp_region, ep.region,
       contains(values(local.atlas_to_gcp_region), ep.region) ? ep.region : lower(ep.region)
-    ) => ep
+    )
+  ]
+  # Fall back to index keys when duplicates exist so terraform_data.region_validations
+  # can surface the explicit duplicate-region precondition instead of a generic map error.
+  privatelink_endpoints_map = length(local._pl_duplicates) > 0 ? {
+    for idx, ep in var.privatelink_endpoints : tostring(idx) => ep
+    } : {
+    for idx, ep in var.privatelink_endpoints : local._pl_endpoint_keys[idx] => ep
   }
   privatelink_endpoints_single_region_map = { for idx, ep in var.privatelink_endpoints_single_region : tostring(idx) => ep }
   privatelink_module_managed              = merge(local.privatelink_endpoints_map, local.privatelink_endpoints_single_region_map)

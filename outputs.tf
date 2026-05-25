@@ -47,7 +47,7 @@ output "resource_ids" {
 }
 
 output "privatelink" {
-  description = "PrivateLink status per endpoint key (both module-managed and BYOE)"
+  description = "PrivateLink status per endpoint key (both module-managed and BYO Endpoint)"
   value = {
     for k, pl in module.privatelink : k => {
       region                      = local.privatelink_module_calls[k].region
@@ -64,7 +64,7 @@ output "privatelink" {
 }
 
 output "privatelink_service_info" {
-  description = "Atlas PrivateLink service info per endpoint key (for BYOE - create your GCP PSC endpoint using these values)"
+  description = "Atlas PrivateLink service info per endpoint key (for BYO Endpoint - create your GCP PSC endpoint using these values)"
   value = {
     for k, ep in mongodbatlas_privatelink_endpoint.this : k => {
       region                      = local.privatelink_endpoints_all[k].region

@@ -40,7 +40,7 @@ sections:
 
       The module supports two connectivity paths (mutually exclusive):
       - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
-      - **Bring Your Own Endpoint (BYOE):** Use the BYOE path if you have multiple teams that manage GCP networking separately. This is a 2-phase workflow:
+      - **BYO Endpoint (Bring Your Own Endpoint):** Use the BYO Endpoint path if you have multiple teams that manage GCP networking separately. This is a 2-phase workflow:
         1. Declare regions via `privatelink_byo_endpoint`: the module creates the Atlas endpoint service and outputs `service_attachment_names`
         2. Create your own forwarding rules externally, then pass the details via `privatelink_byo_service`
 

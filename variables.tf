@@ -203,7 +203,7 @@ variable "privatelink_byo_endpoint" {
   }))
   default     = {}
   description = <<-EOT
-    BYOE Phase 1: Declare regions for which the module creates Atlas PrivateLink endpoints.
+    BYO Endpoint Phase 1: Declare regions for which the module creates Atlas PrivateLink endpoints.
     Key is a user-defined identifier; `region` is the Atlas service region
     (accepts us-east4 or US_EAST_4 format).
 
@@ -223,7 +223,7 @@ variable "privatelink_byo_service" {
   }))
   default     = {}
   description = <<-EOT
-    BYOE Phase 2: Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
+    BYO Endpoint Phase 2: Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
     Keys must exist in privatelink_byo_endpoint.
 
     - `ip_address` is the internal IP of your `google_compute_address`.
