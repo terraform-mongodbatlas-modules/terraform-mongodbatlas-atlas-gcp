@@ -197,27 +197,25 @@ variable "privatelink_endpoints_single_region" {
   }
 }
 
-variable "privatelink_byoe_regions" {
-  type        = map(string)
+variable "privatelink_byo_endpoint" {
+  type = map(object({
+    region = string
+  }))
   default     = {}
   description = <<-EOT
-    BYOE (Bring Your Own Endpoint) Phase 1: declare regions for Atlas endpoint service creation.
+    BYO Endpoint Phase 1: Declare regions for which the module creates Atlas PrivateLink endpoints.
+    Key is a user-defined identifier; `region` is the Atlas service region
+    (accepts us-east4 or US_EAST_4 format).
 
-    Each key is a user-chosen identifier (not necessarily a region name). Each value
-    is a GCP region (`us-east4` or `US_EAST_4`). Atlas creates the endpoint service
-    and returns `service_attachment_names` via the `privatelink_service_info` output.
+    Regions must not overlap with `privatelink_endpoints` (enforced via plan-time
+    precondition after normalization to GCP format).
 
-    Regions must not overlap with `privatelink_endpoints` regions.
-    Phase 2 (`privatelink_byoe`) completes the connection.
+    Type is map(object) (not map(string)) to allow additive fields in future minor
+    versions.
   EOT
-
-  validation {
-    condition     = length(setintersection(values(var.privatelink_byoe_regions), [for ep in var.privatelink_endpoints : ep.region])) == 0
-    error_message = "Regions in privatelink_byoe_regions must not overlap with regions in privatelink_endpoints."
-  }
 }
 
-variable "privatelink_byoe" {
+variable "privatelink_byo_service" {
   type = map(object({
     ip_address           = string
     forwarding_rule_name = string
@@ -225,23 +223,19 @@ variable "privatelink_byoe" {
   }))
   default     = {}
   description = <<-EOT
-    BYOE (Bring Your Own Endpoint) Phase 2: complete the PSC connection.
-
-    After Phase 1 returns `service_attachment_names`, create your own
-    `google_compute_address` + `google_compute_forwarding_rule` targeting
-    `service_attachment_names[0]`, then pass the details here.
+    BYO Endpoint Phase 2: Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
+    Keys must exist in privatelink_byo_endpoint.
 
     - `ip_address` is the internal IP of your `google_compute_address`.
     - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
     - `gcp_project_id` is used when the forwarding rule lives in a different GCP project than the provider default.
-    - Key must exist in `privatelink_byoe_regions`.
 
     Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
   EOT
 
   validation {
-    condition     = alltrue([for k in keys(var.privatelink_byoe) : contains(keys(var.privatelink_byoe_regions), k)])
-    error_message = "All keys in privatelink_byoe must exist in privatelink_byoe_regions."
+    condition     = alltrue([for k in keys(var.privatelink_byo_service) : contains(keys(var.privatelink_byo_endpoint), k)])
+    error_message = "Keys in privatelink_byo_service must exist in privatelink_byo_endpoint."
   }
 }
 

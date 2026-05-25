@@ -45,5 +45,5 @@ tables:
         description: Private connectivity across multiple GCP regions with auto-enabled regional mode
       - folder_name: privatelink_byoe
         feature: PrivateLink (PSC)
-        name: BYOE (Bring Your Own Endpoint)
+        name: BYO Endpoint (Bring Your Own Endpoint)
         description: Two-phase workflow for externally managed GCP forwarding rules
