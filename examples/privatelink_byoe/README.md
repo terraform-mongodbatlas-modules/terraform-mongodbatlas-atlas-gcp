@@ -3,7 +3,7 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# BYOE (Bring Your Own Endpoint)
+# BYO Endpoint (Bring Your Own Endpoint)
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
@@ -77,9 +77,9 @@ Copy and use this code to get started quickly:
   BYOE (Bring Your Own Endpoint) pattern for GCP Private Service Connect.
 
   Single `terraform apply` approach:
-  1. Create Atlas-side PrivateLink using `privatelink_byoe_regions` to get service attachment info.
+  1. Create Atlas-side PrivateLink using `privatelink_byo_endpoint` to get service attachment info.
   2. Create your own GCP address + forwarding rule using `privatelink_service_info` output.
-  3. Register your endpoint with Atlas using `privatelink_byoe` to complete the connection.
+  3. Register your endpoint with Atlas using `privatelink_byo_service` to complete the connection.
 */
 
 locals {
@@ -90,14 +90,14 @@ module "atlas_gcp" {
   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
   project_id = var.project_id
 
-  privatelink_byoe = {
+  privatelink_byo_endpoint = { (local.ep1) = { region = var.gcp_region } }
+  privatelink_byo_service = {
     (local.ep1) = {
       ip_address           = google_compute_address.psc.address
       forwarding_rule_name = google_compute_forwarding_rule.psc.name
       # gcp_project_id     = "my-other-project" # optional: override when forwarding rule is in a different GCP project
     }
   }
-  privatelink_byoe_regions = { (local.ep1) = var.gcp_region }
 
   gcp_tags = var.gcp_tags
 }

@@ -14,9 +14,9 @@ locals {
     contains(values(local.atlas_to_gcp_region), ep.region) ? ep.region : null)
   ]
   _byoe_normalized = [
-    for v in values(var.privatelink_byoe_regions) :
-    lookup(local.atlas_to_gcp_region, v,
-    contains(values(local.atlas_to_gcp_region), v) ? v : null)
+    for ep in values(var.privatelink_byo_endpoint) :
+    lookup(local.atlas_to_gcp_region, ep.region,
+    contains(values(local.atlas_to_gcp_region), ep.region) ? ep.region : null)
   ]
   _log_location_normalized = (
     var.log_integration.enabled && var.log_integration.create_gcs_bucket.enabled
@@ -31,7 +31,7 @@ locals {
   # Validation helpers: extract bad values for error messages
   _pl_unknown    = [for i, r in local._pl_normalized : var.privatelink_endpoints[i].region if r == null]
   _pl_sr_unknown = [for i, r in local._pl_sr_normalized : var.privatelink_endpoints_single_region[i].region if r == null]
-  _byoe_unknown  = [for i, r in local._byoe_normalized : values(var.privatelink_byoe_regions)[i] if r == null]
+  _byoe_unknown  = [for i, r in local._byoe_normalized : values(var.privatelink_byo_endpoint)[i].region if r == null]
   _log_location_unknown = (
     var.log_integration.enabled && var.log_integration.create_gcs_bucket.enabled && local._log_location_normalized == null
     ? [var.log_integration.create_gcs_bucket.location]
@@ -47,7 +47,7 @@ locals {
   )
 
   # Cloud provider access: skip when only privatelink is configured
-  privatelink_configured = length(var.privatelink_endpoints) > 0 || length(var.privatelink_endpoints_single_region) > 0 || length(var.privatelink_byoe_regions) > 0
+  privatelink_configured = length(var.privatelink_endpoints) > 0 || length(var.privatelink_endpoints_single_region) > 0 || length(var.privatelink_byo_endpoint) > 0
   skip_cloud_provider_access = (
     !var.encryption.enabled &&
     !var.backup_export.enabled &&
@@ -92,16 +92,28 @@ locals {
   ) : local.service_account_for_atlas
 
   # PrivateLink: convert lists to maps for for_each
-  privatelink_endpoints_map               = { for ep in var.privatelink_endpoints : ep.region => ep }
+  _pl_endpoint_keys = [
+    for ep in var.privatelink_endpoints :
+    lookup(local.atlas_to_gcp_region, ep.region,
+      contains(values(local.atlas_to_gcp_region), ep.region) ? ep.region : lower(ep.region)
+    )
+  ]
+  # Fall back to index keys when duplicates exist so terraform_data.region_validations
+  # can surface the explicit duplicate-region precondition instead of a generic map error.
+  privatelink_endpoints_map = length(local._pl_duplicates) > 0 ? {
+    for idx, ep in var.privatelink_endpoints : tostring(idx) => ep
+    } : {
+    for idx, ep in var.privatelink_endpoints : local._pl_endpoint_keys[idx] => ep
+  }
   privatelink_endpoints_single_region_map = { for idx, ep in var.privatelink_endpoints_single_region : tostring(idx) => ep }
   privatelink_module_managed              = merge(local.privatelink_endpoints_map, local.privatelink_endpoints_single_region_map)
   privatelink_endpoints_all = merge(
     local.privatelink_module_managed,
-    { for k, region in var.privatelink_byoe_regions : k => { region = region, subnetwork = "", labels = {} } }
+    { for k, ep in var.privatelink_byo_endpoint : k => { region = ep.region, subnetwork = "", labels = {} } }
   )
   privatelink_module_calls = merge(
     local.privatelink_module_managed,
-    { for k, region in var.privatelink_byoe_regions : k => { region = region, subnetwork = "", labels = {} } if contains(keys(var.privatelink_byoe), k) }
+    { for k, ep in var.privatelink_byo_endpoint : k => { region = ep.region, subnetwork = "", labels = {} } if contains(keys(var.privatelink_byo_service), k) }
   )
 
   # Normalize regions for accurate counting (handles mixed GCP/Atlas format input)

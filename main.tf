@@ -18,11 +18,11 @@ resource "terraform_data" "region_validations" {
     }
     precondition {
       condition     = length(local._byoe_unknown) == 0
-      error_message = "Unknown region(s) in privatelink_byoe_regions: [${join(", ", local._byoe_unknown)}]."
+      error_message = "Unknown region(s) in privatelink_byo_endpoint: [${join(", ", local._byoe_unknown)}]."
     }
     precondition {
       condition     = length(local._pl_byoe_overlap) == 0
-      error_message = "Overlap between privatelink_endpoints and privatelink_byoe_regions after normalization: [${join(", ", local._pl_byoe_overlap)}]."
+      error_message = "Overlap between privatelink_endpoints and privatelink_byo_endpoint after normalization: [${join(", ", local._pl_byoe_overlap)}]."
     }
     precondition {
       condition     = length(local._log_location_unknown) == 0
@@ -192,7 +192,7 @@ module "privatelink" {
   service_attachment_name = mongodbatlas_privatelink_endpoint.this[each.key].service_attachment_names[0]
 
   subnetwork  = contains(keys(local.privatelink_module_managed), each.key) ? { self_link = each.value.subnetwork } : null
-  byo         = try(var.privatelink_byoe[each.key], null)
+  byo         = try(var.privatelink_byo_service[each.key], null)
   name_prefix = coalesce(try(each.value.name_prefix, null), "atlas-psc-${lookup(local.atlas_to_gcp_region, each.key, each.key)}-")
 
   labels   = merge(var.gcp_tags, each.value.labels)
