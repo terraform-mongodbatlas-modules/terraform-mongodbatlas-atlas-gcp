@@ -3,7 +3,7 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# BYOE (Bring Your Own Endpoint)
+# BYO Endpoint (Bring Your Own Endpoint)
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
