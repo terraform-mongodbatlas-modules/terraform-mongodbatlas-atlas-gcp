@@ -15,7 +15,7 @@ A **Private Endpoint (PE)** is a private network path from your Virtual Private 
 - [7. Delivery option: BYO Endpoint](#7-delivery-option-byo-endpoint)
 - [8. Operations and maintenance](#8-operations-and-maintenance)
 - [9. Cost and environment guidance](#9-cost-and-environment-guidance)
-- [10. GCP module configuration](#10-gcp-module-configuration)
+- [10. Cluster and GCP module integration](#10-cluster-and-gcp-module-integration)
 - [Appendix A: How it works](#appendix-a-how-it-works)
 - [Glossary](#glossary)
 
@@ -268,21 +268,54 @@ Plan for application-side disruption when any of these happen:
 
 Use one Atlas project per environment so toggles like `privatelink_regional_mode` cannot affect another environment.
 
-## 10. GCP module configuration
+## 10. Cluster and GCP module integration
 
-| Pattern | Cluster module input | GCP module input | Worked example |
-| --- | --- | --- | --- |
-| [Single region, same-region clients](#3-pattern-single-region-same-region-clients) | One region in `regions` | [`privatelink_endpoints`](../README.md#privatelink_endpoints) (one entry) | [`examples/privatelink`](../examples/privatelink) |
-| [Single region, cross-region clients](#4-pattern-single-region-cross-region-clients) | One region in `regions` | `all_region_mode = true` on the endpoint object | [`examples/privatelink_global_access`](../examples/privatelink_global_access) |
-| Single region, multi-VPC | One region in `regions` | [`privatelink_endpoints_single_region`](../README.md#privatelink_endpoints_single_region) | See README variable reference |
-| [Multi-region, peered networks](#5-pattern-multi-region-cluster-peered-networks) | Multi-region `regions`; regional mode default | [`privatelink_endpoints`](../README.md#privatelink_endpoints) (one entry per cluster region) | Adapt [`examples/privatelink_multi_region`](../examples/privatelink_multi_region) (drop `privatelink_regional_mode`) |
-| [Multi-region, regional connection strings](#6-pattern-multi-region-cluster-regional-connection-strings) | Geo-sharded `regions` | `privatelink_endpoints` + `privatelink_regional_mode = "auto"` | [`examples/privatelink_multi_region`](../examples/privatelink_multi_region) |
-| [BYO Endpoint](#7-delivery-option-byo-endpoint) (any pattern) | Any pattern above | [`privatelink_byo_endpoint`](../README.md#privatelink_byo_endpoint) and [`privatelink_byo_service`](../README.md#privatelink_byo_service) | [`examples/privatelink_byoe`](../examples/privatelink_byoe) |
-| Reference: full module integration | Multi-feature | PSC + encryption + backup | [`examples/complete`](../examples/complete) |
+PrivateLink wiring splits across two modules in the same Atlas project:
 
-**Regional-mode dependency ordering:** Clusters that depend on `privatelink_regional_mode` should declare `depends_on = [module.atlas_gcp]` (or an explicit dependency on `mongodbatlas_private_endpoint_regional_mode`) so Atlas updates the project-level setting before the cluster apply runs. See the [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md#private-endpoint-regional-mode-breaking-change).
+- **`module.atlas_gcp`**: Creates Atlas private endpoint services and GCP consumer endpoints (or registers BYO forwarding rules).
+- **`module.cluster`**: Defines cluster topology. Atlas emits private connection strings from both.
 
-**Region keys:** Module-managed `privatelink_endpoints` keys normalize to GCP format (`us-east4`). Deployments that previously used Atlas-format keys (`US_EAST_4`) need `moved` blocks; see the [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md#privatelink-region-key-normalization-breaking-change).
+Share the same `project_id` on both modules. Atlas requires one private endpoint service per electable cluster region, so each region in the cluster module's `regions` list needs a matching entry in `privatelink_endpoints` (or the BYO equivalent).
+
+Set `depends_on = [module.atlas_gcp]` on the cluster module to ensure private endpoints are ready before creating the cluster.
+
+Pattern-specific variable choices are in [sections 3–7](#3-pattern-single-region-same-region-clients). The [module README](../README.md#private-service-connect) and [`examples/`](../examples/) directory hold full variable reference and worked configs.
+
+### Basic example
+
+Single-region replica set with one module-managed endpoint:
+
+```hcl
+module "atlas_gcp" {
+  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+  version    = "~> 0.2"
+  project_id = var.project_id
+
+  privatelink_endpoints = [{
+    region     = "us-east4"
+    subnetwork = var.subnetwork
+  }]
+}
+
+module "cluster" {
+  source       = "terraform-mongodbatlas-modules/cluster/mongodbatlas"
+  project_id   = var.project_id
+  name         = "app-data"
+  cluster_type = "REPLICASET"
+
+  regions = [{
+    name          = "US_EAST_4"
+    provider_name = "GCP"
+    node_count    = 3
+  }]
+
+  depends_on = [module.atlas_gcp] # Ensures private endpoints are ready before creating the cluster
+}
+```
+
+The cluster module uses Atlas region names (`US_EAST_4`); the GCP module accepts GCP format (`us-east4`) or Atlas format on input. Module-managed `privatelink_endpoints` keys normalize to GCP format in Terraform state.
+
+For multi-region layouts, add one endpoint per cluster region and set `privatelink_regional_mode = "auto"` when applications need per-region connection strings ([Pattern 6](#6-pattern-multi-region-cluster-regional-connection-strings)).
 
 ## Appendix A: How it works
 
@@ -314,7 +347,7 @@ You can set both at once. They do not replace each other.
 
 ### A.4 PSC forwarding-rule details
 
-GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes shard traffic on that rule by mapping cluster ports internally; this is the "port-mapped PSC" architecture. Legacy `pl-*` hostnames from older Atlas integrations are deprecated and removed in April 2027 — new deployments do not see them.
+GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes shard traffic on that rule by mapping cluster ports internally; this is the "port-mapped PSC" architecture. Legacy `pl-*` hostnames from older Atlas integrations are deprecated this module do not use them.
 
 ## Glossary
 
@@ -335,4 +368,4 @@ GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes sha
 - [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md)
 - [Atlas: Learn About Private Endpoints](https://www.mongodb.com/docs/atlas/security-private-endpoint/)
 - [Cluster topology guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-cluster/blob/main/docs/cluster_topology.md)
-- [Google PSC + MongoDB codelab](https://codelabs.developers.google.com/codelabs/psc-mongo-globalaccess)
+- [Google PSC + MongoDB codelab (uses legacy `port_mapping_enabled = false`)](https://codelabs.developers.google.com/codelabs/psc-mongo-globalaccess)

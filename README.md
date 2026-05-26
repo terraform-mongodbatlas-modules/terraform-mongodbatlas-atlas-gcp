@@ -232,6 +232,8 @@ All Features | [Encryption + Backup Export + PrivateLink](./examples/complete) |
 Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
 Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
 Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
+PrivateLink (PSC) | [Single-Region Private Service Connect](./examples/privatelink) | Module-managed PSC for a single Atlas cluster region
+PrivateLink (PSC) | [PSC Global Access (Hub-Spoke)](./examples/privatelink_global_access) | Cross-region clients in the same VPC via all_region_mode on a module-managed endpoint
 PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with privatelink_regional_mode = "auto"
 PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
 Read-Only GCP | [BYO CPA + Pre-Granted IAM](./examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
@@ -403,17 +405,13 @@ Default: `{}`
 
 ## Private Service Connect
 
-Private Service Connect (PSC) enables private connectivity between your GCP VPCs and MongoDB Atlas, keeping traffic off the public internet. Use PSC when your security policy requires private-only network access to Atlas clusters.
+Private Service Connect (PSC) enables private connectivity between your GCP VPCs and MongoDB Atlas. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see [PrivateLink Topology Guide](docs/privatelink-topology-guide.md). The sections below document module variables.
 
 The module supports two connectivity paths (mutually exclusive):
 - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
-- **BYO Endpoint (Bring Your Own Endpoint):** Use the BYO Endpoint path if you have multiple teams that manage GCP networking separately. This is a 2-phase workflow:
-  1. Declare regions via `privatelink_byo_endpoint`: the module creates the Atlas endpoint service and outputs `service_attachment_names`
-  2. Create your own forwarding rules externally, then pass the details via `privatelink_byo_service`
+- **BYO Endpoint (Bring Your Own Endpoint):** Two-phase workflow via `privatelink_byo_endpoint` and `privatelink_byo_service`. See [privatelink_byoe example](./examples/privatelink_byoe).
 
-Set `privatelink_regional_mode = "auto"` to enable Atlas private endpoint regional mode when PrivateLink spans multiple Atlas service regions. Default is `"disabled"`.
-
-See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
+See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for product details.
 
 ### privatelink_endpoints
 
