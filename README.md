@@ -537,7 +537,7 @@ Controls Atlas private endpoint regional mode for multi-region PrivateLink.
 
 Regional mode affects project-wide private connection strings (regional SRV records for sharded
 clusters). Enable only when apps consume per-region URIs. Omit or leave `"disabled"` for
-single-region clusters, replicaset multi-region setups that use one global URI via peering,
+single-region clusters, replica set multi-region setups that use one global URI via peering,
 or when regional mode is managed outside this module.
 
 Type: `string`

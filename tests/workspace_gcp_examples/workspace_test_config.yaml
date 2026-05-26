@@ -227,6 +227,9 @@ var_groups:
     - name: privatelink_endpoints
       expose_in_workspace: false
       module_value: local.privatelink_endpoints_multi_region
+    - name: privatelink_regional_mode
+      expose_in_workspace: false
+      module_value: '"auto"'
   privatelink_byoe:
     - name: project_id
       expose_in_workspace: false
