@@ -24,6 +24,12 @@ variable "privatelink_endpoints" {
   description = "Multi-region PrivateLink endpoints via PSC. Region accepts us-east4 or US_EAST_4 format. All regions must be UNIQUE."
 }
 
+variable "privatelink_regional_mode" {
+  type        = string
+  description = "Atlas project regional mode for sharded clusters (auto or disabled)"
+  default     = "disabled"
+}
+
 variable "gcp_tags" {
   type        = map(string)
   description = "Labels to apply to GCP resources"
