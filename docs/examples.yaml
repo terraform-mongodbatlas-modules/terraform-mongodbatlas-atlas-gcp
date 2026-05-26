@@ -20,13 +20,15 @@ examples_readme:
 
 tables:
   - name: Examples
+    intro: |
+      The following examples show common configurations you can copy and adapt. Start with the [encryption](./examples/encryption) example for a minimal setup, then explore other examples for PrivateLink, backup export, and log integration. Examples can be combined in a single module call. See the [complete](./examples/complete) and [gcp_read_only](./examples/gcp_read_only) examples.
     columns: ["feature", "name", "description"]
     link_column: name
     example_rows:
       - folder_name: complete
         feature: All Features
-        name: Encryption + Backup Export + PrivateLink
-        description: Full integration using module-managed KMS key, GCS bucket, and PSC connectivity
+        name: Encryption + Backup Export + PrivateLink + Log Integration
+        description: Full v0.2.0 stack with module-managed KMS key, GCS buckets, PSC connectivity, and log export
       - folder_name: encryption
         feature: Encryption at Rest
         name: GCP Cloud KMS Integration (User-Provided)
@@ -42,11 +44,11 @@ tables:
       - folder_name: privatelink
         feature: PrivateLink (PSC)
         name: Module-Managed Private Service Connect
-        description: Module-managed PSC endpoints; see the PrivateLink topology guide for pattern-specific settings
+        description: Module-managed PSC endpoints. See the PrivateLink topology guide for pattern-specific settings
       - folder_name: privatelink_byoe
         feature: PrivateLink (PSC)
         name: BYO Endpoint (Bring Your Own Endpoint)
-        description: Two-phase workflow for externally managed GCP forwarding rules
+        description: Apply-order workflow for externally managed GCP forwarding rules
       - folder_name: gcp_read_only
         feature: Read-Only GCP
         name: BYO CPA + Pre-Granted IAM

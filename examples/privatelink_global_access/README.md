@@ -3,9 +3,9 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# GCS Bucket Export (Module-Managed)
+# Privatelink Global Access
 
-Export Atlas backup snapshots to a module-managed GCS bucket
+
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
@@ -68,58 +68,6 @@ resource "mongodbatlas_project" "this" {
 Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](./main.tf) file.
 
 <!-- END_GETTING_STARTED -->
-
-## Code Snippet
-
-Copy and use this code to get started quickly:
-
-**main.tf**
-```hcl
-module "atlas_gcp" {
-  source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-  project_id = var.project_id
-
-  backup_export = {
-    enabled = true
-    create_gcs_bucket = {
-      enabled       = true
-      name          = var.bucket_name
-      name_suffix   = var.bucket_name_suffix
-      location      = var.gcp_region
-      force_destroy = var.force_destroy
-    }
-  }
-
-  gcp_tags = var.gcp_tags
-}
-
-# Alternative: user-provided bucket (uncomment and remove create_gcs_bucket above)
-# module "atlas_gcp" {
-#   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-#   project_id = var.project_id
-#
-#   backup_export = {
-#     enabled     = true
-#     bucket_name = "my-existing-bucket"
-#   }
-#
-#   gcp_tags = var.gcp_tags
-# }
-
-# backup export configuration and GCS bucket details
-output "backup_export" {
-  value = module.atlas_gcp.backup_export
-}
-
-# export_bucket_id -- pass to cluster module's backup schedule export { export_bucket_id = ... }
-output "export_bucket_id" {
-  value = module.atlas_gcp.export_bucket_id
-}
-```
-
-**Additional files needed:**
-- [variables.tf](./variables.tf)
-- [versions.tf](./versions.tf)
 
 
 

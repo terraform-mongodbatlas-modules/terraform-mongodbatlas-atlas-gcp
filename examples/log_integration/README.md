@@ -5,6 +5,8 @@ Run 'just gen-examples' to regenerate.
 -->
 # GCS Log Export (Module-Managed)
 
+Export Atlas operational and audit logs to a module-managed GCS bucket
+
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
 

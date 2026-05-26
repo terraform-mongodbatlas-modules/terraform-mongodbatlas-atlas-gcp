@@ -5,6 +5,8 @@ Run 'just gen-examples' to regenerate.
 -->
 # Module-Managed Private Service Connect
 
+Module-managed PSC endpoints. See the PrivateLink topology guide for pattern-specific settings
+
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
 
