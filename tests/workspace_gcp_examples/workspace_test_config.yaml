@@ -76,8 +76,8 @@ examples:
         dump:
           skip_lines:
             substring_attributes: [bucket_name]
-  - name: privatelink_multi_region
-    var_groups: [privatelink_multi_region]
+  - name: privatelink
+    var_groups: [privatelink]
     plan_regressions:
       - address: module.atlas_gcp.mongodbatlas_private_endpoint_regional_mode.this[0]
       - address: module.atlas_gcp.mongodbatlas_privatelink_endpoint.this["us-east4"]
@@ -214,10 +214,10 @@ var_groups:
     - name: bucket_name_suffix
       expose_in_workspace: false
       module_value: '"-test"'
-  privatelink_multi_region:
+  privatelink:
     - name: project_id
       expose_in_workspace: false
-      module_value: local.project_id_privatelink_multi_region
+      module_value: local.project_id_privatelink
     - name: gcp_project_id
       expose_in_workspace: false
       module_value: var.gcp_project_id
@@ -226,7 +226,10 @@ var_groups:
       module_value: var.gcp_region
     - name: privatelink_endpoints
       expose_in_workspace: false
-      module_value: local.privatelink_endpoints_multi_region
+      module_value: local.privatelink_endpoints
+    - name: privatelink_regional_mode
+      expose_in_workspace: false
+      module_value: '"auto"'
   privatelink_byoe:
     - name: project_id
       expose_in_workspace: false

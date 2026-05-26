@@ -13,8 +13,8 @@ run "global_access_true_plans" {
     ]
   }
   assert {
-    condition     = var.privatelink_endpoints[0].all_region_mode == true
-    error_message = "Expected all_region_mode true on endpoint object"
+    condition     = local.privatelink_module_managed["us-east4"].all_region_mode == true
+    error_message = "Expected all_region_mode to pass through to module call"
   }
 }
 
@@ -26,7 +26,7 @@ run "global_access_omitted_plans" {
     ]
   }
   assert {
-    condition     = var.privatelink_endpoints[0].all_region_mode == null
+    condition     = local.privatelink_module_managed["us-east4"].all_region_mode == null
     error_message = "Expected all_region_mode null when omitted"
   }
 }

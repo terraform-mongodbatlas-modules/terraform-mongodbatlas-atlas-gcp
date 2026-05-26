@@ -43,13 +43,13 @@ variable "gcp_region" {
 
 variable "project_ids" {
   type = object({
-    complete                 = optional(string)
-    encryption               = optional(string)
-    backup_export            = optional(string)
-    log_integration          = optional(string)
-    privatelink_multi_region = optional(string)
-    privatelink_byoe         = optional(string)
-    gcp_read_only            = optional(string)
+    complete         = optional(string)
+    encryption       = optional(string)
+    backup_export    = optional(string)
+    log_integration  = optional(string)
+    privatelink      = optional(string)
+    privatelink_byoe = optional(string)
+    gcp_read_only    = optional(string)
   })
   default = {}
 }
@@ -93,7 +93,7 @@ locals {
   # tflint-ignore: terraform_unused_declarations
   project_id_log_integration = local.project_ids.log_integration
   # tflint-ignore: terraform_unused_declarations
-  project_id_privatelink_multi_region = local.project_ids.privatelink_multi_region
+  project_id_privatelink = local.project_ids.privatelink
   # tflint-ignore: terraform_unused_declarations
   project_id_privatelink_byoe = local.project_ids.privatelink_byoe
   # tflint-ignore: terraform_unused_declarations
@@ -107,7 +107,7 @@ locals {
     { region = "us-east4", subnetwork = module.network_us_east4.subnetwork_self_link, name_prefix = "atlas-psc-cpl-" },
   ]
   # tflint-ignore: terraform_unused_declarations
-  privatelink_endpoints_multi_region = [
+  privatelink_endpoints = [
     { region = "us-east4", subnetwork = module.network_us_east4.subnetwork_self_link },
     { region = "us-east1", subnetwork = module.network_us_east1.subnetwork_self_link },
   ]
