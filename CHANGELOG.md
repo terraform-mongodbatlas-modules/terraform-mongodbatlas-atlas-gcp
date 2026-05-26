@@ -7,6 +7,7 @@ BREAKING CHANGES:
 * variable/create_gcs_bucket: Changes versioning_enabled default to false on backup_export and log_integration module-managed GCS buckets ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
 * variable/privatelink_byo_endpoint: Renames privatelink_byoe_regions to privatelink_byo_endpoint and changes type to map(object({ region = string })) ([#40](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/40))
 * variable/privatelink_byo_service: Renames privatelink_byoe to privatelink_byo_service ([#40](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/40))
+* variable/privatelink_regional_mode: Makes private endpoint regional mode opt-in; default `"disabled"` replaces automatic enablement for multi-region PrivateLink
 
 NOTES:
 
@@ -21,6 +22,7 @@ ENHANCEMENTS:
 * variable/backup_export: Adds optional expiration_days lifecycle on module-managed GCS buckets ([#37](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/37))
 * variable/skip_iam_bindings: Adds skip flag to omit module-managed GCP IAM bindings when roles are pre-granted externally ([#39](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/39))
 * variable/timeouts: Adds nullable flat timeouts object with 30m defaults for module-managed Atlas and GCP resources, set `timeouts = null` for zero-diff upgrades from v0.x ([#38](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/38))
+* variable/privatelink_endpoints: Adds optional all_region_mode on module-managed PSC forwarding rules ([#32](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/32))
 
 BUG FIXES:
 

@@ -111,6 +111,7 @@ run "timeouts_all_resources_plan_succeeds" {
       enabled        = true
       create_kms_key = { enabled = true, location = "us-east4" }
     }
+    privatelink_regional_mode = "auto"
     privatelink_endpoints = [
       { region = "us-east4", subnetwork = "https://www.googleapis.com/compute/v1/projects/p/regions/us-east4/subnetworks/sub-a" },
       { region = "us-west4", subnetwork = "https://www.googleapis.com/compute/v1/projects/p/regions/us-west4/subnetworks/sub-b" },

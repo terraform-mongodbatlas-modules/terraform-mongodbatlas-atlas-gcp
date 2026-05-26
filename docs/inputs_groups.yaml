@@ -54,6 +54,7 @@ sections:
         - privatelink_endpoints_single_region
         - privatelink_byo_endpoint
         - privatelink_byo_service
+        - privatelink_regional_mode
 
   - id: backup
     title: "Backup Export"

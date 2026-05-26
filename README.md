@@ -433,15 +433,19 @@ Mutually exclusive with `privatelink_endpoints_single_region`.
   forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{region}-`
   where region is in GCP format (e.g., `atlas-psc-us-east4-`). Set a custom prefix when
   multiple deployments share the same GCP project and region to avoid name collisions.
+- `all_region_mode`: when true, enables cross-region VPC client access to this PSC endpoint IP
+  by setting `allow_psc_global_access` on the forwarding rule. When omitted, same-region-only
+  access (v0 behavior). Do not use `allow_global_access` (ILB-only). Not for BYO Endpoint rules.
 
 Type:
 
 ```hcl
 list(object({
-  region      = string
-  subnetwork  = string
-  labels      = optional(map(string), {})
-  name_prefix = optional(string)
+  region          = string
+  subnetwork      = string
+  labels          = optional(map(string), {})
+  name_prefix     = optional(string)
+  all_region_mode = optional(bool)
 }))
 ```
 
@@ -461,15 +465,17 @@ Mutually exclusive with `privatelink_endpoints`.
   forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{index}-`
   where index is the list position (e.g., `atlas-psc-0-`). Recommended to set explicitly
   since index-based defaults are not descriptive.
+- `all_region_mode`: same semantics as `privatelink_endpoints`.
 
 Type:
 
 ```hcl
 list(object({
-  region      = string
-  subnetwork  = string
-  labels      = optional(map(string), {})
-  name_prefix = optional(string)
+  region          = string
+  subnetwork      = string
+  labels          = optional(map(string), {})
+  name_prefix     = optional(string)
+  all_region_mode = optional(bool)
 }))
 ```
 
@@ -506,6 +512,8 @@ Keys must exist in privatelink_byo_endpoint.
 - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
 - `gcp_project_id` is used when the forwarding rule lives in a different GCP project than the provider default.
 
+For cross-region clients, set `allow_psc_global_access = true` on your `google_compute_forwarding_rule` before registration. The module does not create BYOE rules.
+
 Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
 
 Type:
@@ -519,6 +527,22 @@ map(object({
 ```
 
 Default: `{}`
+
+### privatelink_regional_mode
+
+Controls Atlas private endpoint regional mode for multi-region PrivateLink.
+
+- `"disabled"` (default): Do not create `mongodbatlas_private_endpoint_regional_mode`.
+- `"auto"`: Create regional mode when PrivateLink spans more than one distinct Atlas service region.
+
+Regional mode affects project-wide private connection strings (regional SRV records for sharded
+clusters). Enable only when apps consume per-region URIs. Omit or leave `"disabled"` for
+single-region clusters, replicaset multi-region setups that use one global URI via peering,
+or when regional mode is managed outside this module.
+
+Type: `string`
+
+Default: `"disabled"`
 
 
 ## Backup Export
@@ -788,7 +812,7 @@ Description: Atlas PrivateLink service info per endpoint key (for BYO Endpoint -
 
 ### <a name="output_regional_mode_enabled"></a> [regional\_mode\_enabled](#output\_regional\_mode\_enabled)
 
-Description: Whether private endpoint regional mode is enabled (auto-enabled for multi-region)
+Description: Whether private endpoint regional mode is enabled (true when privatelink\_regional\_mode = "auto" and PrivateLink spans multiple Atlas service regions)
 
 ### <a name="output_resource_ids"></a> [resource\_ids](#output\_resource\_ids)
 

@@ -63,3 +63,12 @@ variable "timeouts" {
   nullable    = true
   description = "Timeout configuration for module-managed resources. Set to null to use provider defaults."
 }
+
+variable "all_region_mode" {
+  type        = bool
+  default     = null
+  description = <<-EOT
+    When true, sets allow_psc_global_access on the module-managed google_compute_forwarding_rule.
+    When null, the attribute is omitted (same-region-only access). Not allow_global_access (ILB-only).
+  EOT
+}
