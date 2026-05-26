@@ -39,15 +39,14 @@ sections:
     title: "Private Service Connect"
     level: 2
     description: |
-      Private Service Connect (PSC) enables private connectivity between your GCP VPCs and MongoDB Atlas, keeping traffic off the public internet. Use PSC when your security policy requires private-only network access to Atlas clusters.
+      Private Service Connect (PSC) enables private connectivity between your GCP VPCs and MongoDB Atlas. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see [PrivateLink Topology Guide](docs/privatelink-topology-guide.md). The sections below document module variables.
 
       The module supports two connectivity paths (mutually exclusive):
       - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
-      - **BYO Endpoint (Bring Your Own Endpoint):** Use the BYO Endpoint path if you have multiple teams that manage GCP networking separately. This is a 2-phase workflow:
-        1. Declare regions via `privatelink_byo_endpoint`: the module creates the Atlas endpoint service and outputs `service_attachment_names`
-        2. Create your own forwarding rules externally, then pass the details via `privatelink_byo_service`
+      - **BYO Endpoint (Bring Your Own Endpoint):** Two-phase workflow via `privatelink_byo_endpoint` and `privatelink_byo_service`. See [privatelink_byoe example](./examples/privatelink_byoe).
 
-      See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for details.
+      See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for product details.
+
     match:
       names:
         - privatelink_endpoints
