@@ -31,6 +31,12 @@ variable "privatelink_regional_mode" {
   default     = "disabled"
 }
 
+variable "privatelink_regional_mode" {
+  type        = string
+  description = "Atlas project regional mode for sharded clusters (auto or disabled)"
+  default     = "disabled"
+}
+
 variable "gcp_tags" {
   type        = map(string)
   description = "Labels to apply to GCP resources"
