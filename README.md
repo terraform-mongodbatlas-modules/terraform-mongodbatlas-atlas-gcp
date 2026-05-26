@@ -158,8 +158,6 @@ See the [GCP encryption documentation](https://www.mongodb.com/docs/atlas/securi
 
 **When not to use:**
 - Atlas-managed encryption is sufficient for your compliance requirements.
-- Read-only GCP without a pre-granted KMS IAM role. The module cannot bind roles when `skip_iam_bindings = true`.
-- Private encryption endpoints for KMS. Atlas does not support PSC for GCP KMS (AWS and Azure support private endpoints for their key services).
 
 ### encryption
 
@@ -231,7 +229,6 @@ See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atl
 **When not to use:**
 - VPC peering alone meets your connectivity needs. Use [`mongodbatlas_network_peering`](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/network_peering) directly.
 - You need only public Atlas connectivity.
-- A single global PrivateLink URI suffices and your deployment spans multiple Atlas service regions without opting into regional mode (`privatelink_regional_mode = "auto"`).
 
 ### privatelink_endpoints
 
@@ -434,7 +431,7 @@ Default: `{}`
 
 Enable log integration to export Atlas operational and audit logs to GCS at 1-minute intervals for SIEM or observability pipelines. Provide an existing bucket (`bucket_name`) or let the module create one (`create_gcs_bucket.enabled = true`), with optional per-integration bucket overrides.
 
-See the [log export documentation](https://www.mongodb.com/docs/atlas/export-logs-external-sinks/) for details.
+See the [log export documentation](https://www.mongodb.com/docs/atlas/export-logs-gcs/) for details.
 
 Reordering entries in the `integrations` list can cause a brief delivery gap (~1 min) but no data loss.
 
@@ -650,7 +647,7 @@ Description: Atlas PrivateLink service info per endpoint key (for BYO Endpoint -
 
 Description: True when `privatelink_regional_mode` is `"auto"` and PrivateLink spans more than one distinct Atlas  
 service region. Default variable value is `"disabled"`. See the
-[Atlas regional private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/?cloud-provider=gcp#-optional--regionalized-private-endpoints-for-multi-region-sharded-clusters).
+[Atlas regional private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/?cloud-provider=gcp#optional-regionalized-private-endpoints-for-multi-region-sharded-clusters).
 
 ### <a name="output_resource_ids"></a> [resource\_ids](#output\_resource\_ids)
 
