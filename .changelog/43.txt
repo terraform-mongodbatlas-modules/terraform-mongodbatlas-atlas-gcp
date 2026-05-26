@@ -1,0 +1,6 @@
+```release-note:breaking-change
+variable/privatelink_regional_mode: Makes private endpoint regional mode opt-in with default disabled
+```
+```release-note:enhancement
+variable/privatelink_endpoints: Adds optional all_region_mode on module-managed PSC forwarding rules
+```
