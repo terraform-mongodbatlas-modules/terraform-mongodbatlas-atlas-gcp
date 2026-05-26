@@ -16,12 +16,19 @@ variable "gcp_region" {
 
 variable "privatelink_endpoints" {
   type = list(object({
-    region      = string
-    subnetwork  = string
-    labels      = optional(map(string), {})
-    name_prefix = optional(string)
+    region          = string
+    subnetwork      = string
+    labels          = optional(map(string), {})
+    name_prefix     = optional(string)
+    all_region_mode = optional(bool)
   }))
-  description = "Multi-region PrivateLink endpoints via PSC. Region accepts us-east4 or US_EAST_4 format. All regions must be UNIQUE."
+  description = "Module-managed PrivateLink endpoints via PSC"
+}
+
+variable "privatelink_regional_mode" {
+  type        = string
+  description = "Atlas project regional mode for sharded clusters (auto or disabled)"
+  default     = "disabled"
 }
 
 variable "gcp_tags" {

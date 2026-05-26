@@ -39,10 +39,10 @@ tables:
         feature: Log Integration
         name: GCS Log Export (Module-Managed)
         description: Export Atlas operational and audit logs to a module-managed GCS bucket
-      - folder_name: privatelink_multi_region
+      - folder_name: privatelink
         feature: PrivateLink (PSC)
-        name: Multi-Region Private Service Connect
-        description: Private connectivity across multiple GCP regions with privatelink_regional_mode = "auto"
+        name: Module-Managed Private Service Connect
+        description: Module-managed PSC endpoints; see the PrivateLink topology guide for pattern-specific settings
       - folder_name: privatelink_byoe
         feature: PrivateLink (PSC)
         name: BYO Endpoint (Bring Your Own Endpoint)

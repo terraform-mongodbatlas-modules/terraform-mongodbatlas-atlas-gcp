@@ -146,7 +146,7 @@ module "atlas_gcp" {
 }
 ```
 
-Worked example: [`examples/privatelink_global_access`](../examples/privatelink_global_access).
+Worked example: [`examples/privatelink`](../examples/privatelink) (set `all_region_mode = true` as in the snippet above).
 
 **Cost note:** One endpoint hourly charge; you pay GCP cross-region VPC egress for client-to-cluster traffic.
 
@@ -182,7 +182,7 @@ module "atlas_gcp" {
 }
 ```
 
-Worked example: see [`examples/privatelink_multi_region`](../examples/privatelink_multi_region) and remove `privatelink_regional_mode = "auto"` for this pattern.
+Worked example: [`examples/privatelink`](../examples/privatelink) (multi-region endpoints; leave `privatelink_regional_mode` at its default).
 
 **Cost note:** One endpoint per cluster region; cross-region peering cost is on the customer side.
 
@@ -217,7 +217,7 @@ module "atlas_gcp" {
 }
 ```
 
-Worked example: [`examples/privatelink_multi_region`](../examples/privatelink_multi_region).
+Worked example: [`examples/privatelink`](../examples/privatelink) (set `privatelink_regional_mode = "auto"` as in the snippet above).
 
 **Cost note:** One endpoint per cluster region; no cross-region application traffic since each app stays regional.
 

@@ -232,9 +232,7 @@ All Features | [Encryption + Backup Export + PrivateLink](./examples/complete) |
 Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
 Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
 Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
-PrivateLink (PSC) | [Single-Region Private Service Connect](./examples/privatelink) | Module-managed PSC for a single Atlas cluster region
-PrivateLink (PSC) | [PSC Global Access (Hub-Spoke)](./examples/privatelink_global_access) | Cross-region clients in the same VPC via all_region_mode on a module-managed endpoint
-PrivateLink (PSC) | [Multi-Region Private Service Connect](./examples/privatelink_multi_region) | Private connectivity across multiple GCP regions with privatelink_regional_mode = "auto"
+PrivateLink (PSC) | [Module-Managed Private Service Connect](./examples/privatelink) | Module-managed PSC endpoints; see the PrivateLink topology guide for pattern-specific settings
 PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
 Read-Only GCP | [BYO CPA + Pre-Granted IAM](./examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
 
