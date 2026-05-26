@@ -1,216 +1,379 @@
 # PrivateLink Topology Guide (GCP)
 
-This guide helps you choose a Private Service Connect (PSC) topology for MongoDB Atlas on GCP. It separates **cluster** regional outage tolerance (Atlas electable regions and driver failover) from **client/app** regional outage tolerance (whether apps in another region can still reach a private endpoint when one client region fails).
+This guide helps you choose a Private Service Connect (PSC) layout for MongoDB Atlas on GCP. It maps four customer patterns to the GCP module variables and worked examples.
+
+A **Private Endpoint (PE)** is a private network path from your Virtual Private Cloud (VPC) to an Atlas cluster. **PSC** (Private Service Connect) is Google Cloud's PE technology. **PrivateLink** is the umbrella name MongoDB uses across cloud providers.
 
 ## Table of Contents
 
 - [1. Introduction](#1-introduction)
-- [2. Customer outcomes](#2-customer-outcomes)
-- [3. Concepts and the three-layer model](#3-concepts-and-the-three-layer-model)
-- [4. The primary decision](#4-the-primary-decision)
-- [5. Deployment patterns](#5-deployment-patterns)
-- [6. Failure mode reference](#6-failure-mode-reference)
-- [7. What costs downtime](#7-what-costs-downtime)
-- [8. Cost and dev vs prod](#8-cost-and-dev-vs-prod)
-- [9. Cross-CSP comparison](#9-cross-csp-comparison)
-- [10. Module configuration mapping (GCP)](#10-module-configuration-mapping-gcp)
+- [2. Choose your outcome](#2-choose-your-outcome)
+- [3. Pattern: Single region, same-region clients](#3-pattern-single-region-same-region-clients)
+- [4. Pattern: Single region, cross-region clients](#4-pattern-single-region-cross-region-clients)
+- [5. Pattern: Multi-region cluster, peered networks](#5-pattern-multi-region-cluster-peered-networks)
+- [6. Pattern: Multi-region cluster, regional connection strings](#6-pattern-multi-region-cluster-regional-connection-strings)
+- [7. Delivery option: BYO Endpoint](#7-delivery-option-byo-endpoint)
+- [8. Operations and failure modes](#8-operations-and-failure-modes)
+- [9. Cost and environment guidance](#9-cost-and-environment-guidance)
+- [10. GCP module configuration](#10-gcp-module-configuration)
+- [Appendix A: How it works](#appendix-a-how-it-works)
+- [Glossary](#glossary)
 
 ## 1. Introduction
 
-**Audience:** Teams configuring the GCP module alongside the [cluster module](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-cluster/blob/main/docs/cluster_topology.md).
+**Audience:** Teams configuring the GCP module who need a private network path from their applications to Atlas.
 
-**Pre-reads:**
+**Pre-reads (optional, for deeper context):**
 
-- [Cluster topology guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-cluster/blob/main/docs/cluster_topology.md)
-- [Atlas architecture: network security](https://www.mongodb.com/docs/atlas/architecture/current/network-security/)
-- [Atlas architecture: high availability](https://www.mongodb.com/docs/atlas/architecture/current/high-availability/)
-- [Atlas architecture: disaster recovery](https://www.mongodb.com/docs/atlas/architecture/current/disaster-recovery/)
+- [Cluster topology guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-cluster/blob/main/docs/cluster_topology.md): how Atlas places replica nodes across regions.
+- [Atlas: network security](https://www.mongodb.com/docs/atlas/architecture/current/network-security/), [high availability](https://www.mongodb.com/docs/atlas/architecture/current/high-availability/), [disaster recovery](https://www.mongodb.com/docs/atlas/architecture/current/disaster-recovery/).
 
-**What this guide is not:** A replacement for [Atlas private endpoint product docs](https://www.mongodb.com/docs/atlas/security-private-endpoint/) or arch center DR design. Use the module README for variable reference; use this guide for topology decisions.
+**What this guide is not:** A replacement for the [Atlas private endpoint product docs](https://www.mongodb.com/docs/atlas/security-private-endpoint/) or for arch center disaster recovery (DR) design. Use the module README for variable reference; use this guide to pick a pattern.
 
-## 2. Customer outcomes
+## 2. Choose your outcome
 
-Start with **what you are trying to achieve**:
+### 2.1 What you're optimizing for
 
-- **HA:** AZ failure needs no PrivateLink work; single-region multi-AZ is the Atlas default.
-- **DR:** Region outage tolerance has two axes:
-  - **Cluster:** Automatic cross-region failover via multi-region topology and URI shape.
-  - **Client/app:** Whether surviving app regions can still use private endpoints when one client region is down.
-  Cross-cloud failover has separate limits (see §6).
-- **Cost:** Fewest endpoints, avoid cross-region SKUs, minimal dev setups.
-- **Portability:** Avoid CSP-specific choices that block multi-cloud or migration.
+High Availability (HA) is automatic recovery. Disaster Recovery (DR) is manual recovery from a cross-region backup; it is always available regardless of PrivateLink layout, so this guide does not configure it.
 
-**Alternatives to private endpoints** (CSP-neutral):
+- **Zonal HA:** Tolerate a single-zone failure. Atlas covers this by default with multi-zone replica sets. No PrivateLink work needed.
+- **Regional HA:** Tolerate an Atlas region outage with no human action. Opt-in via a multi-region cluster: electable nodes in two or more regions, and the driver fails over automatically. This drives [Q1](#23-decision-which-pattern-fits) and changes the PrivateLink layout because Atlas needs one private endpoint per cluster region. Without regional HA, an Atlas region outage falls back to DR (manual restore from a cross-region backup).
+- **Multi-region applications:** Where your application tier runs. One region, several regions of the same VPC, or several VPCs across regions. This drives [Q2](#23-decision-which-pattern-fits) and is independent of regional HA. Application-tier resilience to a client region outage falls out of this choice; see the failure tables in each pattern card and [section 8](#8-operations-and-failure-modes).
+- **Cost:** Fewer endpoints, fewer cross-region data flows, smaller dev setups.
+- **Portability:** Avoid GCP-specific options that block multi-cloud or migration later.
 
-| Mechanism | When to choose | When to avoid | Reference |
-| --- | --- | --- | --- |
-| **PE / PrivateLink** | Regulatory requirement; private-only network policy; production | Lower environments without a security mandate | This guide |
-| **VPC peering only** | Single CSP; simpler; lower cost | Multi-cloud; regulated multi-VPC | Arch center |
-| **Public IP + access list** | Dev/test; low risk; quick setup | Production with private-only mandate | Atlas docs |
+### 2.2 Alternatives to private endpoints
 
-**BYO Endpoint** is a delivery mode for private endpoints (customer creates the consumer endpoint instead of the module), not an alternative to private endpoints. See §5.3.
+A private endpoint is one of three ways to keep cluster traffic off the public internet. Pick PrivateLink only if you need it.
 
-## 3. Concepts and the three-layer model
-
-### 3.1 What the driver connects to
-
-On a **replica set**, the driver talks to mongod processes. Horizon records in the connection string matter. You need a private endpoint in every cluster region the driver must reach.
-
-On **sharded** or **geo-sharded** clusters, the driver talks to mongos only. Shard mongod horizons are not in the client connection string. **Regional mode** (Atlas project setting) unlocks region-local private SRV records when app networks cannot peer across regions.
-
-See the [cluster topology guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-cluster/blob/main/docs/cluster_topology.md) for `regions` vs `replication_specs` configuration.
-
-### 3.2 Three-layer model
-
-1. **Cluster topology**
-   - Electable regions define where Atlas runs data nodes.
-2. **Atlas PE layer**
-   - **PE service:** Atlas-side private endpoint service per cluster region.
-   - **Regional mode:** Sharded-only Atlas setting; controls global vs region-local private SRV records.
-   - **Connection strings:** Global private SRV when regional mode is off; per-region SRV when regional mode is on.
-3. **CSP consumer layer**
-   - **Consumer endpoint:** GCP PSC forwarding rule and internal IP (module-managed or BYO Endpoint).
-   - **Cross-region client access:** CSP-specific mechanism so apps in other client regions reach a PE IP in the service region (§9).
-
-**Port-mapped PSC:** GCP uses one forwarding rule per Atlas service region. Atlas maps ports internally; legacy `pl-*` hostnames are deprecated (April 2027).
-
-## 4. The primary decision
-
-Answer in order. **Cluster** and **client/app** regional outage are different problems.
-
-### 4.1 Cluster regional outage tolerance
-
-Does the **Atlas cluster** need automatic failover when a **cluster region** goes down?
-
-- **No** → single-region cluster → §5.1. A cluster region outage is a total private endpoint outage until manual DR (region add, restore, or a public-IP path).
-- **Yes** → multi-region cluster → §5.2.
-
-For Atlas defaults vs explicit topology, see [High Availability](https://www.mongodb.com/docs/atlas/architecture/current/high-availability/) and [Disaster Recovery](https://www.mongodb.com/docs/atlas/architecture/current/disaster-recovery/). For CSP-wide outage tolerance, see [Atlas multi-cloud distribution](https://www.mongodb.com/docs/atlas/cluster-config/multi-cloud-distribution/).
-
-**(Multi-region cluster only) Can your app VPCs peer to every PE subnet?**
-
-- **Yes** → one global URI, regional mode off (§5.2 M1).
-- **No** → region-local URIs, regional mode on (§5.2 M2; sharded clusters only).
-
-### 4.2 Client / app regional outage tolerance
-
-Does the **application tier** need to keep serving when a **client region** fails while the cluster region stays up?
-
-- **No** (single client region, or downtime in that region is acceptable) → default §5.1 same-region clients, or §5.2 with apps colocated per cluster region.
-- **Yes** → surviving app regions must still reach PE. This does **not** require a multi-region cluster:
-  - On **§5.1:** use **cross-region clients** (hub-and-spoke). Apps in healthy client regions keep using PE in the cluster region; requires PSC global access (§9).
-  - On **§5.2 M1:** driver failover covers **cluster** region outage via the global URI; **client** region outage still isolates apps in that region unless you also run redundant app tiers and cross-region PE reachability.
-  - On **§5.2 M2:** each region's apps use a region-local URI; client region outage matches §6.
-
-**Decision summary:**
-
-1. **Cluster region outage, no automatic failover** → single-region cluster (§5.1).
-2. **Cluster region outage, automatic failover** → multi-region cluster (§5.2).
-   - App VPCs peer to all PE subnets → §5.2 M1.
-   - App VPCs cannot peer cross-region → §5.2 M2 (sharded only).
-3. **Client region outage, apps elsewhere must keep serving** → cross-region clients (§5.1 hub-spoke or §9).
-4. **Client region outage acceptable** → same-region clients (default).
-
-## 5. Deployment patterns
-
-Two macro patterns. Each documents DR behavior, cost class, and when not to use.
-
-### 5.1 Single-region cluster
-
-One Atlas cluster region; one PE service in that region by default. Regional mode off. Cluster region outage implies manual DR (region add, restore from backup, or app failover to a public-IP path).
-
-**Sub-variants by client placement:**
-
-- **Same region** (default): Apps and PE in the same region; nothing extra. Client region outage takes apps in that region offline.
-- **Cross-region clients** (hub-and-spoke): Apps in other regions of the same VPC reach PE in the cluster region. Survives **client** region outage for apps in healthy regions; does **not** survive **cluster** region outage (still §5.1 manual DR). Set `all_region_mode = true` on the module-managed endpoint (§10).
-- **Multi-VPC, same region:** Multiple consumer VPCs need PE access to the same cluster. Use `privatelink_endpoints_single_region`. Works for sharded without regional mode; replica set constraint in §8.
-
-### 5.2 Multi-region cluster
-
-Cluster has electable nodes in two or more regions; Atlas requires one PE service per cluster region.
-
-- **M1 — One URI, peered VPCs (regional mode off):** All app VPCs reach PE subnets in every cluster region (VPC peering, VPN, or equivalent). Atlas emits one global private SRV; the driver fails over cross-region automatically. Works for replica set and sharded.
-- **M2 — Regional URIs, unpeered networks (regional mode on):** App networks cannot peer cross-region. Atlas emits region-local URIs; each app uses its region's URI; cross-region failover needs an app-side runbook. **Sharded / geo-sharded only.** Set `privatelink_regional_mode = "auto"` (§10).
-
-### 5.3 BYO Endpoint (cross-cutting delivery)
-
-Orthogonal to §5.1 and §5.2:
-
-- **Module-managed (default):** Single `terraform apply`; module creates consumer endpoint resources.
-- **BYO Endpoint (Bring Your Own Endpoint):** Two-phase apply; customer creates the consumer forwarding rule outside the module. Choose when IAM is restricted, existing network automation owns endpoints, or you must set PSC flags before registration.
-
-Trade-off: BYO Endpoint doubles the apply cycle; pick only when constraints force it.
-
-## 6. Failure mode reference
-
-| Failure | Single-region cluster (§5.1) | Multi-region cluster (§5.2) |
+| Mechanism | When to choose | When to avoid |
 | --- | --- | --- |
-| Node / AZ failure | Auto (Atlas multi-AZ election) | Auto |
-| Cluster region outage | Total outage; manual DR | **M1:** driver fails over via global URI. **M2:** that region's URI is dead; other regions ok |
-| Client region outage (§4.2) | Apps in that region offline; cluster healthy. **Hub-spoke (§5.1):** apps in other client regions keep serving | Same: only apps in that client region are offline unless redundant cross-region app + PE paths exist |
-| PE removed during cluster maintenance | Downtime | Downtime |
+| **PrivateLink (PSC)** | Regulatory requirement; private-only network policy; production. | Lower environments without a security mandate. |
+| **VPC peering only** | Single cloud provider; simpler; lower cost. | Multi-cloud; regulated multi-VPC. |
+| **Public IP + access list** | Dev/test; low risk; quick setup. | Production with a private-only mandate. |
 
-- **Multi-cloud cluster + PE:** A single PE reaches **only nodes in the same CSP**. Use VPN or secondary read preference for cross-CSP nodes ([multi-cloud distribution](https://www.mongodb.com/docs/atlas/cluster-config/multi-cloud-distribution/)).
-- **CSP-wide outage:** PE does not help; falls under arch center DR guidance.
+The **BYO Endpoint** (Bring Your Own Endpoint) option in [section 7](#7-delivery-option-byo-endpoint) is a delivery mode for PrivateLink, not an alternative to it.
 
-## 7. What costs downtime
+### 2.3 Decision: which pattern fits
 
-Operations that force app reconnect or a planned window:
+Two questions, in order:
 
-- **REPLICASET → SHARDED conversion:** Connection string targets change (mongods → mongos); app restart required.
-- **Non-regionalized → regionalized sharded mode:** URI churn, project-wide for sharded clusters; window required.
-- **Multi-region → single-region service (AWS):** Guaranteed downtime ([AWS Cross-Region PrivateLink Field FAQ](https://docs.google.com/document/d/1bvirvP30Jv69HT5nHR4CzJbfuHtEkv5GxyHIcimNXlM)).
-- **Removing PE during cluster maintenance** (multi-region): [PE product doc](https://www.mongodb.com/docs/atlas/security-private-endpoint/).
-- **Cluster region add/remove with PE:** Atlas regenerates DNS / horizons; app reconnect if URI shape changes.
-- **Toggle regional mode:** Sharded URIs regenerate.
+**Q1. Do you need regional HA (automatic regional failover)?**
 
-## 8. Cost and dev vs prod
+- **No** → single-region cluster. An Atlas region outage falls back to DR (manual restore from a cross-region backup).
+- **Yes** → multi-region cluster (Atlas needs one PE per cluster region).
 
-**Cost drivers** (CSP-neutral): endpoint hourly cost, cross-region data egress, regional billing SKUs (§9), regional mode adds no Atlas cost but multiplies consumer endpoints, Atlas PE billing per service ([Atlas PE billing](https://www.mongodb.com/docs/atlas/billing/additional-services/#std-label-billing-private-endpoints-clusters/)).
+**Q2. Do all your application VPCs sit in the same region as the cluster?**
 
-**Dev vs prod:** Dev = public + ACL acceptable; staging = single-region PE; prod = full PE plus DR pattern. One Atlas project per environment avoids regional-mode side effects across environments.
+- **Yes** → same-region clients.
+- **No, but the VPCs in other regions can peer to the cluster region's VPC** → cross-region clients (single-region cluster) or peered networks (multi-region cluster).
+- **No, and they cannot peer cross-region** → regional connection strings (multi-region cluster only; sharded clusters only).
 
-**Replica set caveat:** Max one PE per region for replica sets (across clouds). Multi-VPC same region for replica sets forces regional mode (sharded only) → use sharded or accept the cap.
+| Q1 regional HA | Q2 application regions | Pattern |
+| --- | --- | --- |
+| No | Same region as cluster | [Single region, same-region clients](#3-pattern-single-region-same-region-clients) |
+| No | Other regions, peered | [Single region, cross-region clients](#4-pattern-single-region-cross-region-clients) |
+| Yes | All regions reachable via peering | [Multi-region, peered networks](#5-pattern-multi-region-cluster-peered-networks) |
+| Yes | App regions cannot peer to all cluster regions | [Multi-region, regional connection strings](#6-pattern-multi-region-cluster-regional-connection-strings) |
 
-## 9. Cross-CSP comparison
+For deeper background on Atlas regional outage tolerance, see [Atlas high availability](https://www.mongodb.com/docs/atlas/architecture/current/high-availability/) and [Atlas disaster recovery](https://www.mongodb.com/docs/atlas/architecture/current/disaster-recovery/).
 
-| Capability | GCP (PSC) | AWS (PrivateLink) | Azure (Private Link) |
+## 3. Pattern: Single region, same-region clients
+
+**In one line:** One Atlas region, one private endpoint, applications in the same region.
+
+**When to choose:**
+
+- Production workload with a private-only network policy and a single primary region.
+- You accept manual recovery if the cluster region goes down (region add, restore from backup, or temporary public-IP fallback).
+- All consumer applications live in the cluster's region (or in VPCs peered into that region's VPC).
+
+**Survives:**
+
+- Single-zone failure: yes (Atlas multi-zone replica election).
+- Cluster region outage: no. Manual DR required.
+- Client region outage: not applicable (apps are in the cluster region).
+
+**Doesn't survive:**
+
+- A GCP regional outage takes the cluster offline until you act.
+- Removing the endpoint during a cluster maintenance window causes downtime.
+
+**Multi-VPC variation:** When several consumer VPCs in the same region need their own endpoints to the same cluster, use [`privatelink_endpoints_single_region`](../README.md#privatelink_endpoints_single_region) instead of [`privatelink_endpoints`](../README.md#privatelink_endpoints).
+
+**Replica-set constraint:** Atlas allows at most one PE per region for replica-set clusters. If you need multiple consumer endpoints in one region against a replica set, you must move to a sharded cluster.
+
+**Module configuration:**
+
+```hcl
+module "atlas_gcp" {
+  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+  version    = "~> 0.2"
+  project_id = var.project_id
+
+  privatelink_endpoints = [{
+    region     = "us-east4"
+    subnetwork = var.subnetwork
+  }]
+}
+```
+
+Worked example: [`examples/privatelink`](../examples/privatelink).
+
+**Cost note:** One endpoint hourly charge; no cross-region egress.
+
+## 4. Pattern: Single region, cross-region clients
+
+**In one line:** One Atlas region; applications run in several GCP regions of the same VPC and reach the endpoint through PSC global access.
+
+**When to choose:**
+
+- Same constraints as [Pattern 3](#3-pattern-single-region-same-region-clients), but apps run in multiple GCP regions of the same VPC.
+- You want apps in healthy regions to keep serving when one client region fails.
+- You still accept manual DR for a cluster region outage.
+
+**Survives:**
+
+- Single-zone failure: yes.
+- Cluster region outage: no. Manual DR required (the cluster lives in one region).
+- Client region outage: yes for apps in healthy regions; the endpoint stays reachable from any peered region.
+
+**Doesn't survive:**
+
+- The cluster region itself going down.
+- A consumer region whose apps lose all peering paths to the cluster region.
+
+**Module configuration:** Set `all_region_mode = true` on the endpoint object so the GCP forwarding rule accepts traffic from clients in other regions of the same VPC.
+
+```hcl
+module "atlas_gcp" {
+  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+  version    = "~> 0.2"
+  project_id = var.project_id
+
+  privatelink_endpoints = [{
+    region          = "us-east4"
+    subnetwork      = var.subnetwork
+    all_region_mode = true
+  }]
+}
+```
+
+Worked example: [`examples/privatelink_global_access`](../examples/privatelink_global_access).
+
+**Cost note:** One endpoint hourly charge; you pay GCP cross-region VPC egress for client-to-cluster traffic.
+
+`all_region_mode` is a GCP-level switch on the consumer side. It is not the same as the Atlas project setting [`privatelink_regional_mode`](../README.md#privatelink_regional_mode); see [Appendix A.3](#a3-two-gcp-knobs-not-to-confuse) for the contrast.
+
+## 5. Pattern: Multi-region cluster, peered networks
+
+**In one line:** The Atlas cluster has electable nodes in two or more regions; one private endpoint per cluster region; all application VPCs can reach every endpoint subnet via peering.
+
+**When to choose:**
+
+- You need regional HA (automatic regional failover) for the cluster.
+- Your network team can peer (or VPN, or otherwise route) every application VPC to every cluster region's PE subnet.
+- Works for both replica-set and sharded clusters.
+
+**Survives:**
+
+- Single-zone failure: yes.
+- Cluster region outage: yes; the driver fails over to a healthy region using a single global connection string.
+- Client region outage: only the apps in the failed region go offline. Apps in healthy client regions keep serving.
+
+**Doesn't survive:**
+
+- A scenario where one application region cannot reach one cluster region (driver loses access to that node).
+- Removing a private endpoint during cluster maintenance.
+
+**Module configuration:** Provide one entry in [`privatelink_endpoints`](../README.md#privatelink_endpoints) per cluster region. Leave [`privatelink_regional_mode`](../README.md#privatelink_regional_mode) at its default (off).
+
+```hcl
+module "atlas_gcp" {
+  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+  version    = "~> 0.2"
+  project_id = var.project_id
+
+  privatelink_endpoints = [
+    { region = "us-east4",  subnetwork = var.subnetwork_useast4 },
+    { region = "us-west1",  subnetwork = var.subnetwork_uswest1 },
+  ]
+}
+```
+
+Worked example: see [`examples/privatelink_multi_region`](../examples/privatelink_multi_region) and remove `privatelink_regional_mode = "auto"` for this pattern.
+
+**Cost note:** One endpoint per cluster region; cross-region peering cost is on the customer side.
+
+## 6. Pattern: Multi-region cluster, regional connection strings
+
+**In one line:** Multi-region cluster, but application networks cannot peer cross-region; each region's apps use a connection string scoped to that region.
+
+**When to choose:**
+
+- You need regional HA (automatic regional failover) for the cluster.
+- Application VPCs in different regions cannot peer to each other (regulatory, organizational, or routing constraints).
+- Sharded or geo-sharded clusters only. Replica sets cannot use this pattern.
+
+**Survives:**
+
+- Single-zone failure: yes.
+- Cluster region outage: the failed region's connection string stops resolving; apps in other regions keep working through their own region-scoped connection string. Cross-region failover requires application-side logic.
+- Client region outage: only the apps in the failed client region go offline.
+
+**Doesn't survive:**
+
+- Cluster-side automatic failover from the *application's* point of view: each app is pinned to one region's connection string.
+- Replica-set clusters (the pattern is sharded-only).
+
+**Module configuration:** Set [`privatelink_regional_mode`](../README.md#privatelink_regional_mode) to `"auto"`. The Atlas project then emits one connection string per cluster region.
+
+```hcl
+module "atlas_gcp" {
+  source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
+  version    = "~> 0.2"
+  project_id = var.project_id
+
+  privatelink_endpoints = [
+    { region = "us-east4",  subnetwork = var.subnetwork_useast4 },
+    { region = "us-west1",  subnetwork = var.subnetwork_uswest1 },
+  ]
+  privatelink_regional_mode = "auto"
+}
+```
+
+Worked example: [`examples/privatelink_multi_region`](../examples/privatelink_multi_region).
+
+**Cost note:** One endpoint per cluster region; no cross-region application traffic since each app stays regional.
+
+`privatelink_regional_mode` is an Atlas project setting. See [Appendix A.3](#a3-two-gcp-knobs-not-to-confuse) for how it differs from `all_region_mode`. Toggling it later regenerates connection strings for the whole project; plan a maintenance window.
+
+## 7. Delivery option: BYO Endpoint
+
+**BYO Endpoint** (Bring Your Own Endpoint) is a delivery mode that applies on top of any of [patterns 3 through 6](#2-choose-your-outcome). It does not change the topology; it changes who owns the GCP forwarding rule.
+
+| Mode | Who creates the GCP forwarding rule | Apply cycle |
+| --- | --- | --- |
+| **Module-managed (default)** | The GCP module. | One `terraform apply`. |
+| **BYO Endpoint** | You, outside the module. | Two-phase: phase 1 reserves the Atlas service; phase 2 registers the customer-created endpoint with Atlas. |
+
+**Choose BYO Endpoint when:**
+
+- Your IAM policy denies the GCP module the rights to create forwarding rules.
+- Existing network automation already owns the consumer endpoints.
+- You need to set GCP-side flags before registration (for example `--allow-psc-global-access` for cross-region clients).
+
+**Trade-off:** Two-phase apply doubles the operator work compared with module-managed endpoints. Pick BYO Endpoint only when constraints force it.
+
+**Module configuration:** Use [`privatelink_byo_endpoint`](../README.md#privatelink_byo_endpoint) (phase 1) and [`privatelink_byo_service`](../README.md#privatelink_byo_service) (phase 2). Worked example: [`examples/privatelink_byoe`](../examples/privatelink_byoe).
+
+## 8. Operations and failure modes
+
+### 8.1 Failure mode reference
+
+| Failure | Pattern 3 | Pattern 4 | Pattern 5 | Pattern 6 |
+| --- | --- | --- | --- | --- |
+| Single-zone failure | Auto | Auto | Auto | Auto |
+| Cluster region outage | Total outage; manual DR | Total outage; manual DR | Driver fails over via global URI | Failed region's URI stops; other regions keep working |
+| Client region outage | Apps in that region offline | Apps in healthy client regions keep serving | Only apps in failed region offline | Only apps in failed region offline |
+| PE removed during cluster maintenance | Downtime | Downtime | Downtime | Downtime |
+
+Two scope notes:
+
+- **Multi-cloud cluster + PrivateLink:** A GCP private endpoint reaches only the cluster nodes that Atlas runs on GCP. Use VPN or a secondary read preference for nodes in other clouds. See [Atlas multi-cloud distribution](https://www.mongodb.com/docs/atlas/cluster-config/multi-cloud-distribution/).
+- **GCP-wide outage:** PrivateLink does not help here. This is the territory of multi-cloud topology.
+
+### 8.2 Change events that force a reconnect or a window
+
+Plan for application-side disruption when any of these happen:
+
+- **Replica set converted to sharded:** Connection string targets change; applications restart.
+- **`privatelink_regional_mode` toggled:** Sharded connection strings regenerate project-wide; plan a window.
+- **Cluster region added or removed:** Atlas regenerates DNS records; applications reconnect if the connection string shape changes.
+- **Endpoint removed during cluster maintenance:** Multi-region clusters require the endpoint to stay during maintenance windows. See the [Atlas private endpoint docs](https://www.mongodb.com/docs/atlas/security-private-endpoint/).
+
+## 9. Cost and environment guidance
+
+**Cost drivers (cloud-neutral):**
+
+- Per-endpoint hourly charge from the cloud provider.
+- Atlas private endpoint billing per service. See [Atlas private endpoint billing](https://www.mongodb.com/docs/atlas/billing/additional-services/#std-label-billing-private-endpoints-clusters/).
+- Cross-region data egress when applications and the cluster are in different regions.
+- `privatelink_regional_mode` adds no Atlas charge but creates more consumer endpoints and DNS records.
+
+**Dev vs prod recommendation:**
+
+- **Dev:** Public IP plus access list is acceptable.
+- **Staging:** Single-region private endpoint ([Pattern 3](#3-pattern-single-region-same-region-clients)).
+- **Production:** A private endpoint pattern that matches the production DR shape ([Pattern 5](#5-pattern-multi-region-cluster-peered-networks) or [Pattern 6](#6-pattern-multi-region-cluster-regional-connection-strings)).
+
+Use one Atlas project per environment so toggles like `privatelink_regional_mode` cannot affect another environment.
+
+## 10. GCP module configuration
+
+| Pattern | Cluster module input | GCP module input | Worked example |
 | --- | --- | --- | --- |
-| Cross-region client access (§5.1 hub-spoke) | PSC global access (consumer flag); endpoint stays in service region | Cross-region PrivateLink; interface endpoint in client region | Private Endpoint per client VNet; peering to hub |
-| Regional mode enablement (§5.2 M2) | Manual enable (`privatelink_regional_mode = "auto"`) | Manual enable (`privatelink_regional_mode = "auto"`) | Manual enable (`privatelink_regional_mode = "auto"`) |
-| Optimized sharded connection strings | Not supported (port-mapped PSC) | `loadBalanced` (sharded only) | Not supported |
-| Endpoint architecture | Port-mapped PSC (one forwarding rule per region; legacy `pl-*` deprecated Apr 2027) | NLB-backed interface endpoint; 100 target groups per NLB drives regional mode for high-shard clusters | VNet private endpoint per region |
-| Cross-region billing SKU | None (Atlas); pay GCP cross-region VPC egress | `AWS_PRIVATE_ENDPOINT_REGION` $0.05/hr per remote project-region (live April 2026) | Per-endpoint hourly cost; no separate cross-region SKU |
-| BYO Endpoint pre-registration flag | `--allow-psc-global-access` (when cross-region clients needed) | Endpoint security group rules | VNet / subnet configuration |
+| [Single region, same-region clients](#3-pattern-single-region-same-region-clients) | One region in `regions` | [`privatelink_endpoints`](../README.md#privatelink_endpoints) (one entry) | [`examples/privatelink`](../examples/privatelink) |
+| [Single region, cross-region clients](#4-pattern-single-region-cross-region-clients) | One region in `regions` | `all_region_mode = true` on the endpoint object | [`examples/privatelink_global_access`](../examples/privatelink_global_access) |
+| Single region, multi-VPC | One region in `regions` | [`privatelink_endpoints_single_region`](../README.md#privatelink_endpoints_single_region) | See README variable reference |
+| [Multi-region, peered networks](#5-pattern-multi-region-cluster-peered-networks) | Multi-region `regions`; regional mode default | [`privatelink_endpoints`](../README.md#privatelink_endpoints) (one entry per cluster region) | Adapt [`examples/privatelink_multi_region`](../examples/privatelink_multi_region) (drop `privatelink_regional_mode`) |
+| [Multi-region, regional connection strings](#6-pattern-multi-region-cluster-regional-connection-strings) | Geo-sharded `regions` | `privatelink_endpoints` + `privatelink_regional_mode = "auto"` | [`examples/privatelink_multi_region`](../examples/privatelink_multi_region) |
+| [BYO Endpoint](#7-delivery-option-byo-endpoint) (any pattern) | Any pattern above | [`privatelink_byo_endpoint`](../README.md#privatelink_byo_endpoint) and [`privatelink_byo_service`](../README.md#privatelink_byo_service) | [`examples/privatelink_byoe`](../examples/privatelink_byoe) |
+| Reference: full module integration | Multi-feature | PSC + encryption + backup | [`examples/complete`](../examples/complete) |
 
-**Two module knobs on GCP (do not conflate):**
+**Regional-mode dependency ordering:** Clusters that depend on `privatelink_regional_mode` should declare `depends_on = [module.atlas_gcp]` (or an explicit dependency on `mongodbatlas_private_endpoint_regional_mode`) so Atlas updates the project-level setting before the cluster apply runs. See the [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md#private-endpoint-regional-mode-breaking-change).
 
-- **`all_region_mode`:** GCP consumer forwarding rule; cross-region clients in the same VPC reach a PSC IP in the service region (§5.1 hub-spoke).
-- **`privatelink_regional_mode`:** Atlas project setting; region-local private SRV for sharded M2 (§5.2 M2).
+**Region keys:** Module-managed `privatelink_endpoints` keys normalize to GCP format (`us-east4`). Deployments that previously used Atlas-format keys (`US_EAST_4`) need `moved` blocks; see the [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md#privatelink-region-key-normalization-breaking-change).
 
-## 10. Module configuration mapping (GCP)
+## Appendix A: How it works
 
-Map §5 patterns to cluster inputs, GCP module variables, and examples.
+This section explains the Atlas and GCP mechanics behind the patterns. Skip it if you only need to pick a pattern.
 
-| Pattern | Cluster module | GCP module inputs | Example |
-| --- | --- | --- | --- |
-| §5.1 single-region, same-region clients | Single region in `regions` | `privatelink_endpoints` (one region) | [privatelink](../examples/privatelink) |
-| §5.1 hub-spoke (`all_region_mode`) | Single region in `regions` | `all_region_mode = true` on endpoint object | [privatelink_global_access](../examples/privatelink_global_access) |
-| §5.1 multi-VPC same region | Single region in `regions` | `privatelink_endpoints_single_region` | README variable reference |
-| §5.2 M1 multi-region, one URI | Multi-region `regions`; regional mode off | `privatelink_endpoints` (one entry per cluster region) | Configure endpoints per region; no `privatelink_regional_mode` |
-| §5.2 M2 multi-region, regional URIs | Geo-sharded `regions` | `privatelink_endpoints` + `privatelink_regional_mode = "auto"` | [privatelink_multi_region](../examples/privatelink_multi_region) |
-| §5.3 BYO Endpoint | Any pattern above | `privatelink_byo_endpoint` / `privatelink_byo_service` | [privatelink_byoe](../examples/privatelink_byoe) |
-| Full integration (reference) | Multi-feature | PSC + encryption + backup | [complete](../examples/complete) |
+### A.1 What the driver connects to
 
-**Regional mode ordering:** Clusters that depend on regional mode should declare `depends_on = [module.atlas_gcp]` (or an explicit dependency on `mongodbatlas_private_endpoint_regional_mode`) so connection strings update before cluster resources apply. See [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md#private-endpoint-regional-mode-breaking-change).
+A MongoDB driver opens connections to the cluster's nodes using a connection string Atlas generates. Two cluster shapes drive different connection-string behavior:
 
-**Region keys:** Module-managed `privatelink_endpoints` keys normalize to GCP format (`us-east4`). Deployments that used Atlas-format keys need `moved` blocks; see [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md#privatelink-region-key-normalization-breaking-change).
+- **Replica set:** The driver opens connections to the data-bearing processes in every cluster region. Each region therefore needs its own private endpoint.
+- **Sharded or geo-sharded:** The driver opens connections only to the cluster's query routers, not to individual shards. The query routers exist per region; Atlas can emit one global connection string (when application networks can peer) or one connection string per region (when they cannot).
 
-**Variable reference:** [`privatelink_endpoints`](../README.md#privatelink_endpoints), [`privatelink_endpoints_single_region`](../README.md#privatelink_endpoints_single_region), [`privatelink_regional_mode`](../README.md#privatelink_regional_mode), [`privatelink_byo_endpoint`](../README.md#privatelink_byo_endpoint), [`privatelink_byo_service`](../README.md#privatelink_byo_service).
+### A.2 The three layers
+
+1. **Cluster topology layer (Atlas).** The cluster's electable regions decide where Atlas runs data nodes. This is configured in the cluster module, not the GCP module.
+2. **Atlas private-endpoint layer.** For each cluster region, Atlas exposes a *private endpoint service*. The Atlas project setting `privatelink_regional_mode` controls whether sharded clusters publish one global connection string or one per region.
+3. **GCP consumer layer.** This is what the GCP module manages: a PSC forwarding rule and internal IP that points at the Atlas private endpoint service. `all_region_mode` is the GCP-side switch that lets clients in other regions of the same VPC use this consumer endpoint.
+
+The application driver sees the cluster through layers 2 and 3.
+
+### A.3 Two GCP knobs not to confuse
+
+`all_region_mode` and `privatelink_regional_mode` look similar but operate at different layers:
+
+- **[`all_region_mode`](../README.md#privatelink_endpoints):** Set per endpoint object. Configures the GCP PSC forwarding rule to accept traffic from clients in other regions of the same VPC. Used by [Pattern 4](#4-pattern-single-region-cross-region-clients).
+- **[`privatelink_regional_mode`](../README.md#privatelink_regional_mode):** Atlas project-level setting. Switches sharded clusters from one global connection string to one connection string per region. Used by [Pattern 6](#6-pattern-multi-region-cluster-regional-connection-strings).
+
+You can set both at once. They do not replace each other.
+
+### A.4 PSC forwarding-rule details
+
+GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes shard traffic on that rule by mapping cluster ports internally; this is the "port-mapped PSC" architecture. Legacy `pl-*` hostnames from older Atlas integrations are deprecated and removed in April 2027 — new deployments do not see them.
+
+## Glossary
+
+- **all_region_mode:** Module input on a `privatelink_endpoints` entry that enables PSC global access on the GCP forwarding rule.
+- **BYO Endpoint (Bring Your Own Endpoint):** Delivery mode where the customer creates the GCP forwarding rule outside the module. See [section 7](#7-delivery-option-byo-endpoint).
+- **Connection string:** The URI a MongoDB driver uses to connect to a cluster. Atlas generates one global connection string by default; `privatelink_regional_mode` switches sharded clusters to one connection string per region.
+- **Disaster Recovery (DR):** Manual recovery from a regional or larger failure, typically by restoring from a cross-region backup. Always available regardless of PrivateLink layout.
+- **High Availability (HA):** Automatic recovery with no human action. **Zonal HA** is on by default for any Atlas cluster (multi-zone replica set). **Regional HA** is opt-in via a multi-region cluster.
+- **PE / Private Endpoint:** A private network path from a customer VPC to an Atlas cluster.
+- **PSC / Private Service Connect:** Google Cloud's PE technology.
+- **PrivateLink:** Umbrella name MongoDB uses for PE features across cloud providers. The Atlas terraform variable namespace uses `privatelink_*`.
+- **privatelink_regional_mode:** Atlas project setting that controls whether sharded clusters publish one global or per-region connection string.
+- **VPC (Virtual Private Cloud):** Customer-side private network where applications and PSC consumer endpoints live.
 
 ## Additional resources
 
 - [Module README](../README.md#private-service-connect)
 - [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md)
-- [Google PSC + MongoDB codelab](https://codelabs.developers.google.com/codelabs/psc-mongo-globalaccess)
 - [Atlas: Learn About Private Endpoints](https://www.mongodb.com/docs/atlas/security-private-endpoint/)
+- [Cluster topology guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-cluster/blob/main/docs/cluster_topology.md)
+- [Google PSC + MongoDB codelab](https://codelabs.developers.google.com/codelabs/psc-mongo-globalaccess)
