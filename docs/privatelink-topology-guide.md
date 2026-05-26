@@ -347,7 +347,7 @@ You can set both at once. They do not replace each other.
 
 ### A.4 PSC forwarding-rule details
 
-GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes shard traffic on that rule by mapping cluster ports internally; this is the "port-mapped PSC" architecture. Legacy `pl-*` hostnames from older Atlas integrations are deprecated this module do not use them.
+GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes shard traffic on that rule by mapping cluster ports internally; this is the "port-mapped PSC" architecture. Legacy `pl-*` hostnames from older Atlas integrations are deprecated; this module does not use them.
 
 ## Glossary
 
