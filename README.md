@@ -512,7 +512,7 @@ Keys must exist in privatelink_byo_endpoint.
 - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
 - `gcp_project_id` is used when the forwarding rule lives in a different GCP project than the provider default.
 
-For cross-region clients, set `allow_psc_global_access = true` on your `google_compute_forwarding_rule` before registration. The module does not create BYOE rules.
+For cross-region clients, set `allow_psc_global_access = true` on your `google_compute_forwarding_rule` before registration. The module does not create BYO Endpoint rules.
 
 Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
 
