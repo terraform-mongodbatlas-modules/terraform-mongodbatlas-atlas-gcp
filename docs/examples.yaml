@@ -49,10 +49,6 @@ tables:
         feature: PrivateLink (PSC)
         name: BYO Endpoint (Bring Your Own Endpoint)
         description: Apply-order workflow for externally managed GCP forwarding rules
-      - folder_name: privatelink_global_access
-        feature: PrivateLink (PSC)
-        name: Module-Managed PrivateLink with Global Access
-        description: Module-managed PSC endpoints with cross-region VPC access using `allow_psc_global_access`
       - folder_name: gcp_read_only
         feature: Read-Only GCP
         name: BYO CPA + Pre-Granted IAM

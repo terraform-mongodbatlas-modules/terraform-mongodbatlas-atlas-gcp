@@ -47,7 +47,6 @@ Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) |
 Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
 PrivateLink (PSC) | [Module-Managed Private Service Connect](./examples/privatelink) | Module-managed PSC endpoints. See the PrivateLink topology guide for pattern-specific settings
 PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Apply-order workflow for externally managed GCP forwarding rules
-PrivateLink (PSC) | [Module-Managed PrivateLink with Global Access](./examples/privatelink_global_access) | Module-managed PSC endpoints with cross-region VPC access using `allow_psc_global_access`
 Read-Only GCP | [BYO CPA + Pre-Granted IAM](./examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
 
 <!-- END_TABLES -->

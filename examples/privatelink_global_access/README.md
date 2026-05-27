@@ -3,9 +3,9 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# Module-Managed PrivateLink with Global Access
+# Privatelink Global Access
 
-Module-managed PSC endpoints with cross-region VPC access using `allow_psc_global_access`
+
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
