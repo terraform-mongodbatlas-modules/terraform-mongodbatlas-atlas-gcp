@@ -41,7 +41,7 @@ sections:
     title: "Private Service Connect"
     level: 2
     description: |
-      Enable PSC when applications must reach Atlas over private connectivity instead of the public internet. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see the [PrivateLink Topology Guide](privatelink-topology-guide.md).
+      Enable PSC when applications must reach Atlas over private connectivity instead of the public internet. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see the [PrivateLink Topology Guide](docs/privatelink-topology-guide.md).
 
       The module supports two connectivity paths (mutually exclusive per region):
       - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`.

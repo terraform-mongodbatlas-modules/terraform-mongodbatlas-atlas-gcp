@@ -46,7 +46,7 @@ Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encr
 Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
 Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
 PrivateLink (PSC) | [Module-Managed Private Service Connect](./examples/privatelink) | Module-managed PSC endpoints. See the PrivateLink topology guide for pattern-specific settings
-PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Apply-order workflow for externally managed GCP forwarding rules
+PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | User-managed GCP forwarding rules with module-managed Atlas PrivateLink
 Read-Only GCP | [BYO CPA + Pre-Granted IAM](./examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
 
 <!-- END_TABLES -->
@@ -218,7 +218,7 @@ Default: `{}`
 
 ## Private Service Connect
 
-Enable PSC when applications must reach Atlas over private connectivity instead of the public internet. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see the [PrivateLink Topology Guide](privatelink-topology-guide.md).
+Enable PSC when applications must reach Atlas over private connectivity instead of the public internet. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see the [PrivateLink Topology Guide](docs/privatelink-topology-guide.md).
 
 The module supports two connectivity paths (mutually exclusive per region):
 - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`.

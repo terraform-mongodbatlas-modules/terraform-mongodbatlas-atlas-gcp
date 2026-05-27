@@ -48,7 +48,7 @@ tables:
       - folder_name: privatelink_byoe
         feature: PrivateLink (PSC)
         name: BYO Endpoint (Bring Your Own Endpoint)
-        description: Apply-order workflow for externally managed GCP forwarding rules
+        description: User-managed GCP forwarding rules with module-managed Atlas PrivateLink
       - folder_name: gcp_read_only
         feature: Read-Only GCP
         name: BYO CPA + Pre-Granted IAM

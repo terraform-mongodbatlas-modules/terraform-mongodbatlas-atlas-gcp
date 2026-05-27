@@ -5,7 +5,7 @@ Run 'just gen-examples' to regenerate.
 -->
 # BYO Endpoint (Bring Your Own Endpoint)
 
-Apply-order workflow for externally managed GCP forwarding rules
+User-managed GCP forwarding rules with module-managed Atlas PrivateLink
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
