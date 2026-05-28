@@ -1,27 +1,13 @@
 # MongoDB Atlas GCP Terraform Module
 
-Integrates MongoDB Atlas with Google Cloud Platform:
-
-- **Encryption at Rest** using Google Cloud KMS (customer-managed keys)
-- **PrivateLink** via Private Service Connect (PSC) with port-mapped architecture
-- **Backup Export** to Google Cloud Storage (GCS)
-
-## Public Preview Note
-
-The MongoDB Atlas GCP Module (Public Preview) simplifies Atlas-GCP integrations and applies MongoDB's best practices as intelligent defaults. This preview validates that these patterns meet the needs of most workloads with minimal maintenance or rework. We welcome your feedback and contributions during this preview phase. MongoDB formally supports this module from its v1 release onwards.
-
-## Disclaimer
-
-One of the project's primary objectives is to provide durable modules that support non-breaking migration and upgrade paths. The v0 release (Public Preview) of the MongoDB Atlas GCP Module focuses on gathering feedback and refining the design. Upgrades from v0 to v1 may not be seamless. We plan to deliver a finalized v1 release with long-term upgrade support.
+Use this Terraform module to configure MongoDB Atlas integrations with Google Cloud Platform. The module includes recommended defaults based on MongoDB best practices. MongoDB maintains this module. For questions, open a support request or a GitHub issue.
 
 <!-- BEGIN_TOC -->
 <!-- @generated
 WARNING: This section is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
-- [Public Preview Note](#public-preview-note)
-- [Disclaimer](#disclaimer)
-- [Getting Started](#getting-started)
+- [Module Commitment](#module-commitment)
 - [Examples](#examples)
 - [Requirements](#requirements)
 - [Providers](#providers)
@@ -31,6 +17,7 @@ Run 'just gen-readme' to regenerate. -->
 - [Encryption at Rest](#encryption-at-rest)
 - [Private Service Connect](#private-service-connect)
 - [Backup Export](#backup-export)
+- [Log Integration](#log-integration)
 - [Regions Mapping](#regions-mapping)
 - [Optional Variables](#optional-variables)
 - [Outputs](#outputs)
@@ -38,186 +25,9 @@ Run 'just gen-readme' to regenerate. -->
 - [License](#license)
 <!-- END_TOC -->
 
-## Getting Started
+## Module Commitment
 
-This section guides you step-by-step on setting GCP up encryption at rest in MongoDB Atlas with Terraform.
-
-<!-- BEGIN_GETTING_STARTED -->
-<!-- @generated
-WARNING: This section is auto-generated. Do not edit directly.
-Changes will be overwritten when documentation is regenerated.
-Run 'just gen-readme' to regenerate. -->
-### Prerequisites
-
-If you are familiar with Terraform and already have a project configured in MongoDB Atlas, go to [commands](#commands).
-
-To deploy MongoDB Atlas in GCP with Terraform, ensure you meet the following requirements:
-
-1. Install [Terraform](https://developer.hashicorp.com/terraform/install) to be able to run `terraform` [commands](#commands).
-2. [Sign in](https://account.mongodb.com/account/login) or [create](https://account.mongodb.com/account/register) your MongoDB Atlas Account.
-3. Configure your [Atlas authentication](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs#authentication) method.
-
-   **NOTE**: Service Accounts (SA) are the preferred authentication method. See [Grant Programmatic Access to an Organization](https://www.mongodb.com/docs/atlas/configure-api-access/#grant-programmatic-access-to-an-organization) in the MongoDB Atlas documentation for detailed instructions on configuring SA access to your project.
-
-4. Install and configure the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install).
-
-   ```sh
-   gcloud init
-   ```
-
-   Authenticate in Google Cloud using one of the [supported methods](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication).
-
-   The following example uses [Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials):
-
-   ```sh
-   gcloud auth application-default login
-   ```
-
-5. Use an existing [MongoDB Atlas project](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/project) or [create a new Atlas project resource](#optional-create-a-new-atlas-project-resource).
-
-### Commands
-
-Use the following `terraform` commands to initiate, apply, or destroy your configuration:
-
-```sh
-terraform init # this will download the required providers and create a `terraform.lock.hcl` file.
-# configure authentication env-vars (MONGODB_ATLAS_XXX, GOOGLE_APPLICATION_CREDENTIALS)
-# configure your `vars.tfvars` with required variables
-terraform apply -var-file vars.tfvars
-# cleanup
-terraform destroy -var-file vars.tfvars
-```
-
-### (Optional) Create a New Atlas Project Resource
-
-To set your configuration in a new Atlas project, add the following code to the `main.tf` file:
-
-```hcl
-variable "org_id" {
-  type    = string
-  default = "{ORG_ID}" # REPLACE with your organization id, for example `65def6ce0f722a1507105aa5`.
-}
-
-resource "mongodbatlas_project" "this" {
-  name   = "cluster-module"
-  org_id = var.org_id
-}
-```
-
-Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](./main.tf) file.
-
-<!-- END_GETTING_STARTED -->
-
-### Set Up a Complete GCP Configuration (Encryption, Backup Export, and PrivateLink)
-
-Complete the following steps to configure encryption at rest, backup export, and PrivateLink with GCP using this module:
-
-1. Prepare your terraform files.
-  
-   You can copy the files directly from the examples provided in this module:
-
-    - [examples/complete/main.tf](examples/complete/main.tf)
-    - [examples/complete/variables.tf](examples/complete/variables.tf)
-    - [examples/complete/versions.tf](examples/complete/versions.tf)
-
-   The following code example shows a basic example of a `main.tf` file configuration:
-
-    ```hcl
-    module "atlas_gcp" {
-      source     = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-      project_id = var.project_id
-
-      encryption = {
-        enabled = true
-        create_kms_key = {
-          enabled       = true
-          key_ring_name = var.key_ring_name
-          location      = var.gcp_region
-        }
-      }
-
-      backup_export = {
-        enabled = true
-        create_gcs_bucket = {
-          enabled       = true
-          name_suffix   = var.bucket_name_suffix
-          location      = var.gcp_region
-          force_destroy = var.force_destroy
-        }
-      }
-
-      privatelink_endpoints = var.privatelink_endpoints
-
-      gcp_tags = var.gcp_tags
-    }
-
-    output "encryption" {
-      value = module.atlas_gcp.encryption
-    }
-
-    output "encryption_at_rest_provider" {
-      value = module.atlas_gcp.encryption_at_rest_provider
-    }
-
-    output "backup_export" {
-      value = module.atlas_gcp.backup_export
-    }
-
-    output "export_bucket_id" {
-      value = module.atlas_gcp.export_bucket_id
-    }
-
-    output "privatelink" {
-      value = module.atlas_gcp.privatelink
-    }
-
-    output "resource_ids" {
-      description = "All resource IDs created by the module"
-      value       = module.atlas_gcp.resource_ids
-    }
-    ```
-
-2. Prepare your [variables](#required-variables).
-
-    The following example shows a `vars.tfvars` with the variables to provide at `apply` time:
-
-    ```hcl
-    project_id         = "YOUR_ATLAS_PROJECT_ID"
-    gcp_project_id     = "YOUR_GCP_PROJECT_ID"
-    gcp_region         = "YOUR_GCP_REGION"
-    key_ring_name      = "atlas-encryption-keyring"
-    bucket_name_suffix = "-dev"
-    force_destroy      = false
-
-    privatelink_endpoints = [
-      {
-        region     = "US_EAST_4"
-        subnetwork = "projects/YOUR_GCP_PROJECT_ID/regions/YOUR_GCP_REGION/subnetworks/YOUR_SUBNETWORK_NAME"
-        labels     = {}
-      }
-    ]
-    ```
-
-3. Provide your MongoDB Atlas credentials:
-
-    ```sh
-    export MONGODB_ATLAS_CLIENT_ID="your-client-id-goes-here"
-    export MONGODB_ATLAS_CLIENT_SECRET="your-client-secret-goes-here"
-    ```
-
-    For more details on authentication methods, see [Prerequisites](#prerequisites).
-
-4. Initialize and apply your Terraform configuration (See [Commands](#commands)).
-
-5. Verify your [outputs](#outputs).
-
-You now have encryption at rest, backup export, and PrivateLink configured with GCP.
-
-See the [Examples](#examples) section for additional configurations.
-
-### Clean up your configuration
-
-Run `terraform destroy -var-file vars.tfvars` to undo all changes that Terraform made to your infrastructure.
+MongoDB formally supports this module, including bug fixes, security patches, and backward-compatible enhancements. The v0.2.x release is the GA milestone for this module and carries a two-year stability commitment: no breaking changes through October 2028 (at the earliest).
 
 <!-- BEGIN_TABLES -->
 <!-- @generated
@@ -226,14 +36,17 @@ Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
 ## Examples
 
+The following examples show common configurations you can copy and adapt. Start with the [encryption](./examples/encryption) example for a minimal setup, then explore other examples for PrivateLink, backup export, and log integration. Examples can be combined in a single module call. See the [complete](./examples/complete) and [gcp_read_only](./examples/gcp_read_only) examples.
+
+
 Feature | Name | Description
 --- | --- | ---
-All Features | [Encryption + Backup Export + PrivateLink](./examples/complete) | Full integration using module-managed KMS key, GCS bucket, and PSC connectivity
+All Features | [Encryption + Backup Export + PrivateLink + Log Integration](./examples/complete) | Full v0.2.0 stack with module-managed KMS key, GCS buckets, PSC connectivity, and log export
 Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
 Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
 Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
-PrivateLink (PSC) | [Module-Managed Private Service Connect](./examples/privatelink) | Module-managed PSC endpoints; see the PrivateLink topology guide for pattern-specific settings
-PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | Two-phase workflow for externally managed GCP forwarding rules
+PrivateLink (PSC) | [Module-Managed Private Service Connect](./examples/privatelink) | Module-managed PSC endpoints. See the PrivateLink topology guide for pattern-specific settings
+PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | User-managed GCP forwarding rules with module-managed Atlas PrivateLink
 Read-Only GCP | [BYO CPA + Pre-Granted IAM](./examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
 
 <!-- END_TABLES -->
@@ -286,13 +99,14 @@ Type: `string`
 
 ## GCP Cloud Provider Access
 
-Atlas requires a GCP service account to access your Google Cloud resources (KMS keys for encryption, GCS buckets for backup export). Unlike AWS and Azure, Atlas creates and manages this service account automatically -- you only need to grant it IAM roles on your resources.
-
-The module creates a shared Cloud Provider Access (CPA) setup by default when encryption or backup export is enabled. You can also reuse an existing CPA by setting `create = false` with `existing.role_id` and `existing.service_account_for_atlas`. PrivateLink-only configurations skip CPA entirely since PSC uses GCP resources only.
-
-Set `skip_iam_bindings = true` only when your platform team pre-grants the required GCP IAM roles on KMS keys and GCS buckets. In that case you must use user-provided KMS and buckets (`key_version_resource_id`, `bucket_name`); the module cannot create module-managed KMS or GCS without IAM bindings. `skip_iam_bindings = true` also requires BYO CPA (`cloud_provider_access.create = false`), because a module-created CPA still needs IAM bindings.
+Enable CPA when Atlas must access your GCP resources for encryption at rest or backup export. Atlas creates and manages a GCP service account. You grant it IAM roles on KMS keys and GCS buckets.
 
 See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/atlas/security/set-up-gcp-access/) for details.
+
+**When not to use:**
+- PrivateLink-only deployments, where PSC uses GCP resources only and CPA is not required.
+- Read-only GCP where Terraform cannot create IAM bindings. Use BYO CPA with `skip_iam_bindings = true` and pre-granted roles (see [gcp_read_only example](./examples/gcp_read_only)).
+- Module-managed KMS or GCS when your platform team must grant IAM outside Terraform (`skip_iam_bindings = true` requires user-provided keys and buckets).
 
 ### cloud_provider_access
 
@@ -338,11 +152,12 @@ Default: `false`
 
 ## Encryption at Rest
 
-Atlas encrypts data at rest by default with Atlas-managed keys. Enable customer-managed encryption when compliance or regulatory requirements mandate that you control the encryption keys. Customer-managed encryption gives you full lifecycle control over key rotation, access policies, and key destruction.
-
-Provide either a user-managed KMS key (`key_version_resource_id`) or let the module create one (`create_kms_key.enabled = true`). The module grants the Atlas service account the necessary IAM roles (`roles/cloudkms.cryptoKeyEncrypterDecrypter`, `roles/cloudkms.viewer`) on the key.
+Enable customer-managed encryption when compliance requires you to control encryption keys. Provide a user-managed KMS key (`key_version_resource_id`) or let the module create one (`create_kms_key.enabled = true`).
 
 See the [GCP encryption documentation](https://www.mongodb.com/docs/atlas/security-gcp-kms/) for details.
+
+**When not to use:**
+- Atlas-managed encryption is sufficient for your compliance requirements.
 
 ### encryption
 
@@ -354,8 +169,8 @@ Provide EITHER:
 
 `key_ring_name` sets the name for the GCP KMS key ring. When omitted, defaults to
 `atlas-{project_id}-keyring` to avoid collisions across Atlas projects sharing the
-same GCP project and location. Key rings are permanent in GCP -- choose stable names.
-GCP allows 1-63 characters (`[a-zA-Z][a-zA-Z0-9_-]*`); the auto-generated name is
+same GCP project and location. Key rings are permanent in GCP. Choose stable names.
+GCP allows 1-63 characters (`[a-zA-Z][a-zA-Z0-9_-]*`). The auto-generated name is
 38 characters (well within the limit).
 
 `crypto_key_name` sets the name for the GCP KMS crypto key within the key ring.
@@ -370,10 +185,10 @@ Format: seconds as string, e.g., "7776000s" (90 days). Should be > 86400s (1 day
 When omitted, no automatic rotation occurs. Atlas recommends 90-day rotation and
 creates an alert at that cadence. Each rotation causes a plan diff on
 key_version_resource_id on the next terraform apply. Old key versions remain
-enabled -- no data re-encryption is needed.
+enabled. No data re-encryption is needed.
 
 `enabled_for_search_nodes` (default: `true`) opts the project into BYOK encryption for
-dedicated search nodes. The flag alone is not sufficient -- Atlas also requires cluster-level
+dedicated search nodes. The flag alone is not sufficient. Atlas also requires cluster-level
 BYOK and an internal feature flag. In projects without search nodes, this is a no-op.
 On existing deployments with search nodes, flipping false->true triggers search node
 reprovisioning and index rebuild (search may be temporarily unavailable).
@@ -403,13 +218,17 @@ Default: `{}`
 
 ## Private Service Connect
 
-Private Service Connect (PSC) enables private connectivity between your GCP VPCs and MongoDB Atlas. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see [PrivateLink Topology Guide](docs/privatelink-topology-guide.md). The sections below document module variables.
+Enable PSC when applications must reach Atlas over private connectivity instead of the public internet. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see the [PrivateLink Topology Guide](docs/privatelink-topology-guide.md).
 
-The module supports two connectivity paths (mutually exclusive):
-- **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`. The module creates the GCP forwarding rules and compute addresses.
-- **BYO Endpoint (Bring Your Own Endpoint):** Two-phase workflow via `privatelink_byo_endpoint` and `privatelink_byo_service`. See [privatelink_byoe example](./examples/privatelink_byoe).
+The module supports two connectivity paths (mutually exclusive per region):
+- **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`.
+- **BYO Endpoint (Bring Your Own Endpoint):** Declare Atlas services with `privatelink_byo_endpoint`, then register user-managed forwarding rules with `privatelink_byo_service`. See the [privatelink_byoe example](./examples/privatelink_byoe).
 
 See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for product details.
+
+**When not to use:**
+- VPC peering alone meets your connectivity needs. Use [`mongodbatlas_network_peering`](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/network_peering) directly.
+- You need only public Atlas connectivity.
 
 ### privatelink_endpoints
 
@@ -422,10 +241,10 @@ nodes internally.
 Mutually exclusive with `privatelink_endpoints_single_region`.
 
 - `region` accepts both GCP format (`us-east4`) and Atlas format (`US_EAST_4`).
-  All regions must be unique -- use `privatelink_endpoints_single_region` for
+  All regions must be unique. Use `privatelink_endpoints_single_region` for
   multiple VPCs in the same region.
 - `subnetwork` is a self_link (e.g., `google_compute_subnetwork.this.self_link`).
-  The VPC network is derived from the subnetwork -- no separate `network` input is needed.
+  The VPC network is derived from the subnetwork. No separate `network` input is needed.
 - `labels` are applied to the GCP forwarding rule and compute address resources.
 - `name_prefix` sets the prefix for the GCP compute address (`{name_prefix}ip`) and
   forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{region}-`
@@ -481,15 +300,15 @@ Default: `[]`
 
 ### privatelink_byo_endpoint
 
-BYO Endpoint Phase 1: Declare regions for which the module creates Atlas PrivateLink endpoints.
-Key is a user-defined identifier; `region` is the Atlas service region
-(accepts us-east4 or US_EAST_4 format).
+Create Atlas PrivateLink endpoint services for regions where you manage PSC forwarding rules externally.
+Run `terraform apply` with this variable to provision Atlas-side services and read service names from
+the `privatelink_service_info` output. Key is a user-defined identifier. `region` is the Atlas service
+region (accepts `us-east4` or `US_EAST_4` format).
 
-Regions must not overlap with `privatelink_endpoints` (enforced via plan-time
-precondition after normalization to GCP format).
+Regions must not overlap with `privatelink_endpoints` (enforced via plan-time precondition after
+normalization to GCP format).
 
-Type is map(object) (not map(string)) to allow additive fields in future minor
-versions.
+Type is map(object) (not map(string)) to allow additive fields in future minor versions.
 
 Type:
 
@@ -503,16 +322,16 @@ Default: `{}`
 
 ### privatelink_byo_service
 
-BYO Endpoint Phase 2: Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
-Keys must exist in privatelink_byo_endpoint.
+Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
+Keys must exist in `privatelink_byo_endpoint`. Requires forwarding rule details from a separate apply
+or the same apply when managed in the same Terraform workspace (see the [privatelink_byoe](./examples/privatelink_byoe) example).
 
 - `ip_address` is the internal IP of your `google_compute_address`.
 - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
 - `gcp_project_id` is used when the forwarding rule lives in a different GCP project than the provider default.
 
-For cross-region clients, set `allow_psc_global_access = true` on your `google_compute_forwarding_rule` before registration. The module does not create BYOE rules.
-
-Both phases can run in a single `terraform apply` (see the `privatelink_byoe` example).
+For cross-region clients, set `allow_psc_global_access = true` on your `google_compute_forwarding_rule`
+before registration. The module does not create BYO Endpoint forwarding rules.
 
 Type:
 
@@ -545,11 +364,14 @@ Default: `"disabled"`
 
 ## Backup Export
 
-Atlas Cloud Backup takes automatic snapshots of your clusters. Enable backup export to copy these snapshots to a Google Cloud Storage (GCS) bucket you control, providing an independent recovery path outside of Atlas and meeting data residency or retention requirements.
-
-Provide either an existing bucket (`bucket_name`) or let the module create one with secure defaults (`create_gcs_bucket.enabled = true`).
+Enable backup export to copy Atlas Cloud Backup snapshots to a GCS bucket you control for independent recovery or data residency requirements. Provide an existing bucket (`bucket_name`) or let the module create one (`create_gcs_bucket.enabled = true`).
 
 See the [Export cloud backup snapshot documentation](https://www.mongodb.com/docs/atlas/backup/cloud-backup/export/?cloud-provider=gcp&connection-type=public&interface=atlas-cli#export-cloud-backup-snapshot) for details.
+
+**When not to use:**
+- Atlas Cloud Backup retention in Atlas is sufficient.
+- You cannot grant `roles/storage.objectUser` on the export bucket (required for Atlas snapshot export).
+- Read-only GCP without a pre-granted bucket IAM role when using `skip_iam_bindings = true`.
 
 ### backup_export
 
@@ -605,78 +427,18 @@ object({
 Default: `{}`
 
 
-## Regions Mapping
+## Log Integration
 
-Internal mapping between Atlas region names (`US_EAST_4`) and GCP region names (`us-east4`). The module uses this mapping to normalize all region inputs -- you can use either format in any region variable. Override this variable to restrict allowed regions or add custom mappings.
+Enable log integration to export Atlas operational and audit logs to GCS at 1-minute intervals for SIEM or observability pipelines. Provide an existing bucket (`bucket_name`) or let the module create one (`create_gcs_bucket.enabled = true`), with optional per-integration bucket overrides.
 
-### atlas_to_gcp_region
+See the [log export documentation](https://www.mongodb.com/docs/atlas/export-logs-gcs/) for details.
 
-Atlas to GCP region mapping. Keys = Atlas format, values = GCP format.
-The module accepts either format in all region inputs and normalizes internally.
-Override to restrict allowed regions or add custom mappings.
+Reordering entries in the `integrations` list can cause a brief delivery gap (~1 min) but no data loss.
 
-Type: `map(string)`
-
-Default:
-
-```json
-{
-  "AFRICA_SOUTH_1": "africa-south1",
-  "ASIA_EAST_2": "asia-east2",
-  "ASIA_NORTHEAST_2": "asia-northeast2",
-  "ASIA_NORTHEAST_3": "asia-northeast3",
-  "ASIA_SOUTHEAST_2": "asia-southeast2",
-  "ASIA_SOUTH_1": "asia-south1",
-  "ASIA_SOUTH_2": "asia-south2",
-  "AUSTRALIA_SOUTHEAST_1": "australia-southeast1",
-  "AUSTRALIA_SOUTHEAST_2": "australia-southeast2",
-  "CENTRAL_US": "us-central1",
-  "EASTERN_ASIA_PACIFIC": "asia-east1",
-  "EASTERN_US": "us-east1",
-  "EUROPE_CENTRAL_2": "europe-central2",
-  "EUROPE_NORTH_1": "europe-north1",
-  "EUROPE_SOUTHWEST_1": "europe-southwest1",
-  "EUROPE_WEST_10": "europe-west10",
-  "EUROPE_WEST_12": "europe-west12",
-  "EUROPE_WEST_2": "europe-west2",
-  "EUROPE_WEST_3": "europe-west3",
-  "EUROPE_WEST_4": "europe-west4",
-  "EUROPE_WEST_6": "europe-west6",
-  "EUROPE_WEST_8": "europe-west8",
-  "EUROPE_WEST_9": "europe-west9",
-  "MIDDLE_EAST_CENTRAL_1": "me-central1",
-  "MIDDLE_EAST_CENTRAL_2": "me-central2",
-  "MIDDLE_EAST_WEST_1": "me-west1",
-  "NORTHEASTERN_ASIA_PACIFIC": "asia-northeast1",
-  "NORTH_AMERICA_NORTHEAST_1": "northamerica-northeast1",
-  "NORTH_AMERICA_NORTHEAST_2": "northamerica-northeast2",
-  "NORTH_AMERICA_SOUTH_1": "northamerica-south1",
-  "SOUTHEASTERN_ASIA_PACIFIC": "asia-southeast1",
-  "SOUTH_AMERICA_EAST_1": "southamerica-east1",
-  "SOUTH_AMERICA_WEST_1": "southamerica-west1",
-  "US_EAST_4": "us-east4",
-  "US_EAST_5": "us-east5",
-  "US_SOUTH_1": "us-south1",
-  "US_WEST_2": "us-west2",
-  "US_WEST_3": "us-west3",
-  "US_WEST_4": "us-west4",
-  "WESTERN_EUROPE": "europe-west1",
-  "WESTERN_US": "us-west1"
-}
-```
-
-
-## Optional Variables
-
-Additional configuration options that apply across all features.
-
-### gcp_tags
-
-Labels to apply to all GCP resources created by this module.
-
-Type: `map(string)`
-
-Default: `{}`
+**When not to use:**
+- Atlas UI or API polling meets your observability needs.
+- You cannot grant `roles/storage.objectCreator` on the log bucket.
+- Read-only GCP without pre-granted bucket IAM when using `skip_iam_bindings = true`.
 
 ### log_integration
 
@@ -748,13 +510,86 @@ object({
 
 Default: `{}`
 
+
+## Regions Mapping
+
+Internal mapping between Atlas region names (`US_EAST_4`) and GCP region names (`us-east4`). The module normalizes all region inputs. You can use either format in any region variable. Override this variable to restrict allowed regions or add custom mappings.
+
+### atlas_to_gcp_region
+
+Atlas to GCP region mapping. Keys = Atlas format, values = GCP format.
+The module accepts either format in all region inputs and normalizes internally.
+Override to restrict allowed regions or add custom mappings.
+
+Type: `map(string)`
+
+Default:
+
+```json
+{
+  "AFRICA_SOUTH_1": "africa-south1",
+  "ASIA_EAST_2": "asia-east2",
+  "ASIA_NORTHEAST_2": "asia-northeast2",
+  "ASIA_NORTHEAST_3": "asia-northeast3",
+  "ASIA_SOUTHEAST_2": "asia-southeast2",
+  "ASIA_SOUTH_1": "asia-south1",
+  "ASIA_SOUTH_2": "asia-south2",
+  "AUSTRALIA_SOUTHEAST_1": "australia-southeast1",
+  "AUSTRALIA_SOUTHEAST_2": "australia-southeast2",
+  "CENTRAL_US": "us-central1",
+  "EASTERN_ASIA_PACIFIC": "asia-east1",
+  "EASTERN_US": "us-east1",
+  "EUROPE_CENTRAL_2": "europe-central2",
+  "EUROPE_NORTH_1": "europe-north1",
+  "EUROPE_SOUTHWEST_1": "europe-southwest1",
+  "EUROPE_WEST_10": "europe-west10",
+  "EUROPE_WEST_12": "europe-west12",
+  "EUROPE_WEST_2": "europe-west2",
+  "EUROPE_WEST_3": "europe-west3",
+  "EUROPE_WEST_4": "europe-west4",
+  "EUROPE_WEST_6": "europe-west6",
+  "EUROPE_WEST_8": "europe-west8",
+  "EUROPE_WEST_9": "europe-west9",
+  "MIDDLE_EAST_CENTRAL_1": "me-central1",
+  "MIDDLE_EAST_CENTRAL_2": "me-central2",
+  "MIDDLE_EAST_WEST_1": "me-west1",
+  "NORTHEASTERN_ASIA_PACIFIC": "asia-northeast1",
+  "NORTH_AMERICA_NORTHEAST_1": "northamerica-northeast1",
+  "NORTH_AMERICA_NORTHEAST_2": "northamerica-northeast2",
+  "NORTH_AMERICA_SOUTH_1": "northamerica-south1",
+  "SOUTHEASTERN_ASIA_PACIFIC": "asia-southeast1",
+  "SOUTH_AMERICA_EAST_1": "southamerica-east1",
+  "SOUTH_AMERICA_WEST_1": "southamerica-west1",
+  "US_EAST_4": "us-east4",
+  "US_EAST_5": "us-east5",
+  "US_SOUTH_1": "us-south1",
+  "US_WEST_2": "us-west2",
+  "US_WEST_3": "us-west3",
+  "US_WEST_4": "us-west4",
+  "WESTERN_EUROPE": "europe-west1",
+  "WESTERN_US": "us-west1"
+}
+```
+
+
+## Optional Variables
+
+Additional configuration options that apply across all features.
+
+### gcp_tags
+
+Labels to apply to all GCP resources created by this module.
+
+Type: `map(string)`
+
+Default: `{}`
+
 ### timeouts
 
 Timeout defaults applied to module-managed Atlas and GCP resources that support provider timeouts.
 Timeout strings use Go duration format (e.g., "30m", "1h").
 
 Set `timeouts = null` to skip all module-managed timeout blocks and use provider defaults.
-Useful after `terraform import` and for zero-diff upgrades from v0.x.
 
 - `timeouts = {}` or omitted: 30m create/update/delete (module defaults)
 - `timeouts = null`: no timeout blocks emitted (provider defaults)
@@ -810,7 +645,9 @@ Description: Atlas PrivateLink service info per endpoint key (for BYO Endpoint -
 
 ### <a name="output_regional_mode_enabled"></a> [regional\_mode\_enabled](#output\_regional\_mode\_enabled)
 
-Description: Whether private endpoint regional mode is enabled (true when privatelink\_regional\_mode = "auto" and PrivateLink spans multiple Atlas service regions)
+Description: True when `privatelink_regional_mode` is `"auto"` and PrivateLink spans more than one distinct Atlas  
+service region. Default variable value is `"disabled"`. See the
+[Atlas regional private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/?cloud-provider=gcp#optional-regionalized-private-endpoints-for-multi-region-sharded-clusters).
 
 ### <a name="output_resource_ids"></a> [resource\_ids](#output\_resource\_ids)
 
@@ -823,21 +660,41 @@ Description: Atlas role ID for reuse with other Atlas-GCP features
 
 ## FAQ
 
-**Why does the module require mongodbatlas provider ~> 2.7?**
+### Where can I find what changed in each release?
 
-Provider [v2.7.0](https://github.com/mongodb/terraform-provider-mongodbatlas/blob/master/CHANGELOG.md#270-february-18-2026) added `port_mapping_enabled` on `mongodbatlas_privatelink_endpoint`, required for port-mapped PSC architecture.
+See [CHANGELOG.md](CHANGELOG.md) in this repository. For v0.1.x to v0.2.0 breaking changes and migration steps, see the [v0.2.0 upgrade guide](docs/v0.2.0-upgrade-guide.md).
 
-**How does region format work?**
+### Can I use this module without granting it GCP IAM write access?
+
+Yes. Set `cloud_provider_access.create = false` and `skip_iam_bindings = true` with pre-granted roles on user-provided KMS keys and GCS buckets. See the [gcp_read_only](./examples/gcp_read_only) example.
+
+### What if I only need one integration (for example only PrivateLink)?
+
+The module works for single features. Enable only the variables you need. For a single concern with maximum control, the provider resources might be simpler.
+
+### Does this module support VPC peering?
+
+No. Use [`mongodbatlas_network_peering`](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/network_peering) directly.
+
+### When should I use provider resources instead of this module?
+
+Consider raw provider resources when you need fine-grained control over a single Atlas-GCP integration, your organization forbids opinionated defaults, or this module's feature set exceeds your scope.
+
+### Why does the module require mongodbatlas provider ~> 2.8?
+
+Provider [v2.8.0](https://github.com/mongodb/terraform-provider-mongodbatlas/blob/master/CHANGELOG.md#280-march-11-2026) adds `mongodbatlas_log_integration` with GCS and other external log sink types. The module uses this resource for log integration.
+
+### How does region format work?
 
 All region variables accept both GCP format (`us-east4`) and Atlas format (`US_EAST_4`). The module normalizes internally using a static 41-entry mapping.
 
-**Why is there no encryption private endpoint support?**
+### Why is there no encryption private endpoint support?
 
 Atlas does not support private endpoints for GCP KMS. Only AWS KMS (via PrivateLink) and Azure Key Vault (via Private Link) are supported.
 
-**What is the difference between `privatelink_endpoints` and `privatelink_endpoints_single_region`?**
+### What is the difference between `privatelink_endpoints` and `privatelink_endpoints_single_region`?
 
-`privatelink_endpoints` is for multi-region deployments (unique region per entry, region used as `for_each` key). `privatelink_endpoints_single_region` is for multiple VPCs in the same region (list index as key). They are mutually exclusive.
+`privatelink_endpoints` is for multi-region deployments (unique region per entry, region used as `for_each` key). `privatelink_endpoints_single_region` is for multiple VPCs in the same region (list index as key). They are mutually exclusive. See the [PrivateLink Topology Guide](docs/privatelink-topology-guide.md) for pattern guidance.
 
 ## License
 
