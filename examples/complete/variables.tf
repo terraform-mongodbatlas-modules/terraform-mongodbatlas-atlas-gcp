@@ -26,6 +26,12 @@ variable "bucket_name_suffix" {
   default     = ""
 }
 
+variable "log_bucket_name_suffix" {
+  type        = string
+  description = "Appended to default atlas-logs-{project_id} (include separator, e.g. \"-dev\")"
+  default     = ""
+}
+
 variable "force_destroy" {
   type        = bool
   description = "Allow bucket deletion when not empty"

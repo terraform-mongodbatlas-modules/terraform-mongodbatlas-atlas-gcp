@@ -1,0 +1,4 @@
+condition: []
+role: roles/storage.objectCreator
+timeouts:
+  create: 30m

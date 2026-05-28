@@ -17,7 +17,7 @@ project_ids = {{
   encryption               = "{project_id}"
   backup_export            = "{project_id}"
   log_integration          = "{project_id}"
-  privatelink_multi_region = "{project_id}"
+  privatelink              = "{project_id}"
   privatelink_byoe         = "{project_id}"
   gcp_read_only            = "{project_id}"
 }}

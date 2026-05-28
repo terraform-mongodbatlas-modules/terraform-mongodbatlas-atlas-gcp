@@ -195,8 +195,9 @@ module "privatelink" {
   byo         = try(var.privatelink_byo_service[each.key], null)
   name_prefix = coalesce(try(each.value.name_prefix, null), "atlas-psc-${lookup(local.atlas_to_gcp_region, each.key, each.key)}-")
 
-  labels   = merge(var.gcp_tags, each.value.labels)
-  timeouts = var.timeouts
+  labels          = merge(var.gcp_tags, each.value.labels)
+  all_region_mode = try(each.value.all_region_mode, null)
+  timeouts        = var.timeouts
 
   depends_on = [mongodbatlas_private_endpoint_regional_mode.this]
 }

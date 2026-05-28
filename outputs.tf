@@ -76,7 +76,11 @@ output "privatelink_service_info" {
 }
 
 output "regional_mode_enabled" {
-  description = "Whether private endpoint regional mode is enabled (auto-enabled for multi-region)"
+  description = <<-EOT
+    True when `privatelink_regional_mode` is `"auto"` and PrivateLink spans more than one distinct Atlas
+    service region. Default variable value is `"disabled"`. See the
+    [Atlas regional private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/?cloud-provider=gcp#optional-regionalized-private-endpoints-for-multi-region-sharded-clusters).
+  EOT
   value       = local.enable_regional_mode
 }
 

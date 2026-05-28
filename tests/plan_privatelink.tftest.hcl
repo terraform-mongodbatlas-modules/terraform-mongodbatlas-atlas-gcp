@@ -65,6 +65,7 @@ run "single_region" {
 run "multi_region" {
   command = plan
   variables {
+    privatelink_regional_mode = "auto"
     privatelink_endpoints = [
       { region = "us-east4", subnetwork = "sub-a" },
       { region = "us-west4", subnetwork = "sub-b" }
@@ -72,7 +73,7 @@ run "multi_region" {
   }
   assert {
     condition     = output.regional_mode_enabled == true
-    error_message = "Expected regional mode enabled for multi-region"
+    error_message = "Expected regional mode enabled when privatelink_regional_mode is auto and multiple regions are configured"
   }
   assert {
     condition     = length(output.privatelink_service_info) == 2
@@ -85,6 +86,24 @@ run "multi_region" {
   assert {
     condition     = length(output.privatelink) == 2
     error_message = "Expected two privatelink output entries"
+  }
+}
+
+run "multi_region_regional_mode_disabled" {
+  command = plan
+  variables {
+    privatelink_endpoints = [
+      { region = "us-east4", subnetwork = "sub-a" },
+      { region = "us-west4", subnetwork = "sub-b" }
+    ]
+  }
+  assert {
+    condition     = output.regional_mode_enabled == false
+    error_message = "Expected regional mode disabled by default for multi-region PrivateLink"
+  }
+  assert {
+    condition     = length(mongodbatlas_private_endpoint_regional_mode.this) == 0
+    error_message = "Expected no regional mode resource when privatelink_regional_mode is disabled"
   }
 }
 
@@ -112,6 +131,7 @@ run "atlas_region_format" {
 run "mixed_format_multi_region" {
   command = plan
   variables {
+    privatelink_regional_mode = "auto"
     privatelink_endpoints = [
       { region = "us-east4", subnetwork = "sub-a" },
       { region = "US_WEST_4", subnetwork = "sub-b" }
@@ -119,7 +139,7 @@ run "mixed_format_multi_region" {
   }
   assert {
     condition     = output.regional_mode_enabled == true
-    error_message = "Expected regional mode enabled for mixed-format multi-region"
+    error_message = "Expected regional mode enabled when privatelink_regional_mode is auto and multiple regions are configured"
   }
   assert {
     condition     = length(output.privatelink_service_info) == 2
@@ -190,6 +210,7 @@ run "single_region_multi_vpc" {
 run "byoe_phase1_only" {
   command = plan
   variables {
+    privatelink_regional_mode = "auto"
     privatelink_byo_endpoint = {
       primary   = { region = "us-east4" }
       secondary = { region = "us-west4" }
@@ -197,7 +218,7 @@ run "byoe_phase1_only" {
   }
   assert {
     condition     = output.regional_mode_enabled == true
-    error_message = "Expected regional mode enabled for multi-region BYOE"
+    error_message = "Expected regional mode enabled when privatelink_regional_mode is auto and multiple BYO Endpoint regions are configured"
   }
   assert {
     condition     = length(output.privatelink_service_info) == 2
@@ -252,6 +273,7 @@ run "byoe_custom_gcp_project" {
 run "byoe_partial_rollout" {
   command = plan
   variables {
+    privatelink_regional_mode = "auto"
     privatelink_byo_endpoint = {
       primary   = { region = "us-east4" }
       secondary = { region = "us-west4" }
@@ -262,7 +284,7 @@ run "byoe_partial_rollout" {
   }
   assert {
     condition     = output.regional_mode_enabled == true
-    error_message = "Expected regional mode enabled for multi-region BYOE"
+    error_message = "Expected regional mode enabled when privatelink_regional_mode is auto and multiple BYO Endpoint regions are configured"
   }
   assert {
     condition     = length(output.privatelink_service_info) == 2

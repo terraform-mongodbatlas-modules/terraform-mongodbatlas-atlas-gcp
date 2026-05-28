@@ -121,6 +121,6 @@ locals {
     for k, value in local.privatelink_endpoints_all :
     lookup(local.atlas_to_gcp_region, value.region, value.region)
   ])
-  enable_regional_mode = length(local.privatelink_all_regions) > 1
+  enable_regional_mode = var.privatelink_regional_mode == "auto" && length(local.privatelink_all_regions) > 1
 
 }

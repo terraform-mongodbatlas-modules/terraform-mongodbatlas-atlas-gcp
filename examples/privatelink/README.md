@@ -3,7 +3,9 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# Multi-Region Private Service Connect
+# Module-Managed Private Service Connect
+
+Module-managed PSC endpoints. See the PrivateLink topology guide for pattern-specific settings
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
@@ -77,20 +79,15 @@ module "atlas_gcp" {
   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
   project_id = var.project_id
 
-  privatelink_endpoints = var.privatelink_endpoints
+  privatelink_endpoints     = var.privatelink_endpoints
+  privatelink_regional_mode = var.privatelink_regional_mode
 
   gcp_tags = var.gcp_tags
 }
 
-# privatelink -- per-region status/IP for DNS configuration
 output "privatelink" {
   description = "PrivateLink status per endpoint key"
   value       = module.atlas_gcp.privatelink
-}
-
-output "regional_mode_enabled" {
-  description = "Whether private endpoint regional mode is enabled"
-  value       = module.atlas_gcp.regional_mode_enabled
 }
 ```
 

@@ -5,6 +5,8 @@ Run 'just gen-examples' to regenerate.
 -->
 # GCP Cloud KMS Integration (User-Provided)
 
+Encrypt Atlas data at rest using an existing Google Cloud KMS key version
+
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
 

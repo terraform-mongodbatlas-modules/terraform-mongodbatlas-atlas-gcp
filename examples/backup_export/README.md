@@ -5,6 +5,8 @@ Run 'just gen-examples' to regenerate.
 -->
 # GCS Bucket Export (Module-Managed)
 
+Export Atlas backup snapshots to a module-managed GCS bucket
+
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
 
