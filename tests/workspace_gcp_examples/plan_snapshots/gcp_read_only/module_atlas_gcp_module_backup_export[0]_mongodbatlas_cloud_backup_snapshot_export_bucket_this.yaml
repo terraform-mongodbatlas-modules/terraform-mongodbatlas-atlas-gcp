@@ -1,3 +1,2 @@
 cloud_provider: GCP
 project_id: <project_id>
-role_id: '000000000000000000000001'

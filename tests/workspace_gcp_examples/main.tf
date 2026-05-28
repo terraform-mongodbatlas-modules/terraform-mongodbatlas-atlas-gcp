@@ -113,10 +113,18 @@ locals {
   ]
   # tflint-ignore: terraform_unused_declarations
   subnetwork_privatelink_byoe = module.network_us_east4.subnetwork_self_link
+}
+
+module "gcp_read_only_cpa" {
+  source     = "../../modules/cloud_provider_access"
+  project_id = local.project_id_gcp_read_only
+}
+
+locals {
   # tflint-ignore: terraform_unused_declarations
-  atlas_role_id_gcp_read_only = "000000000000000000000001"
+  atlas_role_id_gcp_read_only = module.gcp_read_only_cpa.role_id
   # tflint-ignore: terraform_unused_declarations
-  atlas_service_account_email_gcp_read_only = "atlas-readonly@${var.gcp_project_id}.iam.gserviceaccount.com"
+  atlas_service_account_email_gcp_read_only = module.gcp_read_only_cpa.service_account_for_atlas
 }
 
 # BYO stand-ins for ex_gcp_read_only: KMS key + GCS buckets (module data sources need existing resources).
@@ -172,6 +180,7 @@ resource "google_storage_bucket_iam_member" "gcp_read_only_stand_in_atlas_logs" 
   member = "serviceAccount:${local.atlas_service_account_email_gcp_read_only}"
 }
 
+# Single depends_on for the four IAM bindings.
 resource "time_sleep" "gcp_read_only_atlas" {
   create_duration = "30s"
   depends_on = [
