@@ -3,7 +3,9 @@ WARNING: This file is auto-generated. Do not edit directly.
 Changes will be overwritten when documentation is regenerated.
 Run 'just gen-examples' to regenerate.
 -->
-# Encryption + Backup Export + PrivateLink
+# Encryption + Backup Export + PrivateLink + Log Integration
+
+Full v0.2.0 stack with module-managed KMS key, GCS buckets, PSC connectivity, and log export
 
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
@@ -96,6 +98,26 @@ module "atlas_gcp" {
     }
   }
 
+  log_integration = {
+    enabled = true
+    create_gcs_bucket = {
+      enabled       = true
+      name_suffix   = var.log_bucket_name_suffix
+      location      = var.gcp_region
+      force_destroy = var.force_destroy
+    }
+    integrations = [
+      {
+        log_types   = ["MONGOD", "MONGOS"]
+        prefix_path = "logs"
+      },
+      {
+        log_types   = ["MONGOD_AUDIT", "MONGOS_AUDIT"]
+        prefix_path = "audit"
+      },
+    ]
+  }
+
   privatelink_endpoints = var.privatelink_endpoints
 
   gcp_tags = var.gcp_tags
@@ -115,6 +137,10 @@ output "backup_export" {
 
 output "export_bucket_id" {
   value = module.atlas_gcp.export_bucket_id
+}
+
+output "log_integration" {
+  value = module.atlas_gcp.log_integration
 }
 
 output "privatelink" {

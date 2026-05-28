@@ -5,6 +5,8 @@ Run 'just gen-examples' to regenerate.
 -->
 # BYO CPA + Pre-Granted IAM
 
+Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
+
 <!-- BEGIN_GETTING_STARTED -->
 ## Prerequisites
 

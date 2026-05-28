@@ -53,8 +53,8 @@ variable "encryption" {
 
     `key_ring_name` sets the name for the GCP KMS key ring. When omitted, defaults to
     `atlas-{project_id}-keyring` to avoid collisions across Atlas projects sharing the
-    same GCP project and location. Key rings are permanent in GCP -- choose stable names.
-    GCP allows 1-63 characters (`[a-zA-Z][a-zA-Z0-9_-]*`); the auto-generated name is
+    same GCP project and location. Key rings are permanent in GCP. Choose stable names.
+    GCP allows 1-63 characters (`[a-zA-Z][a-zA-Z0-9_-]*`). The auto-generated name is
     38 characters (well within the limit).
 
     `crypto_key_name` sets the name for the GCP KMS crypto key within the key ring.
@@ -69,10 +69,10 @@ variable "encryption" {
     When omitted, no automatic rotation occurs. Atlas recommends 90-day rotation and
     creates an alert at that cadence. Each rotation causes a plan diff on
     key_version_resource_id on the next terraform apply. Old key versions remain
-    enabled -- no data re-encryption is needed.
+    enabled. No data re-encryption is needed.
 
     `enabled_for_search_nodes` (default: `true`) opts the project into BYOK encryption for
-    dedicated search nodes. The flag alone is not sufficient -- Atlas also requires cluster-level
+    dedicated search nodes. The flag alone is not sufficient. Atlas also requires cluster-level
     BYOK and an internal feature flag. In projects without search nodes, this is a no-op.
     On existing deployments with search nodes, flipping false->true triggers search node
     reprovisioning and index rebuild (search may be temporarily unavailable).
@@ -127,10 +127,10 @@ variable "privatelink_endpoints" {
     Mutually exclusive with `privatelink_endpoints_single_region`.
 
     - `region` accepts both GCP format (`us-east4`) and Atlas format (`US_EAST_4`).
-      All regions must be unique -- use `privatelink_endpoints_single_region` for
+      All regions must be unique. Use `privatelink_endpoints_single_region` for
       multiple VPCs in the same region.
     - `subnetwork` is a self_link (e.g., `google_compute_subnetwork.this.self_link`).
-      The VPC network is derived from the subnetwork -- no separate `network` input is needed.
+      The VPC network is derived from the subnetwork. No separate `network` input is needed.
     - `labels` are applied to the GCP forwarding rule and compute address resources.
     - `name_prefix` sets the prefix for the GCP compute address (`{name_prefix}ip`) and
       forwarding rule (`{name_prefix}fr`). When omitted, defaults to `atlas-psc-{region}-`
@@ -209,15 +209,15 @@ variable "privatelink_byo_endpoint" {
   }))
   default     = {}
   description = <<-EOT
-    BYO Endpoint Phase 1: Declare regions for which the module creates Atlas PrivateLink endpoints.
-    Key is a user-defined identifier; `region` is the Atlas service region
-    (accepts us-east4 or US_EAST_4 format).
+    Create Atlas PrivateLink endpoint services for regions where you manage PSC forwarding rules externally.
+    Run `terraform apply` with this variable to provision Atlas-side services and read service names from
+    the `privatelink_service_info` output. Key is a user-defined identifier. `region` is the Atlas service
+    region (accepts `us-east4` or `US_EAST_4` format).
 
-    Regions must not overlap with `privatelink_endpoints` (enforced via plan-time
-    precondition after normalization to GCP format).
+    Regions must not overlap with `privatelink_endpoints` (enforced via plan-time precondition after
+    normalization to GCP format).
 
-    Type is map(object) (not map(string)) to allow additive fields in future minor
-    versions.
+    Type is map(object) (not map(string)) to allow additive fields in future minor versions.
   EOT
 }
 
@@ -229,8 +229,9 @@ variable "privatelink_byo_service" {
   }))
   default     = {}
   description = <<-EOT
-    BYO Endpoint Phase 2: Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
-    Keys must exist in privatelink_byo_endpoint.
+    Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
+    Keys must exist in `privatelink_byo_endpoint`. Requires forwarding rule details from a separate apply
+    or the same apply when managed in the same Terraform workspace (see the [privatelink_byoe](./examples/privatelink_byoe) example).
 
     - `ip_address` is the internal IP of your `google_compute_address`.
     - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
@@ -529,7 +530,6 @@ variable "timeouts" {
     Timeout strings use Go duration format (e.g., "30m", "1h").
 
     Set `timeouts = null` to skip all module-managed timeout blocks and use provider defaults.
-    Useful after `terraform import` and for zero-diff upgrades from v0.x.
 
     - `timeouts = {}` or omitted: 30m create/update/delete (module defaults)
     - `timeouts = null`: no timeout blocks emitted (provider defaults)
