@@ -2,7 +2,7 @@
 
 This guide helps you choose a Private Service Connect (PSC) layout for MongoDB Atlas on GCP. It maps four customer patterns to the GCP module variables and worked examples.
 
-Your layout choice determines your application's reach to Atlas in case of region failure, your cost for cross-region data transfer, and connection string resilience when scaling to multiple regions. A single-region setup is simpler but leaves you with manual recovery if that region goes down. A multi-region setup adds resilience but requires one private endpoint for each cluster region and careful coordination between your network topology and your Atlas connection strings. This guide helps you choose the right layout upfront.
+Your layout choice determines your application's reach to Atlas in case of region failure, your cost for cross-region data transfer, and connection string resilience when scaling to multiple regions. A single-region setup is simpler but leaves you with manual recovery if that region goes down. A multi-region setup adds resilience but requires one private endpoint for each cluster region and careful coordination of network resources in each app region with your Atlas connection strings. This guide helps you choose the right layout upfront.
 
 A **Private Endpoint (PE)** is a private network path from your Virtual Private Cloud (VPC) to an Atlas cluster. **PSC** (Private Service Connect) is Google Cloud's PE technology. **PrivateLink** is the umbrella name MongoDB uses across cloud providers.
 
@@ -16,8 +16,8 @@ A **Private Endpoint (PE)** is a private network path from your Virtual Private 
 - [6. Pattern: Multi-region cluster, regional connection strings](#6-pattern-multi-region-cluster-regional-connection-strings)
 - [7. Delivery option: BYO Endpoint](#7-delivery-option-byo-endpoint)
 - [8. Operations and maintenance](#8-operations-and-maintenance)
-- [9. Cost and environment guidance](#9-cost-and-environment-guidance)
-- [10. Cluster and GCP module integration](#10-cluster-and-gcp-module-integration)
+- [9. Cluster and GCP module integration](#9-cluster-and-gcp-module-integration)
+- [10. Alternatives to private endpoints](#10-alternatives-to-private-endpoints)
 - [Appendix A: How it works](#appendix-a-how-it-works)
 - [Glossary](#glossary)
 
@@ -39,24 +39,13 @@ A **Private Endpoint (PE)** is a private network path from your Virtual Private 
 High Availability (HA) is automatic recovery. Disaster Recovery (DR) is manual recovery from a cross-region backup. DR is available regardless of PrivateLink layout and is not covered by this guide.
 
 - **Zonal HA:** Tolerate a single-zone failure. Atlas covers this by default with multi-zone replica sets. No PrivateLink work needed.
-- **Regional HA:** Tolerate an Atlas region outage with no human action. Opt-in via a multi-region cluster: electable nodes in two or more regions, and the driver fails over automatically. This drives [Q1](#23-decision-which-pattern-fits) and changes the PrivateLink layout because Atlas needs one private endpoint per cluster region. Without regional HA, an Atlas region outage falls back to DR (manual restore from a cross-region backup).
-- **Multi-region applications:** Where your application tier runs. One region, several regions of the same VPC, or several VPCs across regions. This drives [Q2](#23-decision-which-pattern-fits) and is independent of regional HA. Application-tier resilience to a client region outage falls out of this choice; see **Resilience** in each pattern below.
+- **Regional HA:** Tolerate an Atlas region outage with no human action. Opt-in via a multi-region cluster: electable nodes in two or more regions, and the driver fails over automatically. This drives [Q1](#22-decision-which-pattern-fits) and changes the PrivateLink layout because Atlas needs one private endpoint per cluster region. Without regional HA, an Atlas region outage falls back to DR (manual restore from a cross-region backup).
+- **Multi-region applications:** Where your application tier runs. One region, several regions of the same VPC, or several VPCs across regions. This drives [Q2](#22-decision-which-pattern-fits) and is independent of regional HA. Application-tier resilience to a client region outage falls out of this choice; see **Resilience** in each pattern below.
 - **Cost:** Fewer endpoints, fewer cross-region data flows, smaller dev setups.
 - **Portability:** Avoid GCP-specific options that block multi-cloud or migration later. On a multi-cloud Atlas cluster, a GCP private endpoint reaches only nodes Atlas runs in GCP. Use VPN or a secondary read preference for nodes in other clouds. See [Atlas multi-cloud distribution](https://www.mongodb.com/docs/atlas/cluster-config/multi-cloud-distribution/).
+- **Private connectivity and GCP resource ownership:** Compare PrivateLink to VPC peering and public IP in [section 10](#10-alternatives-to-private-endpoints). For who creates GCP consumer endpoints (module-managed or BYO Endpoint), see [section 7](#7-delivery-option-byo-endpoint).
 
-### 2.2 Alternatives to private endpoints
-
-A private endpoint is one of three ways to keep cluster traffic off the public internet. Pick PrivateLink only if you need it.
-
-| Mechanism | When to choose | When to avoid |
-| --- | --- | --- |
-| **PrivateLink (PSC)** | Regulatory requirement; private-only network policy; production. | Lower environments without a security mandate. |
-| **VPC peering only** | Single cloud provider; simpler; lower cost. | Multi-cloud; regulated multi-VPC. |
-| **Public IP + access list** | Dev/test; low risk; quick setup. | Production with a private-only mandate. |
-
-The **BYO Endpoint** (Bring Your Own Endpoint) option in [section 7](#7-delivery-option-byo-endpoint) is a delivery mode for PrivateLink, not an alternative to it.
-
-### 2.3 Decision: which pattern fits
+### 2.2 Decision: which pattern fits
 
 Two questions, in order:
 
@@ -252,24 +241,7 @@ Plan for application-side disruption when any of these happen:
 - **Cluster region added or removed:** Atlas may regenerate DNS records when the connection string shape changes. If you add a cluster region without a matching private endpoint already in place, Atlas disables PrivateLink for the entire cluster until you add that endpoint or remove the new region. Add the endpoint **before** you add electable nodes in the new region.
 - **Endpoint removed during cluster maintenance:** Multi-region clusters require the endpoint to stay during maintenance windows. See the [Atlas private endpoint docs](https://www.mongodb.com/docs/atlas/security-private-endpoint/).
 
-## 9. Cost and environment guidance
-
-**Cost drivers (cloud-neutral):**
-
-- Per-endpoint hourly charge from the cloud provider.
-- Atlas private endpoint billing per service. See [Atlas private endpoint billing](https://www.mongodb.com/docs/atlas/billing/additional-services/#std-label-billing-private-endpoints-clusters/).
-- Cross-region data egress when applications and the cluster are in different regions.
-- `privatelink_regional_mode` adds no Atlas charge but creates more consumer endpoints and DNS records.
-
-**Dev vs prod recommendation:**
-
-- **Dev:** Public IP plus access list is acceptable.
-- **Staging:** Single-region private endpoint ([Pattern 3](#3-pattern-single-region-same-region-clients)).
-- **Production:** A private endpoint pattern that matches the production DR shape ([Pattern 5](#5-pattern-multi-region-cluster-peered-networks) or [Pattern 6](#6-pattern-multi-region-cluster-regional-connection-strings)).
-
-Use one Atlas project per environment so toggles like `privatelink_regional_mode` cannot affect another environment.
-
-## 10. Cluster and GCP module integration
+## 9. Cluster and GCP module integration
 
 PrivateLink configuration splits across two modules in the same Atlas project:
 
@@ -318,6 +290,18 @@ The cluster module uses Atlas region names (`US_EAST_4`); the GCP module accepts
 
 For multi-region layouts, add one endpoint per cluster region and set `privatelink_regional_mode = "auto"` when applications need per-region connection strings ([Pattern 6](#6-pattern-multi-region-cluster-regional-connection-strings)).
 
+## 10. Alternatives to private endpoints
+
+If you have not committed to PrivateLink yet, a private endpoint is one of three ways to keep cluster traffic off the public internet.
+
+| Mechanism | When to choose | When to avoid |
+| --- | --- | --- |
+| **PrivateLink (PSC)** | Regulatory requirement; private-only network policy; production. | Lower environments without a security mandate. |
+| **VPC peering only** | Single cloud provider; simpler; lower cost. | Multi-cloud; regulated multi-VPC. |
+| **Public IP + access list** | Dev/test; low risk; quick setup. | Production with a private-only mandate. |
+
+The **BYO Endpoint** (Bring Your Own Endpoint) option in [section 7](#7-delivery-option-byo-endpoint) is a delivery mode for PrivateLink, not an alternative to it.
+
 ## Appendix A: How it works
 
 This section explains the Atlas and GCP mechanics behind the patterns. Skip it if you only need to pick a pattern.
@@ -348,7 +332,7 @@ You can set both at once. They do not replace each other.
 
 ### A.4 PSC forwarding-rule details
 
-GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes shard traffic on that rule by mapping cluster ports internally; this is the "port-mapped PSC" architecture. Connection strings use `psc-*` hostnames; legacy `pl-*` hostnames from older Atlas integrations are deprecated; this module does not use them.
+GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes shard traffic on that rule by mapping cluster ports internally; this is the "port-mapped PSC" architecture. Connection strings use `psc-*` hostnames on GCP. AWS and Azure still use the legacy `pl-*` format. Older GCP integrations also used `pl-*`; that form is deprecated on GCP and this module does not use it.
 
 ## Glossary
 
