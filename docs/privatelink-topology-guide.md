@@ -300,8 +300,6 @@ If you have not committed to PrivateLink yet, a private endpoint is one of three
 | **VPC peering only** | Single cloud provider; simpler; lower cost. | Multi-cloud; regulated multi-VPC. |
 | **Public IP + access list** | Dev/test; low risk; quick setup. | Production with a private-only mandate. |
 
-The **BYO Endpoint** (Bring Your Own Endpoint) option in [section 7](#7-delivery-option-byo-endpoint) is a delivery mode for PrivateLink, not an alternative to it.
-
 ## Appendix A: How it works
 
 This section explains the Atlas and GCP mechanics behind the patterns. Skip it if you only need to pick a pattern.
