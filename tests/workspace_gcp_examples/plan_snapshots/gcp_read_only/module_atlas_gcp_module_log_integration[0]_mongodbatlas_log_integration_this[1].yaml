@@ -2,5 +2,4 @@ log_types:
 - MONGOD_AUDIT
 prefix_path: audit
 project_id: <project_id>
-role_id: '000000000000000000000001'
 type: GCS_LOG_EXPORT
