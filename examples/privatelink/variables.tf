@@ -22,7 +22,7 @@ variable "privatelink_endpoints" {
     name_prefix     = optional(string)
     all_region_mode = optional(bool)
   }))
-  description = "Module-managed PrivateLink endpoints via PSC"
+  description = "Module-managed PrivateLink endpoints via PSC. All entries must be unique by region."
 }
 
 variable "privatelink_regional_mode" {

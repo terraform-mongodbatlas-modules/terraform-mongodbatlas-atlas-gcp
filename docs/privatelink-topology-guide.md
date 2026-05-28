@@ -239,7 +239,7 @@ Plan for application-side disruption when any of these happen:
 - **Replica set converted to sharded:** Connection string targets change; applications restart.
 - **`privatelink_regional_mode` toggled:** Sharded connection strings regenerate project-wide; plan a window.
 - **Cluster region added or removed:** Atlas may regenerate DNS records when the connection string shape changes. If you add a cluster region without a matching private endpoint already in place, Atlas disables PrivateLink for the entire cluster until you add that endpoint or remove the new region. Add the endpoint **before** you add electable nodes in the new region.
-- **Endpoint removed during cluster maintenance:** Multi-region clusters require the endpoint to stay during maintenance windows. See the [Atlas private endpoint docs](https://www.mongodb.com/docs/atlas/security-private-endpoint/).
+- **Removing an endpoint during cluster maintenance:** Multi-region clusters require the endpoint to stay during maintenance windows. See the [Atlas private endpoint docs](https://www.mongodb.com/docs/atlas/security-private-endpoint/?cloud-provider=gcp).
 
 ## 9. Cluster and GCP module integration
 
