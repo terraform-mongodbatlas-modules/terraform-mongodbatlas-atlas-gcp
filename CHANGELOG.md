@@ -1,5 +1,7 @@
 ## (Unreleased)
 
+## 0.2.0 (May 29, 2026)
+
 BREAKING CHANGES:
 
 * module: Normalizes module-managed multi-region PrivateLink endpoint for_each keys to lowercase GCP region format ([#40](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/40))
