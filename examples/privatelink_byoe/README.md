@@ -65,7 +65,7 @@ resource "mongodbatlas_project" "this" {
 }
 ```
 
-Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink_byoe/main.tf) file.
+Replace the `var.project_id` with `mongodbatlas_project.this.id` in the [main.tf](./main.tf) file.
 
 <!-- END_GETTING_STARTED -->
 
@@ -90,7 +90,6 @@ locals {
 
 module "atlas_gcp" {
   source  = "terraform-mongodbatlas-modules/atlas-gcp/mongodbatlas"
-  version = "v0.2.0"
   project_id = var.project_id
 
   privatelink_byo_endpoint = { (local.ep1) = { region = var.gcp_region } }
@@ -138,8 +137,8 @@ output "forwarding_rule_id" {
 ```
 
 **Additional files needed:**
-- [variables.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink_byoe/variables.tf)
-- [versions.tf](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink_byoe/versions.tf)
+- [variables.tf](./variables.tf)
+- [versions.tf](./versions.tf)
 
 
 
