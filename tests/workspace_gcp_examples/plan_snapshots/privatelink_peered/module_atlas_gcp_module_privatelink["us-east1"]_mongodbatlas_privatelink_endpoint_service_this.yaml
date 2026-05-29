@@ -1,0 +1,6 @@
+endpoint_service_id: atlas-psc-us-east1-fr
+project_id: <project_id>
+provider_name: GCP
+timeouts:
+  create: 30m
+  delete: 30m
