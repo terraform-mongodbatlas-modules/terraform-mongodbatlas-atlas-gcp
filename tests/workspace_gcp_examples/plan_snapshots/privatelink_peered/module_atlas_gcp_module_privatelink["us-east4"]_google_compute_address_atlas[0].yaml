@@ -2,7 +2,6 @@ address_type: INTERNAL
 deletion_policy: DELETE
 effective_labels:
   goog-terraform-provisioned: 'true'
-name: atlas-psc-us-east4-ip
 project: tf-lz-module-gcp-ci
 region: us-east4
 terraform_labels:
