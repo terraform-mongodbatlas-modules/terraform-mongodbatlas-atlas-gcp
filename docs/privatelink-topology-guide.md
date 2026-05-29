@@ -84,7 +84,7 @@ For deeper background on Atlas regional outage tolerance, see [Atlas high availa
 - **Cluster region:** Total outage until manual DR.
 - **Client region:** Not applicable (apps colocate with the cluster).
 
-**Multi-VPC variation:** When several consumer VPCs in the same region need their own endpoints to the same cluster, use [`privatelink_endpoints_single_region`](../README.md#privatelink_endpoints_single_region) instead of [`privatelink_endpoints`](../README.md#privatelink_endpoints).
+**Multi-VPC variation:** When several consumer VPCs in the same region need their own endpoints to the same cluster, use [`privatelink_endpoints_single_region`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_endpoints_single_region) instead of [`privatelink_endpoints`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_endpoints).
 
 **Replica-set constraint:** Atlas allows at most one PE per region for replica-set clusters. If you need multiple consumer endpoints in one region against a replica set, you must move to a sharded cluster.
 
@@ -103,7 +103,7 @@ module "atlas_gcp" {
 }
 ```
 
-Worked example: [`examples/privatelink`](../examples/privatelink).
+Worked example: [`examples/privatelink`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink).
 
 **Cost note:** One endpoint hourly charge; no cross-region egress.
 
@@ -137,11 +137,11 @@ module "atlas_gcp" {
 }
 ```
 
-Worked example: [`examples/privatelink`](../examples/privatelink) (set `all_region_mode = true` as in the snippet above).
+Worked example: [`examples/privatelink`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink) (set `all_region_mode = true` as in the snippet above).
 
 **Cost note:** One endpoint hourly charge; you pay GCP cross-region VPC egress for client-to-cluster traffic.
 
-`all_region_mode` is a GCP-level switch on the consumer side. It is not the same as the Atlas project setting [`privatelink_regional_mode`](../README.md#privatelink_regional_mode); see [Appendix A.3](#a3-two-gcp-knobs-not-to-confuse) for the contrast.
+`all_region_mode` is a GCP-level switch on the consumer side. It is not the same as the Atlas project setting [`privatelink_regional_mode`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_regional_mode); see [Appendix A.3](#a3-two-gcp-knobs-not-to-confuse) for the contrast.
 
 ## 5. Pattern: Multi-region cluster, peered networks
 
@@ -157,7 +157,7 @@ Worked example: [`examples/privatelink`](../examples/privatelink) (set `all_regi
 - **Cluster region:** Driver fails over via one global connection string when the routing mesh is intact; any unreachable app-to-cluster region pair blocks access to nodes in that region.
 - **Client region:** Only apps in the failed client region go offline.
 
-**Module configuration:** Provide one entry in [`privatelink_endpoints`](../README.md#privatelink_endpoints) per cluster region. Leave [`privatelink_regional_mode`](../README.md#privatelink_regional_mode) at its default (off).
+**Module configuration:** Provide one entry in [`privatelink_endpoints`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_endpoints) per cluster region. Leave [`privatelink_regional_mode`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_regional_mode) at its default (off).
 
 ```hcl
 module "atlas_gcp" {
@@ -172,7 +172,7 @@ module "atlas_gcp" {
 }
 ```
 
-Worked example: [`examples/privatelink`](../examples/privatelink) (multi-region endpoints; leave `privatelink_regional_mode` at its default).
+Worked example: [`examples/privatelink`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink) (multi-region endpoints; leave `privatelink_regional_mode` at its default).
 
 **Cost note:** One endpoint per cluster region; cross-region peering cost is on the customer side.
 
@@ -191,7 +191,7 @@ Worked example: [`examples/privatelink`](../examples/privatelink) (multi-region 
 - **Cluster region:** That region's connection string stops resolving; other regions keep working via their own URI. Cross-region failover from the application's view requires app-side logic (each app is pinned to one region's URI).
 - **Client region:** Only apps in the failed client region go offline.
 
-**Module configuration:** Set [`privatelink_regional_mode`](../README.md#privatelink_regional_mode) to `"auto"`. The Atlas project then emits one connection string per cluster region.
+**Module configuration:** Set [`privatelink_regional_mode`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_regional_mode) to `"auto"`. The Atlas project then emits one connection string per cluster region.
 
 ```hcl
 module "atlas_gcp" {
@@ -207,7 +207,7 @@ module "atlas_gcp" {
 }
 ```
 
-Worked example: [`examples/privatelink`](../examples/privatelink) (set `privatelink_regional_mode = "auto"` as in the snippet above).
+Worked example: [`examples/privatelink`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink) (set `privatelink_regional_mode = "auto"` as in the snippet above).
 
 **Cost note:** One endpoint per cluster region; no cross-region application traffic since each app stays regional.
 
@@ -215,7 +215,7 @@ Worked example: [`examples/privatelink`](../examples/privatelink) (set `privatel
 
 ## 7. Delivery option: BYO Endpoint
 
-**BYO Endpoint** (Bring Your Own Endpoint) is a delivery mode that applies on top of any of [patterns 3 through 6](#2-choose-your-outcome). It does not change the topology; it changes who owns the GCP forwarding rule. For product background, see [Atlas: Learn About Private Endpoints](https://www.mongodb.com/docs/atlas/security-private-endpoint/). For module variables and a worked config, see the [module README](../README.md#privatelink_byo_endpoint) and [`examples/privatelink_byoe`](../examples/privatelink_byoe).
+**BYO Endpoint** (Bring Your Own Endpoint) is a delivery mode that applies on top of any of [patterns 3 through 6](#2-choose-your-outcome). It does not change the topology; it changes who owns the GCP forwarding rule. For product background, see [Atlas: Learn About Private Endpoints](https://www.mongodb.com/docs/atlas/security-private-endpoint/). For module variables and a worked config, see the [module README](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_byo_endpoint) and [`examples/privatelink_byoe`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink_byoe).
 
 | Mode | Who creates the GCP forwarding rule | Apply cycle |
 | --- | --- | --- |
@@ -230,7 +230,7 @@ Worked example: [`examples/privatelink`](../examples/privatelink) (set `privatel
 
 **Trade-off:** Multi-phase apply adds operator work compared with module-managed endpoints. Pick BYO Endpoint only when constraints force it.
 
-**Module configuration:** Use [`privatelink_byo_endpoint`](../README.md#privatelink_byo_endpoint) for the Atlas service and [`privatelink_byo_service`](../README.md#privatelink_byo_service) for Atlas registration, with your GCP resources in between. Both module steps can run in one `terraform apply` when your root module also declares the forwarding rule. Worked example: [`examples/privatelink_byoe`](../examples/privatelink_byoe).
+**Module configuration:** Use [`privatelink_byo_endpoint`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_byo_endpoint) for the Atlas service and [`privatelink_byo_service`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_byo_service) for Atlas registration, with your GCP resources in between. Both module steps can run in one `terraform apply` when your root module also declares the forwarding rule. Worked example: [`examples/privatelink_byoe`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink_byoe).
 
 ## 8. Operations and maintenance
 
@@ -252,7 +252,7 @@ Share the same `project_id` on both modules. Atlas requires one private endpoint
 
 Set `depends_on = [module.atlas_gcp]` on the cluster module to ensure private endpoints are ready before creating the cluster.
 
-Pattern-specific variable choices are in [sections 3–7](#3-pattern-single-region-same-region-clients). The [module README](../README.md#private-service-connect) and [`examples/`](../examples/) directory hold full variable reference and worked configs.
+Pattern-specific variable choices are in [sections 3–7](#3-pattern-single-region-same-region-clients). The [module README](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#private-service-connect) and [`examples/`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples) directory hold full variable reference and worked configs.
 
 ### Basic example
 
@@ -323,8 +323,8 @@ The application driver sees the cluster through layers 2 and 3.
 
 `all_region_mode` and `privatelink_regional_mode` look similar but operate at different layers:
 
-- **[`all_region_mode`](../README.md#privatelink_endpoints):** Set per endpoint object. Configures the GCP PSC forwarding rule to accept traffic from clients in other regions of the same VPC. Used by [Pattern 4](#4-pattern-single-region-cross-region-clients).
-- **[`privatelink_regional_mode`](../README.md#privatelink_regional_mode):** Atlas project-level setting. Switches sharded clusters from one global connection string to one connection string per region. Used by [Pattern 6](#6-pattern-multi-region-cluster-regional-connection-strings).
+- **[`all_region_mode`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_endpoints):** Set per endpoint object. Configures the GCP PSC forwarding rule to accept traffic from clients in other regions of the same VPC. Used by [Pattern 4](#4-pattern-single-region-cross-region-clients).
+- **[`privatelink_regional_mode`](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#privatelink_regional_mode):** Atlas project-level setting. Switches sharded clusters from one global connection string to one connection string per region. Used by [Pattern 6](#6-pattern-multi-region-cluster-regional-connection-strings).
 
 You can set both at once. They do not replace each other.
 
@@ -347,8 +347,8 @@ GCP PSC uses one forwarding rule per Atlas service region. Atlas multiplexes sha
 
 ## Additional resources
 
-- [Module README](../README.md#private-service-connect)
-- [v0.2.0 upgrade guide](v0.2.0-upgrade-guide.md)
+- [Module README](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/README.md#private-service-connect)
+- [v0.2.0 upgrade guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/docs/v0.2.0-upgrade-guide.md)
 - [Atlas: Learn About Private Endpoints](https://www.mongodb.com/docs/atlas/security-private-endpoint/)
 - [Cluster topology guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-cluster/blob/main/docs/cluster_topology.md)
 - [Google PSC + MongoDB codelab (uses legacy `port_mapping_enabled = false`)](https://codelabs.developers.google.com/codelabs/psc-mongo-globalaccess)

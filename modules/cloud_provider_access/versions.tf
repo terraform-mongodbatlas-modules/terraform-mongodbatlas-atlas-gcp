@@ -7,4 +7,9 @@ terraform {
       version = "~> 2.8"
     }
   }
+
+  provider_meta "mongodbatlas" {
+    module_name    = "atlas-gcp"
+    module_version = "0.2.0"
+  }
 }

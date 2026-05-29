@@ -36,18 +36,18 @@ Changes will be overwritten when documentation is regenerated.
 Run 'just gen-readme' to regenerate. -->
 ## Examples
 
-The following examples show common configurations you can copy and adapt. Start with the [encryption](./examples/encryption) example for a minimal setup, then explore other examples for PrivateLink, backup export, and log integration. Examples can be combined in a single module call. See the [complete](./examples/complete) and [gcp_read_only](./examples/gcp_read_only) examples.
+The following examples show common configurations you can copy and adapt. Start with the [encryption](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/encryption) example for a minimal setup, then explore other examples for PrivateLink, backup export, and log integration. Examples can be combined in a single module call. See the [complete](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/complete) and [gcp_read_only](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/gcp_read_only) examples.
 
 
 Feature | Name | Description
 --- | --- | ---
-All Features | [Encryption + Backup Export + PrivateLink + Log Integration](./examples/complete) | Full v0.2.0 stack with module-managed KMS key, GCS buckets, PSC connectivity, and log export
-Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](./examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
-Backup Export | [GCS Bucket Export (Module-Managed)](./examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
-Log Integration | [GCS Log Export (Module-Managed)](./examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
-PrivateLink (PSC) | [Module-Managed Private Service Connect](./examples/privatelink) | Module-managed PSC endpoints. See the PrivateLink topology guide for pattern-specific settings
-PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](./examples/privatelink_byoe) | User-managed GCP forwarding rules with module-managed Atlas PrivateLink
-Read-Only GCP | [BYO CPA + Pre-Granted IAM](./examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
+All Features | [Encryption + Backup Export + PrivateLink + Log Integration](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/complete) | Full v0.2.0 stack with module-managed KMS key, GCS buckets, PSC connectivity, and log export
+Encryption at Rest | [GCP Cloud KMS Integration (User-Provided)](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/encryption) | Encrypt Atlas data at rest using an existing Google Cloud KMS key version
+Backup Export | [GCS Bucket Export (Module-Managed)](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/backup_export) | Export Atlas backup snapshots to a module-managed GCS bucket
+Log Integration | [GCS Log Export (Module-Managed)](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/log_integration) | Export Atlas operational and audit logs to a module-managed GCS bucket
+PrivateLink (PSC) | [Module-Managed Private Service Connect](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink) | Module-managed PSC endpoints. See the PrivateLink topology guide for pattern-specific settings
+PrivateLink (PSC) | [BYO Endpoint (Bring Your Own Endpoint)](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink_byoe) | User-managed GCP forwarding rules with module-managed Atlas PrivateLink
+Read-Only GCP | [BYO CPA + Pre-Granted IAM](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/gcp_read_only) | Uses an existing CPA and skip_iam_bindings for environments where Terraform cannot create GCP IAM bindings
 
 <!-- END_TABLES -->
 <!-- BEGIN_TF_DOCS -->
@@ -105,7 +105,7 @@ See the [GCP cloud provider access documentation](https://www.mongodb.com/docs/a
 
 **When not to use:**
 - PrivateLink-only deployments, where PSC uses GCP resources only and CPA is not required.
-- Read-only GCP where Terraform cannot create IAM bindings. Use BYO CPA with `skip_iam_bindings = true` and pre-granted roles (see [gcp_read_only example](./examples/gcp_read_only)).
+- Read-only GCP where Terraform cannot create IAM bindings. Use BYO CPA with `skip_iam_bindings = true` and pre-granted roles (see [gcp_read_only example](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/gcp_read_only)).
 - Module-managed KMS or GCS when your platform team must grant IAM outside Terraform (`skip_iam_bindings = true` requires user-provided keys and buckets).
 
 ### cloud_provider_access
@@ -218,11 +218,11 @@ Default: `{}`
 
 ## Private Service Connect
 
-Enable PSC when applications must reach Atlas over private connectivity instead of the public internet. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see the [PrivateLink Topology Guide](docs/privatelink-topology-guide.md).
+Enable PSC when applications must reach Atlas over private connectivity instead of the public internet. For topology decisions (single-region vs multi-region, hub-spoke, regional mode, BYO Endpoint), see the [PrivateLink Topology Guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/docs/privatelink-topology-guide.md).
 
 The module supports two connectivity paths (mutually exclusive per region):
 - **Module-managed:** Provide a subnetwork per region via `privatelink_endpoints` or `privatelink_endpoints_single_region`.
-- **BYO Endpoint (Bring Your Own Endpoint):** Declare Atlas services with `privatelink_byo_endpoint`, then register user-managed forwarding rules with `privatelink_byo_service`. See the [privatelink_byoe example](./examples/privatelink_byoe).
+- **BYO Endpoint (Bring Your Own Endpoint):** Declare Atlas services with `privatelink_byo_endpoint`, then register user-managed forwarding rules with `privatelink_byo_service`. See the [privatelink_byoe example](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink_byoe).
 
 See the [Atlas private endpoints documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) for product details.
 
@@ -324,7 +324,7 @@ Default: `{}`
 
 Link user-managed PSC forwarding rules to Atlas PrivateLink endpoint services.
 Keys must exist in `privatelink_byo_endpoint`. Requires forwarding rule details from a separate apply
-or the same apply when managed in the same Terraform workspace (see the [privatelink_byoe](./examples/privatelink_byoe) example).
+or the same apply when managed in the same Terraform workspace (see the [privatelink_byoe](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/privatelink_byoe) example).
 
 - `ip_address` is the internal IP of your `google_compute_address`.
 - `forwarding_rule_name` is the GCP resource name of your `google_compute_forwarding_rule`.
@@ -663,11 +663,11 @@ Description: Atlas role ID for reuse with other Atlas-GCP features
 
 ### Where can I find what changed in each release?
 
-See [CHANGELOG.md](CHANGELOG.md) in this repository. For v0.1.x to v0.2.0 breaking changes and migration steps, see the [v0.2.0 upgrade guide](docs/v0.2.0-upgrade-guide.md).
+See [CHANGELOG.md](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/CHANGELOG.md) in this repository. For v0.1.x to v0.2.0 breaking changes and migration steps, see the [v0.2.0 upgrade guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/docs/v0.2.0-upgrade-guide.md).
 
 ### Can I use this module without granting it GCP IAM write access?
 
-Yes. Set `cloud_provider_access.create = false` and `skip_iam_bindings = true` with pre-granted roles on user-provided KMS keys and GCS buckets. See the [gcp_read_only](./examples/gcp_read_only) example.
+Yes. Set `cloud_provider_access.create = false` and `skip_iam_bindings = true` with pre-granted roles on user-provided KMS keys and GCS buckets. See the [gcp_read_only](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/examples/gcp_read_only) example.
 
 ### What if I only need one integration (for example only PrivateLink)?
 
@@ -695,8 +695,8 @@ Atlas does not support private endpoints for GCP KMS. Only AWS KMS (via PrivateL
 
 ### What is the difference between `privatelink_endpoints` and `privatelink_endpoints_single_region`?
 
-`privatelink_endpoints` is for multi-region deployments (unique region per entry, region used as `for_each` key). `privatelink_endpoints_single_region` is for multiple VPCs in the same region (list index as key). They are mutually exclusive. See the [PrivateLink Topology Guide](docs/privatelink-topology-guide.md) for pattern guidance.
+`privatelink_endpoints` is for multi-region deployments (unique region per entry, region used as `for_each` key). `privatelink_endpoints_single_region` is for multiple VPCs in the same region (list index as key). They are mutually exclusive. See the [PrivateLink Topology Guide](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/docs/privatelink-topology-guide.md) for pattern guidance.
 
 ## License
 
-See [LICENSE](LICENSE) for full details.
+See [LICENSE](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/blob/v0.2.0/LICENSE) for full details.
