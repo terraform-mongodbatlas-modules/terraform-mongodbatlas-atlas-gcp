@@ -43,15 +43,15 @@ variable "gcp_region" {
 
 variable "project_ids" {
   type = object({
-    complete         = optional(string)
-    encryption       = optional(string)
-    backup_export    = optional(string)
-    log_integration  = optional(string)
-    privatelink                   = optional(string)
-    privatelink_global_access     = optional(string)
-    privatelink_peered            = optional(string)
-    privatelink_byoe              = optional(string)
-    gcp_read_only    = optional(string)
+    complete                  = optional(string)
+    encryption                = optional(string)
+    backup_export             = optional(string)
+    log_integration           = optional(string)
+    privatelink               = optional(string)
+    privatelink_global_access = optional(string)
+    privatelink_peered        = optional(string)
+    privatelink_byoe          = optional(string)
+    gcp_read_only             = optional(string)
   })
   default = {}
 }
