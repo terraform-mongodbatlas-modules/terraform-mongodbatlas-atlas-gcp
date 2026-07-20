@@ -10,7 +10,7 @@ terraform {
       version = "~> 3.0"
     }
   }
-  required_version = ">= 1.9"
+  required_version = ">= 1.10"
 }
 
 variable "org_id" {
