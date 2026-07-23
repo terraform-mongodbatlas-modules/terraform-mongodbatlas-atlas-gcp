@@ -93,7 +93,7 @@ To skip hooks temporarily: `git commit --no-verify` or `git push --no-verify`.
 ### Provider Testing Policy
 
 - **PR/push/nightly (check, plan-tests, compat-tests)**: Uses registry provider
-- **PR/push/nightly (plan-snapshot-tests)**: Runs minimum, maximum, and provider-head lanes against Terraform `1.10` with provider `2.8.0`, the latest Terraform and compatible registry provider, and the latest Terraform with the provider default branch, respectively.
+- **PR/push/nightly (plan-snapshot-tests)**: Runs minimum, maximum, and provider-head lanes against Terraform `1.10` with provider `2.11.0`, the latest Terraform and compatible registry provider, and the latest Terraform with the provider default branch, respectively.
 - **Pre-release**: Uses latest published registry provider by default; optionally specify `provider_branch` input to test with a specific provider branch
 
 ### Required Secrets
