@@ -60,7 +60,7 @@ Run 'just docs' to regenerate.
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](https://developer.hashicorp.com/terraform/install) (>= 1.9)
+- <a name="requirement_terraform"></a> [terraform](https://developer.hashicorp.com/terraform/install) (>= 1.10)
 
 - <a name="requirement_google"></a> [google](https://registry.terraform.io/providers/hashicorp/google/latest/docs) (>= 6.0)
 
