@@ -1,5 +1,10 @@
 ## (Unreleased)
 
+NOTES:
+
+* provider/mongodbatlas: Requires minimum version 2.11.0 for mongodbatlas_privatelink_endpoint update timeout support ([#62](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/62))
+* terraform: Requires minimum version 1.10 to align with the MongoDB Atlas provider compatibility matrix ([#62](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/62))
+
 ## 0.2.0 (May 29, 2026)
 
 BREAKING CHANGES:
