@@ -149,7 +149,7 @@ variable "privatelink_endpoints" {
   validation {
     condition = alltrue([
       for ep in var.privatelink_endpoints :
-      ep.name_prefix == null || (
+      ep.name_prefix == null ? true : (
         can(regex("^[a-z][a-z0-9-]*$", ep.name_prefix)) && length(ep.name_prefix) <= 61
       )
     ])
@@ -195,7 +195,7 @@ variable "privatelink_endpoints_single_region" {
   validation {
     condition = alltrue([
       for ep in var.privatelink_endpoints_single_region :
-      ep.name_prefix == null || (
+      ep.name_prefix == null ? true : (
         can(regex("^[a-z][a-z0-9-]*$", ep.name_prefix)) && length(ep.name_prefix) <= 61
       )
     ])

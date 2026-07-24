@@ -60,17 +60,17 @@ Run 'just docs' to regenerate.
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](https://developer.hashicorp.com/terraform/install) (>= 1.9)
+- <a name="requirement_terraform"></a> [terraform](https://developer.hashicorp.com/terraform/install) (>= 1.10)
 
 - <a name="requirement_google"></a> [google](https://registry.terraform.io/providers/hashicorp/google/latest/docs) (>= 6.0)
 
-- <a name="requirement_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.8)
+- <a name="requirement_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.11)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.8)
+- <a name="provider_mongodbatlas"></a> [mongodbatlas](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs) (~> 2.11)
 
 - <a name="provider_terraform"></a> [terraform](https://developer.hashicorp.com/terraform/language/resources/terraform-data)
 
@@ -681,9 +681,9 @@ No. Use [`mongodbatlas_network_peering`](https://registry.terraform.io/providers
 
 Consider raw provider resources when you need fine-grained control over a single Atlas-GCP integration, your organization forbids opinionated defaults, or this module's feature set exceeds your scope.
 
-### Why does the module require mongodbatlas provider ~> 2.8?
+### Why does the module require mongodbatlas provider ~> 2.11?
 
-Provider [v2.8.0](https://github.com/mongodb/terraform-provider-mongodbatlas/blob/master/CHANGELOG.md#280-march-11-2026) adds `mongodbatlas_log_integration` with GCS and other external log sink types. The module uses this resource for log integration.
+Provider [v2.11.0](https://github.com/mongodb/terraform-provider-mongodbatlas/blob/master/CHANGELOG.md#2110-april-22-2026) adds update timeout support to `mongodbatlas_privatelink_endpoint`. The module configures this timeout for managed private endpoints.
 
 ### How does region format work?
 
