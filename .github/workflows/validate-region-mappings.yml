@@ -30,7 +30,7 @@ jobs:
           terraform: 'true'
 
       - name: Setup AtlasCLI
-        uses: mongodb/atlas-github-action@e3c9e0204659bafbb3b65e1eb1ee745cca0e9f3b # v0.2.2
+        uses: mongodb/atlas-github-action@e3c9e0204659bafbb3b65e1eb1ee745cca0e9f3b
 
   # === OK_EDIT: path-sync job-validate ===
       - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
