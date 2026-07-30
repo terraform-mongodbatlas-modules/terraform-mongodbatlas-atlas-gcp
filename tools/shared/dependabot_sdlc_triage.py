@@ -359,18 +359,24 @@ def render_comment() -> str:
             "Review this pull request's `dependabot-*` labels.",
             "",
             "- `dependabot-cluster`: this update affects SDLC-managed content. Do not merge this "
-            "pull request. Check the equivalent cluster update and its SDLC sync; those changes "
-            "should be brought here automatically.",
+            "pull request. If a matching cluster Dependabot PR exists, wait for it and its SDLC "
+            "sync. If none exists, the source may be a destination-only workflow that Dependabot "
+            "does not scan in cluster. Create a cluster PR with the suggested action version, then "
+            "merge its SDLC sync.",
             "- `dependabot-required`: this pull request contains destination-owned updates. It can "
             "follow normal review once it has no `dependabot-cluster` label.",
-            "- Both labels: wait for the cluster update and SDLC sync first. Then run triage "
-            "again; merge only when `dependabot-cluster` has been removed.",
+            "- Both labels: follow the `dependabot-cluster` guidance first. Then run triage again; "
+            "merge only when `dependabot-cluster` has been removed.",
             "- `dependabot-unsupported`: automatic ownership classification was not possible. "
             "Review manually and extend the triage script if this update type should be supported.",
             "",
             "If this pull request has no `dependabot-*` label, check the Dependabot SDLC triage "
             "workflow run before relying on it. If it did not run or failed, correct the workflow "
             "or script and rerun it manually.",
+            "",
+            "After a cluster update and its SDLC sync are merged, comment `@dependabot recreate` "
+            "on this pull request to rebuild it from the updated default branch. Triage runs "
+            "automatically after the refresh; run it manually if labels still need reconciliation.",
             "",
             "If Dependabot PR checks fail because they need credentials, define them as Dependabot "
             "secrets as well as Actions secrets. Dependabot-triggered checks cannot access Actions "
