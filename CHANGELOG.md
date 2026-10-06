@@ -1,5 +1,9 @@
 ## (Unreleased)
 
+BUG FIXES:
+
+* output/encryption_at_rest_provider: Adds `depends_on` so Terraform applies the cluster resource after the project's encryption-at-rest configuration; previously Terraform could apply the cluster resource first, causing intermittent apply failures ([#82](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/82))
+
 ## 0.2.1 (August 19, 2026)
 
 NOTES:
