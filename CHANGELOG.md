@@ -1,5 +1,9 @@
 ## (Unreleased)
 
+BUG FIXES:
+
+* module: Shortens plan snapshot paths so Windows can clone the module without exceeding the path length limit ([#81](https://github.com/terraform-mongodbatlas-modules/terraform-mongodbatlas-atlas-gcp/pull/81))
+
 ## 0.2.2 (October 09, 2026)
 
 BUG FIXES:
