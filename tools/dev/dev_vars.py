@@ -6,7 +6,7 @@ import typer
 
 app = typer.Typer()
 
-WORKSPACE_DIR = Path(__file__).parent.parent.parent / "tests" / "workspace_gcp_examples"
+WORKSPACE_DIR = Path(__file__).parent.parent.parent / "tests" / "ws_gcp"
 DEV_TFVARS = WORKSPACE_DIR / "dev.tfvars"
 
 DEFAULT_GCP_REGION = "us-east1"

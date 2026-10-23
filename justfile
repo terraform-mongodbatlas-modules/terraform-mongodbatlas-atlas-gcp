@@ -269,10 +269,10 @@ dev-vars-gcp:
     {{py}} dev.dev_vars gcp
 
 plan-snapshot-test-gcp *args:
-    just plan-snapshot-test --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars {{args}}
+    just plan-snapshot-test --var-file {{justfile_directory()}}/tests/ws_gcp/dev.tfvars {{args}}
 
 apply-examples-gcp *args:
-    just apply-examples --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars {{args}}
+    just apply-examples --var-file {{justfile_directory()}}/tests/ws_gcp/dev.tfvars {{args}}
 
 destroy-examples-gcp *args:
-    just destroy-examples --var-file {{justfile_directory()}}/tests/workspace_gcp_examples/dev.tfvars {{args}}
+    just destroy-examples --var-file {{justfile_directory()}}/tests/ws_gcp/dev.tfvars {{args}}
