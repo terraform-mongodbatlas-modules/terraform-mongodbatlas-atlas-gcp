@@ -35,7 +35,7 @@ Runs `terraform init` and `terraform validate` across all supported Terraform ve
 
 ## Plan Snapshot Tests
 
-Plan snapshot tests verify `terraform plan` output consistency. They use workspace directories under `tests/workspace_gcp_examples/`.
+Plan snapshot tests verify `terraform plan` output consistency. They use workspace directories under `tests/ws_gcp/`.
 
 ### Generating dev.tfvars
 
@@ -70,7 +70,7 @@ just destroy-examples-gcp --auto-approve
 
 ### Snapshot Configuration
 
-Configure examples in `tests/workspace_gcp_examples/workspace_test_config.yaml`:
+Configure examples in `tests/ws_gcp/workspace_test_config.yaml`:
 
 ```yaml
 examples:
