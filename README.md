@@ -27,7 +27,9 @@ Run 'just gen-readme' to regenerate. -->
 
 ## Module Commitment
 
-MongoDB formally supports this module, including bug fixes, security patches, and backward-compatible enhancements. The v0.2.x release is the GA milestone for this module and carries a two-year stability commitment: no breaking changes through October 2028 (at the earliest).
+MongoDB formally supports this module, including bug fixes, security patches, and backward-compatible enhancements. The v1 release carries a two-year stability commitment: no breaking changes through October 2028 (at the earliest).
+
+The module tracks MongoDB Atlas provider releases and adopts each new provider major after a stabilization period following general availability. Before adopting, we test the new provider major against the latest supported minor version of the module. Adopting a provider major does not rename or remove module variables or change defaults. You can move to a new provider major on your current module minor version without changing your configuration.
 
 <!-- BEGIN_TABLES -->
 <!-- @generated
@@ -680,10 +682,6 @@ No. Use [`mongodbatlas_network_peering`](https://registry.terraform.io/providers
 ### When should I use provider resources instead of this module?
 
 Consider raw provider resources when you need fine-grained control over a single Atlas-GCP integration, your organization forbids opinionated defaults, or this module's feature set exceeds your scope.
-
-### Why does the module require mongodbatlas provider ~> 2.11?
-
-Provider [v2.11.0](https://github.com/mongodb/terraform-provider-mongodbatlas/blob/master/CHANGELOG.md#2110-april-22-2026) adds update timeout support to `mongodbatlas_privatelink_endpoint`. The module configures this timeout for managed private endpoints.
 
 ### How does region format work?
 
